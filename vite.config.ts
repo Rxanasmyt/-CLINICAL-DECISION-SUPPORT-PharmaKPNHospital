@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  // ใช้ path สัมพัทธ์ เพื่อเสิร์ฟได้ทั้งที่ราก (รพ.) และใต้ /<repo>/ (GitHub Pages)
+  base: './',
   plugins: [
     react(),
     VitePWA({
@@ -12,8 +14,8 @@ export default defineConfig({
         short_name: 'PharmaKPN',
         description: 'ระบบสนับสนุนการตัดสินใจด้านยาสำหรับเภสัชกร · โรงพยาบาลกรงปินัง',
         lang: 'th',
-        start_url: '/',
-        scope: '/',
+        start_url: './',
+        scope: './',
         display: 'standalone',
         background_color: '#F4F1EA',
         theme_color: '#0E3F3B',
@@ -25,7 +27,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
-        navigateFallback: '/index.html',
+        navigateFallback: 'index.html',
         runtimeCaching: [
           { urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i, handler: 'StaleWhileRevalidate', options: { cacheName: 'gfonts-css' } },
           { urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i, handler: 'CacheFirst', options: { cacheName: 'gfonts-files', expiration: { maxEntries: 30, maxAgeSeconds: 31536000 }, cacheableResponse: { statuses: [0, 200] } } },
