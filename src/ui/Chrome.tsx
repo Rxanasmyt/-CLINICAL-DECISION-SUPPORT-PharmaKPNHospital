@@ -84,3 +84,24 @@ function SyncPanel({ state, close }: { state: SyncState; close: () => void }) {
     </div>
   );
 }
+
+/** ตราแอป (ไอคอนแคปซูล) คู่ตรา รพ. — ใช้ในส่วนหัว */
+export function BrandMark() {
+  return (
+    <span className="brandmark" aria-hidden="true">
+      <img className="bm-icon" src="favicon.svg" alt="" />
+      <span className="bm-badge"><img src="assets/kpn-logo-trim.png" alt="" /></span>
+    </span>
+  );
+}
+
+/** ตราแอปขนาดใหญ่ + ตรา รพ. ในหน้าแรก */
+export function HeroMark() {
+  return (
+    <span className="heromark" role="img" aria-label="PharmaKPNHospital โดยโรงพยาบาลกรงปินัง">
+      <img className="hm-icon" src="favicon.svg" alt="" />
+      <span className="hm-link" />
+      <span className="hm-hosp"><img src="assets/kpn-logo-trim.png" alt="" /></span>
+    </span>
+  );
+}
