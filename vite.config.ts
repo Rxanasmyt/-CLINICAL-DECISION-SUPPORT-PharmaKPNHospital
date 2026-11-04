@@ -1,10 +1,14 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'node:fs';
+
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 export default defineConfig({
   // ใช้ path สัมพัทธ์ เพื่อเสิร์ฟได้ทั้งที่ราก (รพ.) และใต้ /<repo>/ (GitHub Pages)
   base: './',
+  define: { __APP_VERSION__: JSON.stringify(pkg.version), __BUILD_DATE__: JSON.stringify(new Date().toISOString()) },
   plugins: [
     react(),
     VitePWA({

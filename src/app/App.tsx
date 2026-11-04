@@ -801,7 +801,7 @@ export default class App extends React.Component<any, any> {
         {id:'reg', code:'S-02', title:'ทะเบียน ADR และตัวชี้วัด', sub:'ตัวชี้วัดรายไตรมาส intensive monitoring การให้ข้อมูลด้านยา CQI และรายงานคณะกรรมการ PTC', ref:'มาตรฐานข้อ 3 และ 9', accent:'#0E3F3B', tint:'#E4EFEC', glyph:'KPI'},
         {id:'std', code:'S-03', title:'มาตรฐานความปลอดภัยด้านยา', sub:'ประเมินตนเองข้อ 3 และข้อ 9 ตามแบบประเมิน พ.ศ. 2570 พร้อมหลักฐานจากแอปและรายงานพิมพ์', ref:'แบบประเมิน สป. 2570', accent:'#A66A00', tint:'#FBF1DE', glyph:'STD'}
       ].map(c => Object.assign({go: () => this.setState(c.id === 'reg' ? {mode: 'adr', regOpen: true, regTab: 'ov'} : {mode: c.id})}, c)),
-      appVersion: 'เวอร์ชัน 2.0 · ปรับปรุงล่าสุด พฤศจิกายน 2569',
+      appVersion: 'เวอร์ชัน ' + __APP_VERSION__ + ' · ปรับปรุงล่าสุด ' + (d => ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'][d.getMonth()] + ' ' + (d.getFullYear() + 543))(new Date(__BUILD_DATE__)),
       hospitalName: this.props.hospitalName || 'โรงพยาบาลกรงปินัง',
       deptName: this.props.deptName || 'กลุ่มงานเภสัชกรรมและคุ้มครองผู้บริโภค',
       tbCols: st.narrow ? 'minmax(0,1fr)' : 'minmax(0,340px) minmax(0,1fr)',
