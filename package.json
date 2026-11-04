@@ -1,0 +1,37 @@
+{
+  "name": "pharmakpnhospital",
+  "private": true,
+  "version": "2.1.0",
+  "type": "module",
+  "description": "ระบบสนับสนุนการตัดสินใจด้านยาสำหรับเภสัชกร · โรงพยาบาลกรงปินัง",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "gen:data": "node tools/extract-constants.mjs $PROTOTYPE",
+    "gen:view": "node tools/dc-to-jsx.mjs $PROTOTYPE",
+    "gen:golden": "node tools/gen-golden.mjs $PROTOTYPE",
+    "gen:icons": "node tools/make-icons.mjs"
+  },
+  "dependencies": {
+    "dexie": "^4.4.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^6.2.1",
+    "fake-indexeddb": "^6.2.7",
+    "htmlparser2": "^12.0.0",
+    "jsdom": "^30.1.3",
+    "sharp": "^0.35.5",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.0"
+  }
+}
