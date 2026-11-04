@@ -4,6 +4,8 @@
 // @ts-nocheck
 import React from 'react';
 import { View } from '../ui/View.generated';
+import { store } from '../storage';
+import { buildBackup, importBackup } from '../storage/backup';
 import { C, BARCOL, SEV } from '../data/theme';
 import { TB_ADULT, TB_CHILD, LTBI_INH_CHILD, LTBI_RPT_CHILD, FACTORS } from '../data/tb';
 import { DAYS, PAT, WCOLOR } from '../data/warfarin';
@@ -69,7 +71,8 @@ export default class App extends React.Component<any, any> {
     window.addEventListener('keydown', this._kd);
     try {
       window.localStorage.removeItem('adrDraft.v1');
-      this.setState({cases: this.loadCases(), cqi: this.loadCqi(), stdA: this.ls('stdAssess.v1', {}), infoLog: this.ls('infoEval.v1', []), intLog: this.ls('intensive.v1', []), ptcLog: this.ls('ptcMeet.v1', []), wlLog: this.ls('workload.v1', [])});
+      this.refreshFromStore();
+      this._unsub = store.subscribe(() => this.refreshFromStore());
       window.localStorage.removeItem('adrDraft.v2');
       window.localStorage.removeItem('adrDraft.v3');
       this.setState({
@@ -127,6 +130,7 @@ export default class App extends React.Component<any, any> {
   }
   componentWillUnmount() {
     window.removeEventListener('keydown', this._kd);
+    if (this._unsub) this._unsub();
     if (this._onResize) window.removeEventListener('resize', this._onResize);
     if (this._ro) this._ro.disconnect();
     if (this._raf) window.clearTimeout(this._raf);
@@ -134,10 +138,10 @@ export default class App extends React.Component<any, any> {
 
   mode() { return this.state.mode === null ? (this.props.defaultMode || 'home') : this.state.mode; }
   loadCases() {
-    try { const r = window.localStorage.getItem('adrCases.v1'); return r ? JSON.parse(r) : []; } catch (e) { return []; }
+    return store.getJson('adrCases.v1', []);
   }
   saveCases(list) {
-    try { window.localStorage.setItem('adrCases.v1', JSON.stringify(list)); } catch (e) {}
+    store.setJson('adrCases.v1', list);
     this.setState({cases: list});
   }
   whoUmc() { return whoUmc(this.state); }
@@ -163,8 +167,8 @@ export default class App extends React.Component<any, any> {
       adrType: (st.sev2 || {}).type || '', serious: ((st.sev2 || {}).serious || []).length > 0
     };
   }
-  ls(k, d) { try { const r = window.localStorage.getItem(k); return r ? JSON.parse(r) : d; } catch (e) { return d; } }
-  lsSet(k, v, stKey) { try { window.localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} this.setState({[stKey]: v}); }
+  ls(k, d) { return store.getJson(k, d); }
+  lsSet(k, v, stKey) { store.setJson(k, v); this.setState({[stKey]: v}); }
   fyStart() { const n = new Date(); return new Date(n.getMonth() >= 9 ? n.getFullYear() : n.getFullYear() - 1, 9, 1); }
   stdEvidence() {
     const st = this.state;
@@ -248,8 +252,8 @@ export default class App extends React.Component<any, any> {
     if (!w) { window.alert('เบราว์เซอร์บล็อกหน้าต่างใหม่ — อนุญาต pop-up แล้วกดพิมพ์อีกครั้ง'); return; }
     w.document.open(); w.document.write(html); w.document.close();
   }
-  loadCqi() { try { const r = window.localStorage.getItem('adrCqi.v1'); return r ? JSON.parse(r) : []; } catch (e) { return []; } }
-  saveCqi(list) { try { window.localStorage.setItem('adrCqi.v1', JSON.stringify(list)); } catch (e) {} this.setState({cqi: list}); }
+  loadCqi() { return store.getJson('adrCqi.v1', []); }
+  saveCqi(list) { store.setJson('adrCqi.v1', list); this.setState({cqi: list}); }
   qKey(month) { const [y, m] = month.split('-').map(Number); return y + '-Q' + (Math.floor((m - 1) / 3) + 1); }
   qLabel(k) { const [y, q] = k.split('-Q'); return 'Q' + q + '/' + String(Number(y) + 543).slice(2); }
   quarterTrend() {
@@ -270,8 +274,7 @@ export default class App extends React.Component<any, any> {
     return out;
   }
   backupJson() {
-    const data = {app: 'PharmaKPNHospital', kind: 'adr-registry', v: 2, exported: new Date().toISOString(), cases: this.loadCases(), cqi: this.loadCqi(),
-      info: this.ls('infoEval.v1', []), intensive: this.ls('intensive.v1', []), ptc: this.ls('ptcMeet.v1', []), workload: this.ls('workload.v1', []), std: this.ls('stdAssess.v1', {})};
+    const data = buildBackup(store);
     const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -284,34 +287,18 @@ export default class App extends React.Component<any, any> {
     const rd = new FileReader();
     rd.onload = () => {
       try {
-        const d = JSON.parse(rd.result);
-        if (!d || d.kind !== 'adr-registry' || !Array.isArray(d.cases)) throw new Error('bad');
-        const cur = this.loadCases();
-        const ids = new Set(cur.map(c => c.id + '|' + c.label));
-        let addC = 0;
-        d.cases.forEach(c => { const k = c.id + '|' + c.label; if (!ids.has(k)) { cur.push(c); ids.add(k); addC++; } });
-        cur.sort((a, b) => String(b.saved).localeCompare(String(a.saved)));
-        this.saveCases(cur.slice(0, 3000));
-        const cq = this.loadCqi();
-        const cids = new Set(cq.map(x => x.id));
-        let addQ = 0;
-        (d.cqi || []).forEach(x => { if (!cids.has(x.id)) { cq.push(x); addQ++; } });
-        this.saveCqi(cq);
-        const mergeList = (key, stKey, arr, idf) => { if (!Array.isArray(arr)) return 0; const cur2 = this.ls(key, []); const seen = new Set(cur2.map(idf)); let n = 0; arr.forEach(x => { if (!seen.has(idf(x))) { cur2.push(x); seen.add(idf(x)); n++; } }); this.lsSet(key, cur2, stKey); return n; };
-        mergeList('infoEval.v1', 'infoLog', d.info, x => x.id);
-        mergeList('intensive.v1', 'intLog', d.intensive, x => x.id);
-        mergeList('ptcMeet.v1', 'ptcLog', d.ptc, x => x);
-        if (Array.isArray(d.workload)) {
-          const wl = this.ls('workload.v1', []);
-          d.workload.forEach(x => { const i = wl.findIndex(y => y.month === x.month); if (i < 0) wl.push(x); else wl[i] = Object.assign({}, x, wl[i]); });
-          this.lsSet('workload.v1', wl, 'wlLog');
-        }
-        this.setState({importMsg: 'รวมไฟล์สำเร็จ — เพิ่มเคสใหม่ ' + addC + ' ราย · โครงการ CQI ' + addQ + ' เรื่อง (ข้ามรายการที่ซ้ำแล้ว)'});
+        const r = importBackup(store, JSON.parse(rd.result));
+        this.refreshFromStore();
+        this.setState({importMsg: 'รวมไฟล์สำเร็จ — เพิ่มเคสใหม่ ' + r.cases + ' ราย · โครงการ CQI ' + r.cqi + ' เรื่อง (ข้ามรายการที่ซ้ำแล้ว)'});
       } catch (e) {
         this.setState({importMsg: 'ไฟล์ไม่ถูกต้อง — ใช้ไฟล์ .json ที่ส่งออกจากปุ่ม "สำรองข้อมูล" ของแอปนี้เท่านั้น'});
       }
     };
     rd.readAsText(file);
+  }
+  /** ดึงข้อมูลที่บันทึกไว้จาก store เข้า state (หลังนำเข้าไฟล์ หรือหลัง sync รวมข้อมูลจากเครื่องอื่น) */
+  refreshFromStore() {
+    this.setState({cases: this.loadCases(), cqi: this.loadCqi(), stdA: this.ls('stdAssess.v1', {}), infoLog: this.ls('infoEval.v1', []), intLog: this.ls('intensive.v1', []), ptcLog: this.ls('ptcMeet.v1', []), wlLog: this.ls('workload.v1', [])});
   }
   printQuarterReport() {
     const R = this.registry(), T = this.quarterTrend(), cq = this.loadCqi();
@@ -441,6 +428,7 @@ export default class App extends React.Component<any, any> {
     const list = this.loadCases().slice();
     const entry = {id: Date.now(), label, saved: new Date().toISOString().slice(0, 16), data: this.caseSnapshot(), sum: this.caseSummary()};
     const i = list.findIndex(c => c.label === label);
+    entry.cid = i >= 0 ? String(list[i].cid || list[i].id) : String(entry.id);   // รหัสเคสคงที่ ใช้เป็น id ตอน sync (label มีชื่อผู้ป่วย จึงใช้ไม่ได้)
     if (i >= 0) list[i] = entry; else list.unshift(entry);
     this.saveCases(list.slice(0, 1000));
     this.setState({savedFlash: true});
@@ -1546,7 +1534,7 @@ export default class App extends React.Component<any, any> {
     v.toggleAnon = () => this.setState({anonCsv: !st.anonCsv});
     v.clearAll = () => {
       if (!window.confirm('ลบข้อมูลทั้งหมดในเครื่องนี้ (ทะเบียน ADR, CQI, intensive monitoring, การให้ข้อมูลด้านยา, การประเมินตนเอง)? ควรสำรองไฟล์ก่อน')) return;
-      ['adrCases.v1', 'adrCqi.v1', 'infoEval.v1', 'intensive.v1', 'ptcMeet.v1', 'stdAssess.v1', 'workload.v1'].forEach(k => { try { window.localStorage.removeItem(k); } catch (e) {} });
+      store.clearLocal();
       this.setState({cases: [], cqi: [], infoLog: [], intLog: [], ptcLog: [], stdA: {}, wlLog: [], importMsg: 'ลบข้อมูลทั้งหมดแล้ว'});
     };
 

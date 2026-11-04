@@ -69,7 +69,7 @@ describe('Warfarin', () => {
 
 describe('ยาน้ำเด็ก', () => {
   it(`ตรงต้นแบบทุกกรณี (${Object.keys(G.ped).length})`, () => checkAll('ped', ([id, ri, w, age, days]) => {
-    const drug = PEDLIQ.find((d: any) => d.id === id)!;
+    const drug: any = PEDLIQ.find((d: any) => d.id === id)!;
     const reg = drug.regs[+ri];
     const wt = w === 'none' ? 0 : +w;
     const ageN = w === 'none' ? NaN : (age === '' ? NaN : +age);
