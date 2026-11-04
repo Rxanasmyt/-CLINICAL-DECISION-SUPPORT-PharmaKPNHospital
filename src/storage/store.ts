@@ -155,8 +155,9 @@ export class Store {
   }
 
   /** ประวัติการแก้ไขล่าสุด (ใหม่สุดก่อน) */
-  async auditList(limit = 200): Promise<AuditRow[]> { await this.chain; return this.db.audit.orderBy('at').reverse().limit(limit).toArray(); }
-  async auditAll(): Promise<AuditRow[]> { await this.chain; return this.db.audit.orderBy('at').toArray(); }
+  async auditList(limit = 200): Promise<AuditRow[]> { const all = await this.auditAll(); return all.reverse().slice(0, limit); }
+  /** เรียงตามเวลา แล้วตามลำดับที่บันทึก (เหตุการณ์ในมิลลิวินาทีเดียวกันต้องไม่สลับลำดับ) */
+  async auditAll(): Promise<AuditRow[]> { await this.chain; return (await this.db.audit.toArray()).sort((a, b) => a.at - b.at || (a.id ?? 0) - (b.id ?? 0)); }
 
   subscribe(fn: (keys: string[]) => void) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   private emit(keys: string[]) { this.listeners.forEach((f) => f(keys)); }
