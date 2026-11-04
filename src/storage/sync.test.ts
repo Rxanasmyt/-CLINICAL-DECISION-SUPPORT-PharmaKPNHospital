@@ -91,7 +91,7 @@ describe('PDPA: ไม่มีชื่อผู้ป่วยบน Google Sh
     expect(row.data.data.pt.name).toBe('');
     expect(row.data.data.pt.hn).toBe(await hashHn('66012345', 'KPN-salt'));
     expect(row.data.data.pt.hn).toMatch(/^sha256:[0-9a-f]{64}$/);
-    expect(row.summary.drugs).toBe('Allopurinol');                 // คอลัมน์สรุปไว้ดูใน Sheets
+    expect(row.summary['ยาที่สงสัย']).toBe('Allopurinol');                 // คอลัมน์สรุปไว้ดูใน Sheets
     expect(server.rows.get('intensive_monitoring|7').data.hn).toBe(await hashHn('66012345', 'KPN-salt'));
   });
   it('ไม่ตั้ง salt = ไม่ส่งข้อมูลที่มี HN', async () => {
@@ -214,5 +214,20 @@ describe('ไฟล์สำรอง JSON จากต้นแบบ', () => {
     await A.engine.syncNow();
     expect(server.raw.join('\n')).not.toContain('สมหญิง');
     expect(server.rows.has('adr_cases|1')).toBe(true);
+  });
+});
+
+describe('ส่งข้อมูลทั้งหมดใหม่', () => {
+  it('resetPushed ทำให้ทุกรายการค้างส่ง แล้วซิงก์ส่งขึ้นเซิร์ฟเวอร์ใหม่', async () => {
+    const server = fakeServer();
+    const A = await device(server);
+    A.store.setJson('adrCqi.v1', [{ id: 1, title: 'a' }, { id: 2, title: 'b' }]);
+    await A.engine.syncNow();
+    expect(A.store.pendingCount()).toBe(0);
+    server.rows.clear();
+    expect(A.store.resetPushed()).toBe(2);
+    expect(A.store.pendingCount()).toBe(2);
+    await A.engine.syncNow();
+    expect(server.rows.size).toBe(2);
   });
 });

@@ -101,6 +101,15 @@ export class Store {
     return { collection: row.collection, id: row.id, updatedAt: row.updatedAt, data };
   }
 
+  /** ส่งข้อมูลทั้งหมดขึ้นเซิร์ฟเวอร์ใหม่ (ใช้เมื่อเปลี่ยนโครงสร้างชีต หรือสร้างชีตใหม่) — คืนจำนวนรายการ */
+  resetPushed(): number {
+    const writes: RecRow[] = [];
+    this.rec.forEach((r, pk) => { const n = { ...r, pushedAt: 0 }; this.rec.set(pk, n); writes.push(n); });
+    this.persist(() => this.db.rec.bulkPut(writes));
+    this.emit([]);
+    return writes.length;
+  }
+
   markPushed(rows: { pk: string; updatedAt: number }[]) {
     const writes: RecRow[] = [];
     for (const r of rows) {

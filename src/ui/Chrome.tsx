@@ -80,6 +80,7 @@ function SyncPanel({ state, close }: { state: SyncState; close: () => void }) {
         <div className="row">
           <button type="button" className="pri" onClick={() => { save(); void engine.syncNow(); }}>บันทึกและซิงก์</button>
           <button type="button" onClick={() => { save(); }}>บันทึก</button>
+          <button type="button" title="ใช้หลังสร้างชีตใหม่หรือเปลี่ยนโครงสร้างชีต" onClick={() => { if (window.confirm('ส่งข้อมูลทั้งหมดในเครื่องขึ้น Google Sheets ใหม่ใช่ไหม? (รายการเดิมในชีตจะถูกเขียนทับด้วยข้อมูลล่าสุดของเครื่องนี้)')) { save(); store.resetPushed(); void engine.syncNow(); } }}>ส่งข้อมูลทั้งหมดใหม่</button>
           <button type="button" onClick={close}>ปิด</button>
         </div>
       </div>

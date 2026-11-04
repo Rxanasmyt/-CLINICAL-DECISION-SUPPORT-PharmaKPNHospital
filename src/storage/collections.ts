@@ -1,5 +1,6 @@
 // แผนผัง: คีย์เดิมใน localStorage ของต้นแบบ → ชุดข้อมูล (ตาราง/แผ่นงาน)
 import type { CollectionName } from './types';
+import { SUMMARIES } from './labels';
 
 type Kind = 'array' | 'object';
 
@@ -11,35 +12,22 @@ export interface CollectionDef {
   /** id ของรายการ (array) */
   idOf?: (item: any) => string;
   /** คอลัมน์สรุปสำหรับดูใน Sheets (ห้ามมีข้อมูลระบุตัวผู้ป่วย) */
-  summary: (data: any, id: string) => Record<string, string | number | boolean>;
+  summary: (data: any, id: string) => Record<string, string | number>;
   /** เรียงลำดับหลังรวมข้อมูลจากเครื่องอื่น */
   sort?: (a: any, b: any) => number;
 }
 
-const join = (x: any) => (Array.isArray(x) ? x.join(', ') : x ?? '');
 const idDesc = (a: any, b: any) => Number(b.id) - Number(a.id);
 
 export const COLLECTIONS: CollectionDef[] = [
-  { name: 'adr_cases', key: 'adrCases.v1', kind: 'array',
-    idOf: (c) => String(c.cid ?? c.id),
-    sort: (a, b) => String(b.saved).localeCompare(String(a.saved)),
-    summary: (c) => { const s = c.sum || {}; return {
-      saved: c.saved ?? '', month: s.month ?? '', drugs: join(s.drugs), events: join(s.events), naranjo: s.nj ?? '', naranjoCat: s.njCat ?? '',
-      whoUmc: s.who ?? '', preventability: s.prev ?? '', severe: !!s.severe, repeat: !!s.repeat, type: s.type ?? '', outcome: s.outcome ?? '',
-      adrType: s.adrType ?? '', serious: !!s.serious, medError: s.medErr ?? '', hpvc: s.hpvc ?? '', rca: s.rca ?? '',
-    }; } },
-  { name: 'cqi_projects', key: 'adrCqi.v1', kind: 'array', idOf: (x) => String(x.id), sort: idDesc,
-    summary: (x) => ({ title: x.title ?? '', type: x.type ?? '', indicator: x.indicator ?? '', start: x.start ?? '', status: x.status ?? '' }) },
-  { name: 'intensive_monitoring', key: 'intensive.v1', kind: 'array', idOf: (x) => String(x.id), sort: idDesc,
-    summary: (x) => ({ hn_hash: x.hn ?? '', drug: x.drug ?? '', group: x.group ?? '', start: x.start ?? '', next: x.next ?? '', status: x.status ?? '' }) },
-  { name: 'drug_info_log', key: 'infoEval.v1', kind: 'array', idOf: (x) => String(x.id), sort: idDesc,
-    summary: (x) => ({ date: x.date ?? '', who: x.who ?? '', topic: x.topic ?? '', how: x.how ?? '', understanding: x.und ?? '', satisfaction: x.sat ?? '' }) },
-  { name: 'workload_monthly', key: 'workload.v1', kind: 'array', idOf: (x) => String(x.month),
-    summary: (x) => ({ ...x }) },
-  { name: 'ptc_meetings', key: 'ptcMeet.v1', kind: 'array', idOf: (x) => String(x),
-    summary: (x) => ({ date: String(x) }) },
-  { name: 'std_assessment', key: 'stdAssess.v1', kind: 'object',
-    summary: (x, id) => ({ item: id, status: x?.st ?? '', note: x?.note ?? '' }) },
+  { name: 'adr_cases', key: 'adrCases.v1', kind: 'array', idOf: (c) => String(c.cid ?? c.id),
+    sort: (a, b) => String(b.saved).localeCompare(String(a.saved)), summary: SUMMARIES.adr_cases },
+  { name: 'cqi_projects', key: 'adrCqi.v1', kind: 'array', idOf: (x) => String(x.id), sort: idDesc, summary: SUMMARIES.cqi_projects },
+  { name: 'intensive_monitoring', key: 'intensive.v1', kind: 'array', idOf: (x) => String(x.id), sort: idDesc, summary: SUMMARIES.intensive_monitoring },
+  { name: 'drug_info_log', key: 'infoEval.v1', kind: 'array', idOf: (x) => String(x.id), sort: idDesc, summary: SUMMARIES.drug_info_log },
+  { name: 'workload_monthly', key: 'workload.v1', kind: 'array', idOf: (x) => String(x.month), summary: SUMMARIES.workload_monthly },
+  { name: 'ptc_meetings', key: 'ptcMeet.v1', kind: 'array', idOf: (x) => String(x), summary: SUMMARIES.ptc_meetings },
+  { name: 'std_assessment', key: 'stdAssess.v1', kind: 'object', summary: SUMMARIES.std_assessment },
 ];
 
 export const BY_KEY: Record<string, CollectionDef> = Object.fromEntries(COLLECTIONS.map((c) => [c.key, c]));
