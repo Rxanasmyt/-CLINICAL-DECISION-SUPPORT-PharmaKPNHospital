@@ -5,6 +5,7 @@
 import React from 'react';
 import { View } from '../ui/View.generated';
 import { store } from '../storage';
+import { BottomNav, AdrTabs } from '../ui/Chrome';
 import { buildBackup, importBackup } from '../storage/backup';
 import { C, BARCOL, SEV } from '../data/theme';
 import { TB_ADULT, TB_CHILD, LTBI_INH_CHILD, LTBI_RPT_CHILD, FACTORS } from '../data/tb';
@@ -32,7 +33,7 @@ export default class App extends React.Component<any, any> {
     weight: '55', ageGroup: 'adult', phase: 'intensive', factors: [], tbTrack: 'active',
     wDose: '21', inr: '2.4', wTarget: 'std', bleeding: 'none',
     noHalf: false, sameDaily: false, blockDays: false,
-    adrView: 'split', adrScale: 'hour',
+    adrView: 'split', adrScale: 'hour', adrTab: 'fill', narrow: false,
     pt: {hn:'', name:'', age:'', sex:'', hx:''},
     drugs: [{id:1, name:'', dose:'', route:'', start:'', stop:'', suspect:true}],
     events: [{id:1, desc:'', onset:'', severity:'moderate', better:''}],
@@ -49,6 +50,9 @@ export default class App extends React.Component<any, any> {
   componentDidMount() {
     this._onResize = () => this.measureSheet();
     window.addEventListener('resize', this._onResize);
+    this._mq = window.matchMedia('(max-width:1024px)');
+    this._mqf = () => this.setState({narrow: this._mq.matches});
+    this._mq.addEventListener('change', this._mqf); this._mqf();
     this.observeWrap();
     this.measureSheet();
     this._kd = (e) => {
@@ -131,6 +135,7 @@ export default class App extends React.Component<any, any> {
   componentWillUnmount() {
     window.removeEventListener('keydown', this._kd);
     if (this._unsub) this._unsub();
+    if (this._mq) this._mq.removeEventListener('change', this._mqf);
     if (this._onResize) window.removeEventListener('resize', this._onResize);
     if (this._ro) this._ro.disconnect();
     if (this._raf) window.clearTimeout(this._raf);
@@ -767,7 +772,14 @@ export default class App extends React.Component<any, any> {
   }
 
   /* ---------- render ---------- */
-  render() { return <View v={this.renderVals()} />; }
+  render() {
+    const mode = this.mode();
+    return (<>
+      <View v={this.renderVals()} />
+      <BottomNav mode={mode} go={(m) => this.setState({mode: m})} />
+      {mode === 'adr' && <AdrTabs tab={this.state.adrTab || 'fill'} set={(t) => this.setState({adrTab: t})} />}
+    </>);
+  }
 
   renderVals() {
     const st = this.state, mode = this.mode();
@@ -792,7 +804,7 @@ export default class App extends React.Component<any, any> {
       appVersion: 'เวอร์ชัน 2.0 · ปรับปรุงล่าสุด พฤศจิกายน 2569',
       hospitalName: this.props.hospitalName || 'โรงพยาบาลกรงปินัง',
       deptName: this.props.deptName || 'กลุ่มงานเภสัชกรรมและคุ้มครองผู้บริโภค',
-      tbCols: 'minmax(0,340px) minmax(0,1fr)',
+      tbCols: st.narrow ? 'minmax(0,1fr)' : 'minmax(0,340px) minmax(0,1fr)',
       tabs: [['home','หน้าแรก'],['tb','ขนาดยา TB'],['warf','Warfarin'],['ped','ยาน้ำเด็ก'],['adr','ประเมินแพ้ยา'],['calc','เครื่องมือ'],['std','มาตรฐาน']].map(([id, label]) => {
         const a = mode === id;
         return {label, go: () => this.setState({mode: id}), fw: a ? '600' : '500',
@@ -1152,7 +1164,7 @@ export default class App extends React.Component<any, any> {
     v.adrEdit = true;
     v.adrSheet = true;
     v.adrSplit = true;
-    v.adrLayout = 'minmax(0,1.05fr) minmax(0,1fr)';
+    v.adrLayout = st.narrow ? 'minmax(0,1fr)' : 'minmax(0,1.05fr) minmax(0,1fr)';
     v.viewOpts = [];
     v.scaleOpts = [];
     const pf = (k) => (e) => this.setState({pt: Object.assign({}, st.pt, {[k]: e.target.value})});

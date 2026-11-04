@@ -15,7 +15,7 @@ await p.goto(url, { waitUntil: 'load' });
 await p.waitForTimeout(800);
 await p.screenshot({ path: `${out}/home.png`, fullPage: true });
 for (const label of ['ขนาดยา TB', 'Warfarin', 'ยาน้ำเด็ก', 'ประเมินแพ้ยา', 'เครื่องมือ', 'มาตรฐาน']) {
-  const btn = p.locator('nav button', { hasText: label }).first();
+  const btn = p.locator('nav button:visible', { hasText: label.replace('ขนาดยา ', '').replace('ประเมินแพ้ยา','แพ้ยา').replace('ยาน้ำเด็ก','ยาน้ำเด็ก') }).first();
   await btn.click();
   await p.waitForTimeout(500);
   await p.screenshot({ path: `${out}/${label.replace(/\s/g, '_')}.png`, fullPage: true });

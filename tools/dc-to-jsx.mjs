@@ -121,13 +121,18 @@ function node(n, scope, parentTag) {
 }
 function lit(t) { return /[{}<>]/.test(t) ? '{' + JSON.stringify(t) + '}' : t; }
 
-const body = kids(doc.children, new Set(), null);
+let body = kids(doc.children, new Set(), null);
+// เพิ่มสถานะ sync ในแถบหน่วยงาน (ไม่มีในต้นแบบ)
+const MARK = 'สำหรับเภสัชกร · ใช้ภายในหน่วยงาน</span>';
+if (!body.includes(MARK)) throw new Error('marker not found');
+body = body.replace(MARK, MARK + '<SyncBadge />');
 const out = `// สร้างอัตโนมัติจาก ${srcFile.split('/').pop()} (template) ด้วย tools/dc-to-jsx.mjs — ห้ามแก้ด้วยมือ
 // แก้ไข markup ที่ต้นฉบับ แล้วรัน: npm run gen:view
 /* eslint-disable */
 // @ts-nocheck
 import { Fragment } from 'react';
 import { fx, K } from './runtime';
+import { SyncBadge } from './Chrome';
 
 export function View({ v }: { v: any }) {
   return (<>${body}</>);

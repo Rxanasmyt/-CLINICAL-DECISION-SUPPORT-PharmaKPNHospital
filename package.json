@@ -9,7 +9,11 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:data": "node tools/extract-constants.mjs $PROTOTYPE",
+    "gen:view": "node tools/dc-to-jsx.mjs $PROTOTYPE",
+    "gen:golden": "node tools/gen-golden.mjs $PROTOTYPE",
+    "gen:icons": "node tools/make-icons.mjs"
   },
   "dependencies": {
     "dexie": "^4.4.7",
