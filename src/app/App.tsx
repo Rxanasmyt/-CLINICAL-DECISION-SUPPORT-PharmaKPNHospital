@@ -12,7 +12,8 @@ import { TB_ADULT, TB_CHILD, LTBI_INH_CHILD, LTBI_RPT_CHILD, FACTORS } from '../
 import { DAYS, PAT, WCOLOR } from '../data/warfarin';
 import { PEDLIQ } from '../data/pediatric';
 import { NARANJO, ALTCAUSE, CRIT, XREACT, ADVRULES, PREVQ, TRIGGERS, TRIG_CITE, SERIOUS, INT_GROUPS, DRUGPRESET, SXPRESET, LABPRESET } from '../data/adr';
-import { STD_SRC, STD, WL_FIELDS, REF_REVIEW } from '../data/standards';
+import { STD_SRC, WL_FIELDS, REF_REVIEW } from '../data/standards';
+import { STD } from '../data/standards-merged';
 import * as REFS from '../data/references';
 import { num, frac, pills, devices } from '../logic/shared';
 import { computeTb, computeLtbi, band } from '../logic/tb';
