@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14877E"/><stop offset=".55" stop-color="#0F5D57"/><stop offset="1" stop-color="#0A2F2C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".28" cy=".18" r=".8">
+      <stop offset="0" stop-color="#7FE0CF" stop-opacity=".55"/><stop offset="1" stop-color="#7FE0CF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="capL" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#CFE6E2"/>
+    </linearGradient>
+    <linearGradient id="capR" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFB79B"/><stop offset="1" stop-color="#EE8A68"/>
+    </linearGradient>
+    <clipPath id="cap"><rect x="-150" y="-62" width="300" height="124" rx="62"/></clipPath>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#021412" flood-opacity=".45"/></filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+  <!-- วงจรชีพจรจาง ๆ ด้านหลัง -->
+  <path d="M-10 392 H150 l28-62 40 112 34-84 22 34 H522" fill="none" stroke="#7FE0CF" stroke-opacity=".22" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- แคปซูล -->
+  <g transform="translate(256 236) rotate(-38)" filter="url(#sh)">
+    <g clip-path="url(#cap)">
+      <rect x="-150" y="-62" width="150" height="124" fill="url(#capL)"/>
+      <rect x="0" y="-62" width="150" height="124" fill="url(#capR)"/>
+      <rect x="-150" y="-62" width="300" height="46" fill="#fff" opacity=".28"/>
+      <rect x="-3" y="-62" width="6" height="124" fill="#0A2F2C" opacity=".12"/>
+    </g>
+    <rect x="-150" y="-62" width="300" height="124" rx="62" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="3"/>
+  </g>
+  <!-- เครื่องหมายบวกแบบ 4 เม็ดรี (อ้างอิงโลโก้ รพ.) -->
+  <g transform="translate(386 392)" fill="#7FE0CF">
+    <ellipse cx="0" cy="-30" rx="13" ry="21"/><ellipse cx="0" cy="30" rx="13" ry="21"/>
+    <ellipse cx="-30" cy="0" rx="21" ry="13"/><ellipse cx="30" cy="0" rx="21" ry="13"/>
+  </g>
+</svg>
