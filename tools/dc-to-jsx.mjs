@@ -125,7 +125,7 @@ let body = kids(doc.children, new Set(), null);
 // เพิ่มสถานะ sync ในแถบหน่วยงาน (ไม่มีในต้นแบบ)
 const MARK = 'สำหรับเภสัชกร · ใช้ภายในหน่วยงาน</span>';
 if (!body.includes(MARK)) throw new Error('marker not found');
-body = body.replace(MARK, MARK + '<SyncBadge />');
+body = body.replace(MARK, MARK + '<SyncBadge /><SecurityBadge />');
 // ตราแอป + ตรา รพ. ในส่วนหัวและหน้าแรก (แทนรูปโลโก้เดี่ยวของต้นแบบ)
 const swap = (re, jsx) => { if (!re.test(body)) throw new Error('logo marker not found: ' + re); body = body.replace(re, jsx); };
 swap(/<img src="assets\/kpn-logo\.png" alt="โรงพยาบาลกรงปินัง" style=\{\{"width": "40px"[^>]*\/>/, '<BrandMark />');
@@ -136,7 +136,7 @@ const out = `// สร้างอัตโนมัติจาก ${srcFile.sp
 // @ts-nocheck
 import { Fragment } from 'react';
 import { fx, K } from './runtime';
-import { SyncBadge, BrandMark, HeroMark } from './Chrome';
+import { SyncBadge, BrandMark, HeroMark } from './Chrome';\nimport { SecurityBadge } from './Security';
 
 export function View({ v }: { v: any }) {
   return (<>${body}</>);

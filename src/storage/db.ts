@@ -15,14 +15,18 @@ export interface RecRow {
   /** ลายนิ้วมือของข้อมูล ณ การแก้ไขล่าสุด ใช้ตรวจว่ามีการแก้จริง */
   fp: string;
 }
+/** ประวัติการแก้ไข (เก็บเฉพาะในเครื่อง · ไม่มีข้อมูลระบุตัวผู้ป่วย: ใช้รหัสรายการเท่านั้น) */
+export interface AuditRow { id?: number; at: number; user: string; action: string; collection: string; recordId: string }
 export interface MetaRow { key: string; value: unknown }
 
 export class AppDb extends Dexie {
   kv!: Table<KvRow, string>;
   rec!: Table<RecRow, string>;
   meta!: Table<MetaRow, string>;
+  audit!: Table<AuditRow, number>;
   constructor(name = 'pharmakpn') {
     super(name);
     this.version(1).stores({ kv: 'key', rec: 'pk, collection', meta: 'key' });
+    this.version(2).stores({ kv: 'key', rec: 'pk, collection', meta: 'key', audit: '++id, at' });
   }
 }
