@@ -1,8 +1,13 @@
-// สร้างไอคอน PWA จากโลโก้ รพ. (public/assets/kpn-logo.png)
+// สร้างไอคอน PWA จาก tools/icon.svg → public/
 import sharp from 'sharp';
-const src = 'public/assets/kpn-logo.png';
-for (const [size, name, pad] of [[192, 'pwa-192.png', 0.12], [512, 'pwa-512.png', 0.12], [512, 'pwa-maskable-512.png', 0.28]]) {
-  const inner = Math.round(size * (1 - pad * 2));
-  const logo = await sharp(src).resize(inner, inner, { fit: 'contain', background: '#ffffff' }).toBuffer();
-  await sharp({ create: { width: size, height: size, channels: 3, background: '#ffffff' } }).composite([{ input: logo, gravity: 'center' }]).png().toFile('public/' + name);
-}
+import fs from 'node:fs';
+const svg = fs.readFileSync('tools/icon.svg');
+const png = (size, file) => sharp(svg, { density: 384 }).resize(size, size).png().toFile('public/' + file);
+await png(192, 'pwa-192.png');
+await png(512, 'pwa-512.png');
+await png(180, 'apple-touch-icon.png');
+await png(32, 'favicon-32.png');
+// maskable: ย่อภาพให้อยู่ในโซนปลอดภัย 80% บนพื้นสีเดียวกับขอบไอคอน
+const inner = await sharp(svg, { density: 384 }).resize(Math.round(512 * 0.8)).png().toBuffer();
+await sharp({ create: { width: 512, height: 512, channels: 3, background: '#0F5D57' } }).composite([{ input: inner, gravity: 'center' }]).png().toFile('public/pwa-maskable-512.png');
+fs.copyFileSync('tools/icon.svg', 'public/favicon.svg');
