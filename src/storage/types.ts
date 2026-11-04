@@ -30,6 +30,8 @@ export interface StorageAdapter {
 
 export interface SyncSettings {
   enabled: boolean;
+  /** ยืนยันว่าได้รับอนุมัติจากผู้รับผิดชอบ PDPA / IT ของ รพ. แล้ว (ไม่ติ๊ก = ไม่ซิงก์) */
+  approved: boolean;
   /** URL ของ Apps Script Web App */
   url: string;
   /** token ที่ตั้งไว้ใน Apps Script (ตรวจทุกคำขอ) */

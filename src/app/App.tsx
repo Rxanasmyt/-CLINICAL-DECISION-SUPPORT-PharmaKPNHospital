@@ -6,6 +6,8 @@ import React from 'react';
 import { View } from '../ui/View.generated';
 import { store } from '../storage';
 import { BottomNav, AdrTabs } from '../ui/Chrome';
+import { BackupBar, userDisplay } from '../ui/Security';
+import { markBackup } from '../security/backupReminder';
 import { buildBackup, importBackup } from '../storage/backup';
 import { C, BARCOL, SEV } from '../data/theme';
 import { TB_ADULT, TB_CHILD, LTBI_INH_CHILD, LTBI_RPT_CHILD, FACTORS } from '../data/tb';
@@ -86,7 +88,7 @@ export default class App extends React.Component<any, any> {
         events: [{id:1, desc:'', onset:'', severity:'moderate', better:''}],
         labs: [{id:1, name:'', date:'', value:''}],
         naranjo: {}, reactionType: '', outcome: 'recovering', pharmNote: '',
-        altCauses: [], altNote: '', crit: {}, pharmSign: '', doctorSign: ''
+        altCauses: [], altNote: '', crit: {}, pharmSign: userDisplay(), doctorSign: ''
       });
     } catch (e) {}
   }
@@ -282,6 +284,7 @@ export default class App extends React.Component<any, any> {
   backupJson() {
     const data = buildBackup(store);
     const blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+    markBackup();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = 'ADR-backup-' + new Date().toISOString().slice(0, 10) + '.json';
@@ -776,6 +779,7 @@ export default class App extends React.Component<any, any> {
   render() {
     const mode = this.mode();
     return (<>
+      <BackupBar hasData={['adrCases.v1','adrCqi.v1','infoEval.v1','intensive.v1','ptcMeet.v1','workload.v1'].some(k => (store.getJson(k, []) || []).length > 0) || Object.keys(store.getJson('stdAssess.v1', {}) || {}).length > 0} onBackup={() => this.backupJson()} />
       <View v={this.renderVals()} />
       <BottomNav mode={mode} go={(m) => this.setState({mode: m})} />
       {mode === 'adr' && <AdrTabs tab={this.state.adrTab || 'fill'} set={(t) => this.setState({adrTab: t})} />}

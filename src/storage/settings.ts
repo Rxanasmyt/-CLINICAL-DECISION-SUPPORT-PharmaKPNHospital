@@ -2,7 +2,7 @@
 import type { SyncSettings } from './types';
 
 const KEY = 'pharmaKpn.sync.v1';
-export const DEFAULT_SETTINGS: SyncSettings = { enabled: false, url: '', token: '', salt: '' };
+export const DEFAULT_SETTINGS: SyncSettings = { enabled: false, approved: false, url: '', token: '', salt: '' };
 
 export function loadSettings(): SyncSettings {
   try { const r = localStorage.getItem(KEY); return r ? { ...DEFAULT_SETTINGS, ...JSON.parse(r) } : { ...DEFAULT_SETTINGS }; } catch { return { ...DEFAULT_SETTINGS }; }
@@ -10,4 +10,4 @@ export function loadSettings(): SyncSettings {
 export function saveSettings(s: SyncSettings) {
   try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* ignore */ }
 }
-export const isConfigured = (s: SyncSettings) => !!(s.enabled && s.url && s.token);
+export const isConfigured = (s: SyncSettings) => !!(s.enabled && s.approved && s.url && s.token);

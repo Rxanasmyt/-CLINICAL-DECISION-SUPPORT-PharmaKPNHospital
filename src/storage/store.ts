@@ -1,6 +1,6 @@
 // ที่เก็บข้อมูลในเครื่อง: อ่านเร็วแบบ synchronous จากแคชในหน่วยความจำ + เขียน IndexedDB ทันที
 // หน้าจอ (ตรรกะเดิมจากต้นแบบ) ใช้ getJson/setJson แทน localStorage โดยไม่ต้องเปลี่ยนรูปแบบข้อมูล
-import { AppDb, type RecRow } from './db';
+import { AppDb, type AuditRow, type RecRow } from './db';
 import { BY_KEY, COLLECTIONS, applyEntry, toEntries, type CollectionDef } from './collections';
 import { restoreLocalIdentifiers } from './pdpa';
 import type { CollectionName, StoredRecord } from './types';
@@ -15,6 +15,9 @@ export class Store {
   private listeners = new Set<(keys: string[]) => void>();
   private chain: Promise<unknown> = Promise.resolve();
   ready = false;
+  private actor: () => string = () => '';
+  /** กำหนดชื่อผู้ใช้ที่ลงในประวัติการแก้ไข */
+  setActor(fn: () => string) { this.actor = fn; }
 
   constructor(public db: AppDb = new AppDb(), private legacy: Storage | null = safeLocalStorage()) {}
 
@@ -43,10 +46,11 @@ export class Store {
   }
 
   /** เขียนค่าทั้งชุด (รูปแบบเดียวกับต้นแบบ) — ตรวจว่ารายการใดเปลี่ยน/ถูกลบ เพื่อใส่คิวส่งขึ้นเซิร์ฟเวอร์ */
-  setJson(key: string, value: unknown, silent = false) {
+  setJson(key: string, value: unknown, silent = false, source?: string) {
     const def = BY_KEY[key];
     this.cache.set(key, value);
     const writes: RecRow[] = [];
+    const audits: AuditRow[] = [];
     if (def) {
       const now = Date.now();
       const next = toEntries(def, value);
@@ -56,17 +60,20 @@ export class Store {
         if (!prev || prev.deleted || prev.fp !== fp) {
           const row: RecRow = { pk, collection: def.name, id, updatedAt: bump(prev), pushedAt: prev?.pushedAt ?? 0, deleted: false, fp };
           this.rec.set(pk, row); writes.push(row);
+          audits.push({ at: now, user: this.actor(), action: source ?? (prev && !prev.deleted ? 'แก้ไข' : 'เพิ่ม'), collection: def.name, recordId: id });
         }
       });
       this.rec.forEach((prev, pk) => {
         if (prev.collection !== def.name || prev.deleted || next.has(prev.id)) return;
         const row: RecRow = { ...prev, deleted: true, updatedAt: bump(prev), fp: '' };
         this.rec.set(pk, row); writes.push(row);
+        audits.push({ at: now, user: this.actor(), action: source ?? 'ลบ', collection: def.name, recordId: prev.id });
       });
     }
     this.persist(async () => {
       await this.db.kv.put({ key, value });
       if (writes.length) await this.db.rec.bulkPut(writes);
+      if (audits.length) await this.db.audit.bulkAdd(audits);
     });
     if (!silent) this.emit([key]);
     return writes.length;
@@ -75,7 +82,7 @@ export class Store {
   /** ลบข้อมูลทั้งหมดในเครื่องนี้ (ไม่ส่ง tombstone — ข้อมูลที่ซิงก์ไว้ในเซิร์ฟเวอร์ยังอยู่) */
   async clearLocal() {
     this.cache.clear(); this.rec.clear(); this.cursors = {};
-    this.persist(async () => { await this.db.kv.clear(); await this.db.rec.clear(); await this.db.meta.clear(); });
+    this.persist(async () => { await this.db.kv.clear(); await this.db.rec.clear(); await this.db.meta.clear(); await this.db.audit.add({ at: Date.now(), user: this.actor(), action: 'ลบข้อมูลทั้งหมดในเครื่อง', collection: '*', recordId: '*' }); });
     await this.chain;
     for (const def of COLLECTIONS) { try { this.legacy?.removeItem(def.key); } catch { /* ignore */ } }
     this.emit(COLLECTIONS.map((c) => c.key));
@@ -109,6 +116,7 @@ export class Store {
     let value = this.cache.get(def.key) ?? (def.kind === 'object' ? {} : []);
     let changed = false, maxT = this.cursors[collection] ?? 0;
     const writes: RecRow[] = [];
+    const audits: AuditRow[] = [];
     for (const r of records) {
       maxT = Math.max(maxT, r.updatedAt);
       const pk = pkOf(collection, r.id), local = this.rec.get(pk);
@@ -121,6 +129,7 @@ export class Store {
       value = applyEntry(def, value, r.id, r.deleted ? undefined : data);
       const row: RecRow = { pk, collection, id: r.id, updatedAt: r.updatedAt, pushedAt: r.updatedAt, deleted: !!r.deleted, fp: r.deleted ? '' : fpOf(data) };
       this.rec.set(pk, row); writes.push(row); changed = true;
+      audits.push({ at: Date.now(), user: 'ซิงก์', action: r.deleted ? 'รับการลบจากซิงก์' : 'รับจากซิงก์', collection, recordId: r.id });
     }
     if (changed && def.sort && def.kind === 'array') value = (value as any[]).slice().sort(def.sort);
     this.cursors[collection] = maxT;
@@ -130,10 +139,15 @@ export class Store {
       if (changed) await this.db.kv.put({ key: def.key, value });
       if (writes.length) await this.db.rec.bulkPut(writes);
       await this.db.meta.put({ key: 'cursors', value: { ...this.cursors } });
+      if (audits.length) await this.db.audit.bulkAdd(audits);
     });
     if (keys.length) this.emit(keys);
     return keys;
   }
+
+  /** ประวัติการแก้ไขล่าสุด (ใหม่สุดก่อน) */
+  async auditList(limit = 200): Promise<AuditRow[]> { await this.chain; return this.db.audit.orderBy('at').reverse().limit(limit).toArray(); }
+  async auditAll(): Promise<AuditRow[]> { await this.chain; return this.db.audit.orderBy('at').toArray(); }
 
   subscribe(fn: (keys: string[]) => void) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   private emit(keys: string[]) { this.listeners.forEach((f) => f(keys)); }

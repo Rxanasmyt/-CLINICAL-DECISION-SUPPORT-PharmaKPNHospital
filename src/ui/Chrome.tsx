@@ -70,7 +70,9 @@ function SyncPanel({ state, close }: { state: SyncState; close: () => void }) {
       <div className="card" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="ตั้งค่าการซิงก์">
         <h2>ตั้งค่าการซิงก์ข้อมูล</h2>
         <p className="muted">ข้อมูลบันทึกในเครื่องนี้ทันที (IndexedDB) แล้วส่งไป Google Sheets ของกลุ่มงาน — <b>ไม่ส่งชื่อผู้ป่วย</b> ส่งเฉพาะรหัสเคสและ HN ที่ผ่าน hash (SHA-256 + salt)</p>
-        <label className="chk"><input type="checkbox" checked={s.enabled} onChange={(e) => set('enabled', e.target.checked)} /> เปิดการซิงก์</label>
+        <label className="chk"><input type="checkbox" checked={s.approved} onChange={(e) => set('approved', e.target.checked)} /> ได้รับอนุมัติจากผู้รับผิดชอบ PDPA / IT ของโรงพยาบาลให้ใช้ Google Sheets แล้ว</label>
+        <label className="chk"><input type="checkbox" checked={s.enabled} disabled={!s.approved} onChange={(e) => set('enabled', e.target.checked)} /> เปิดการซิงก์</label>
+        {!s.approved && <p className="muted">ต้องยืนยันการอนุมัติก่อนจึงจะเปิดซิงก์ได้ (HN ที่ hash แล้วยังนับเป็นข้อมูลส่วนบุคคลตาม PDPA)</p>}
         {field('url', 'URL ของ Apps Script Web App', 'https://script.google.com/macros/s/…/exec')}
         {field('token', 'Token (ตรงกับ TOKEN ใน Apps Script)', 'ข้อความลับของกลุ่มงาน', 'password')}
         {field('salt', 'Salt ของ รพ. สำหรับ hash HN', 'ต้องตรงกันทุกเครื่อง · ห้ามเปลี่ยนภายหลัง', 'password')}

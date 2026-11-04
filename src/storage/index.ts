@@ -14,7 +14,10 @@ export function applySettings(s: SyncSettings = loadSettings()) {
 }
 
 export async function initStorage() {
+  store.setActor(() => { try { const u = JSON.parse(localStorage.getItem('pharmaKpn.security.v1') || '{}').user || {}; return String(u.name || '').trim(); } catch { return ''; } });
   await store.init();
+  // ขอให้เบราว์เซอร์เก็บข้อมูลถาวร (ลดโอกาสถูกล้างเมื่อพื้นที่เต็ม)
+  try { void navigator.storage?.persist?.(); } catch { /* ignore */ }
   engine.start();
   applySettings();
 }
