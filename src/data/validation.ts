@@ -15,5 +15,6 @@ export const VALIDATION: ValidationItem[] = [
   { id: 'warf', name: 'ปรับขนาด Warfarin + ตารางยารายสัปดาห์', reference: 'สมาคมแพทย์โรคหัวใจแห่งประเทศไทย · ขนาดเม็ดที่ รพ. มีจริง', status: 'pending', reviewer: '', reviewedAt: '' },
   { id: 'ped', name: 'ยาน้ำเด็ก 15 รายการ', reference: 'BNFC · AAP · WHO · รายการยาและความแรงของ รพ.', status: 'pending', reviewer: '', reviewedAt: '' },
   { id: 'ins', name: 'จำนวน insulin ที่ต้องจ่าย', reference: 'ขนาดบรรจุ vial/penfill ที่ รพ. จัดซื้อ', status: 'pending', reviewer: '', reviewedAt: '' },
+  { id: 'adrauto', name: 'กฎเติมอัตโนมัติ: ชนิด ADR (A/B), Serious, สถานะ HPVC, คำแนะนำ Preventability', reference: 'Rawlins–Thompson · เกณฑ์ serious ADR · มาตรฐานข้อ 9-3.1 · Schumock & Thornton', status: 'pending', reviewer: '', reviewedAt: '' },
   { id: 'adr', name: 'Naranjo / WHO-UMC / Schumock & Thornton', reference: 'เอกสารต้นฉบับของแต่ละเกณฑ์', status: 'pending', reviewer: '', reviewedAt: '' },
 ];
