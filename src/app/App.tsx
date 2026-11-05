@@ -8,6 +8,7 @@ import { store } from '../storage';
 import { BottomNav, AdrTabs } from '../ui/Chrome';
 import { BackupBar, userDisplay } from '../ui/Security';
 import { CaseListModal } from '../ui/CaseList';
+import { suggestSerious, effectiveSev2, effectiveHpvc, prevHints } from '../logic/adrAuto';
 import { markBackup } from '../security/backupReminder';
 import { buildBackup, importBackup } from '../storage/backup';
 import { C, BARCOL, SEV } from '../data/theme';
@@ -170,10 +171,10 @@ export default class App extends React.Component<any, any> {
       triggers: (st.triggers || []).slice(),
       type: st.reactionType || '', outcome: st.outcome || '',
       pharm: st.pharmSign || '',
-      medErr: (st.rep || {}).medErr || '', hpvc: (st.rep || {}).hpvc || '',
+      medErr: (st.rep || {}).medErr || '', hpvc: this.hpvcEff().value,
       rca: pv.k === 'prev' ? (((st.rep || {}).rcaCause || '').trim() && ((st.rep || {}).rcaPlan || '').trim() ? 'done' : 'missing') : 'na',
       rcaCat: ((st.rep || {}).rcaCat || []).slice(),
-      adrType: (st.sev2 || {}).type || '', serious: ((st.sev2 || {}).serious || []).length > 0
+      adrType: this.sev2Eff().type, serious: this.sev2Eff().serious.length > 0
     };
   }
   ls(k, d) { return store.getJson(k, d); }
@@ -433,6 +434,13 @@ export default class App extends React.Component<any, any> {
       pharmSign: '', doctorSign: '', rep: {medErr: '', medErrNo: '', hpvc: '', hpvcDate: '', rcaCat: [], rcaCause: '', rcaPlan: '', rcaOwner: ''}, sev2: {type: '', serious: []}};
   }
   openCaseData(c) { this.setState(Object.assign({adrView: 'edit', adrTab: 'fill'}, this.caseDefaults(), c.data)); }
+  /** ค่าที่ใช้จริงของ ชนิด ADR / serious / HPVC (เภสัชกรเลือกเองมีผลเหนือค่าอัตโนมัติ) */
+  sev2Eff() {
+    const st = this.state;
+    const sug = suggestSerious({outcome: st.outcome, crit: {sjs: this.critFlag('sjs').met, dress: this.critFlag('dress').met, ana: this.critFlag('ana').met}});
+    return effectiveSev2(st.sev2, st.reactionType, sug);
+  }
+  hpvcEff() { return effectiveHpvc((this.state.rep || {}).hpvc, this.sev2Eff()); }
   caseSnapshot() {
     const s = this.state;
     return {pt: s.pt, drugs: s.drugs, events: s.events, labs: s.labs, naranjo: s.naranjo,
@@ -1188,12 +1196,12 @@ export default class App extends React.Component<any, any> {
     const pf = (k) => (e) => this.setState({pt: Object.assign({}, st.pt, {[k]: e.target.value})});
     v.pt = st.pt;
     v.setHN = pf('hn'); v.setName = pf('name'); v.setAge = pf('age'); v.setSex = pf('sex'); v.setHx = pf('hx');
-    v.setReactionType = (e) => this.setState({reactionType: e.target.value});
+    v.setReactionType = (e) => this.setState(s0 => ({reactionType: e.target.value, sev2: Object.assign({}, s0.sev2 || {type: '', serious: []}, {type: '', typeOff: false})}));
     v.setPharmNote = (e) => this.setState({pharmNote: e.target.value});
     v.pharmNote = st.pharmNote;
     v.reactionType = st.reactionType;
     v.typeOpts = ['Type A (คาดเดาได้จากฤทธิ์ยา)','Type B (idiosyncratic / immune)','Type I IgE-mediated','Type II cytotoxic','Type III immune complex','Type IV T-cell mediated (delayed)','ยังระบุไม่ได้'].map(t => ({
-      label: t, go: () => this.setState({reactionType: t}),
+      label: t, go: () => this.setState(s0 => ({reactionType: t, sev2: Object.assign({}, s0.sev2 || {type: '', serious: []}, {type: '', typeOff: false})})),
       fw: st.reactionType === t ? '600' : '400',
       fg: st.reactionType === t ? C.teal : C.mut,
       bg: st.reactionType === t ? C.tealS : '#FBFAF7',
@@ -1449,6 +1457,7 @@ export default class App extends React.Component<any, any> {
     const pv = this.prevScore();
     v.pvLabel = pv.label; v.pvFg = pv.fg; v.pvBg = pv.bg;
     v.pvProgress = 'ตอบแล้ว ' + pv.answered + '/' + PREVQ.length;
+    const pvHints = prevHints({drugs: st.drugs, labs: st.labs});
     v.pvRows = pv.rows.map(r => {
       const set = (val) => () => this.setState(s0 => {
         const p = Object.assign({}, s0.prev || {});
@@ -1461,7 +1470,7 @@ export default class App extends React.Component<any, any> {
       };
       return {n: r.n + '.', q: r.q, en: r.en,
         yes: btn('y', 'ใช่', '#FFFFFF', '#B3261E'), no: btn('n', 'ไม่ใช่', '#FFFFFF', '#2E7D5B'),
-        autoTag: r.auto ? 'เติมอัตโนมัติ · ' + r.why : '', hasAuto: r.auto};
+        autoTag: r.auto ? 'เติมอัตโนมัติ · ' + r.why : (pvHints[r.n] ? 'คำแนะนำ · ' + pvHints[r.n] : ''), hasAuto: r.auto || !!pvHints[r.n]};
     });
     v.pvAllNo = () => this.setState(s0 => {
       const p = Object.assign({}, s0.prev || {});
@@ -1499,18 +1508,26 @@ export default class App extends React.Component<any, any> {
     /* severity / type (std 9 · 3.1) */
     const xSv = st.sev2 || {type: '', serious: []};
     const xSetSv = (p) => this.setState(s0 => ({sev2: Object.assign({}, s0.sev2 || {type: '', serious: []}, p)}));
+    const xEff = this.sev2Eff();
     v.adrTypeOpts = [['A', 'Type A', 'เกี่ยวกับฤทธิ์ยา คาดการณ์ได้ ขึ้นกับขนาดยา'], ['B', 'Type B', 'ไม่เกี่ยวกับฤทธิ์ยา เช่น ภูมิแพ้ / idiosyncratic']].map(([k, l, d]) => {
-      const on = xSv.type === k;
-      return {lab: l, d, go: () => xSetSv({type: on ? '' : k}), fg: on ? '#FFFFFF' : '#16211F', dFg: on ? 'rgba(255,255,255,.8)' : '#6B7B77', bg: on ? '#0F5D57' : '#FFFFFF', bd: on ? '#0F5D57' : 'rgba(22,33,31,.14)'};
+      const on = xEff.type === k;
+      return {lab: l + (on && xEff.typeAuto ? ' · อัตโนมัติ' : ''), d: on && xEff.typeAuto ? 'เติมให้จาก: ' + xEff.typeWhy + ' (กดเลือกใหม่เพื่อแก้)' : d,
+        go: () => on ? xSetSv({type: '', typeOff: true}) : xSetSv({type: k, typeOff: false}),
+        fg: on ? '#FFFFFF' : '#16211F', dFg: on ? 'rgba(255,255,255,.8)' : '#6B7B77', bg: on ? '#0F5D57' : '#FFFFFF', bd: on ? '#0F5D57' : 'rgba(22,33,31,.14)'};
     });
     v.seriousOpts = SERIOUS.map(k => {
-      const on = (xSv.serious || []).indexOf(k) >= 0;
-      return {lab: k, mark: on ? '✓' : '', go: () => xSetSv({serious: on ? xSv.serious.filter(x => x !== k) : (xSv.serious || []).concat([k])}),
+      const on = xEff.serious.indexOf(k) >= 0, why = xEff.seriousAuto[k];
+      return {lab: k + (on && why ? ' (อัตโนมัติ: ' + why + ')' : ''), mark: on ? '✓' : '', go: () => this.setState(s0 => {
+          const m = s0.sev2 || {type: '', serious: []}, rem = (m.removed || []).slice(), man = (m.serious || []).slice();
+          if (on) { const i = man.indexOf(k); if (i >= 0) man.splice(i, 1); if (why && rem.indexOf(k) < 0) rem.push(k); }
+          else { const j = rem.indexOf(k); if (j >= 0) rem.splice(j, 1); else if (man.indexOf(k) < 0) man.push(k); }
+          return {sev2: Object.assign({}, m, {serious: man, removed: rem})};
+        }),
         bg: on ? '#FBEAE8' : '#FFFFFF', bd: on ? '#B3261E' : 'rgba(22,33,31,.12)', boxBg: on ? '#B3261E' : '#FFFFFF', boxBd: on ? '#B3261E' : 'rgba(22,33,31,.22)'};
     });
-    v.isSerious = (xSv.serious || []).length > 0;
-    v.seriousTxt = (xSv.serious || []).length ? 'Serious ADR — ' + xSv.serious.join(', ') : 'Non-serious';
-    v.sheetAdrType = (xSv.type ? 'Type ' + xSv.type : 'ยังไม่จำแนก type') + ' · ' + v.seriousTxt;
+    v.isSerious = xEff.serious.length > 0;
+    v.seriousTxt = xEff.serious.length ? 'Serious ADR — ' + xEff.serious.join(', ') : 'Non-serious';
+    v.sheetAdrType = (xEff.type ? 'Type ' + xEff.type : 'ยังไม่จำแนก type') + ' · ' + v.seriousTxt;
 
     /* registry extra tabs */
     const xToday = new Date().toISOString().slice(0, 10);
@@ -1630,7 +1647,12 @@ export default class App extends React.Component<any, any> {
       return {lab, go: () => setRep({[key]: on ? '' : val}), fg: on ? '#FFFFFF' : '#3E4F4C', bg: on ? onBg : '#FFFFFF', bd: on ? onBg : 'rgba(22,33,31,.14)'};
     };
     v.medErrOpts = [opt('medErr', 'yes', 'รายงานแล้ว', '#0F5D57'), opt('medErr', 'no', 'ยังไม่รายงาน', '#A66A00'), opt('medErr', 'na', 'ไม่เข้าข่าย', '#6B7B77')];
-    v.hpvcOpts = [opt('hpvc', 'sent', 'ส่งแล้ว', '#0F5D57'), opt('hpvc', 'pending', 'รอส่ง', '#A66A00'), opt('hpvc', 'notreq', 'ไม่ต้องส่ง', '#6B7B77')];
+    const hEff = this.hpvcEff();
+    const hopt = (val, lab, onBg) => {
+      const on = hEff.value === val, auto = on && hEff.auto;
+      return {lab: lab + (auto ? ' · อัตโนมัติ (type B / serious)' : ''), go: () => setRep({hpvc: (on && !auto) ? '' : val}), fg: on ? '#FFFFFF' : '#3E4F4C', bg: on ? onBg : '#FFFFFF', bd: on ? onBg : 'rgba(22,33,31,.14)'};
+    };
+    v.hpvcOpts = [hopt('sent', 'ส่งแล้ว', '#0F5D57'), hopt('pending', 'รอส่ง', '#A66A00'), hopt('notreq', 'ไม่ต้องส่ง', '#6B7B77')];
     v.medErrNo = rep.medErrNo || ''; v.setMedErrNo = (e) => setRep({medErrNo: e.target.value});
     v.hpvcDate = rep.hpvcDate || ''; v.setHpvcDate = (e) => setRep({hpvcDate: e.target.value});
     v.showMedErrNo = rep.medErr === 'yes';
@@ -1649,7 +1671,8 @@ export default class App extends React.Component<any, any> {
     const ML = {yes:'รายงานเข้าระบบ med error แล้ว', no:'ยังไม่รายงานเข้าระบบ med error', na:'ไม่เข้าข่ายรายงาน med error'};
     const HL = {sent:'ส่งรายงาน อย./HPVC แล้ว', pending:'รอส่งรายงาน อย./HPVC', notreq:'ไม่ต้องส่งรายงาน อย./HPVC'};
     const repBits = [];
-    if (rep.hpvc) repBits.push(HL[rep.hpvc] + (rep.hpvc === 'sent' && rep.hpvcDate ? ' (' + this.fmtD(rep.hpvcDate, false) + ')' : ''));
+    const hv = this.hpvcEff().value;
+    if (hv) repBits.push(HL[hv] + (hv === 'sent' && rep.hpvcDate ? ' (' + this.fmtD(rep.hpvcDate, false) + ')' : ''));
     if (rep.medErr) repBits.push(ML[rep.medErr] + (rep.medErr === 'yes' && rep.medErrNo ? ' เลขที่ ' + rep.medErrNo : ''));
     v.sheetRep = repBits.join(' · '); v.hasSheetRep = repBits.length > 0;
     v.sheetRca = pv.k === 'prev' && (rep.rcaCause || rep.rcaPlan)
