@@ -92,6 +92,15 @@ function thaiStamp_(ms) {
   return Number(Utilities.formatDate(d, TZ, 'd')) + ' ' + MON[Number(Utilities.formatDate(d, TZ, 'M')) - 1] + ' ' + (Number(Utilities.formatDate(d, TZ, 'yyyy')) + 543) + ' ' + Utilities.formatDate(d, TZ, 'HH:mm');
 }
 
+// กันสูตร/วันที่แฝง: ข้อความที่ขึ้นต้นด้วย = + - @ หรือมีแต่ตัวเลขและเครื่องหมาย ให้เป็นข้อความล้วน (ใส่ ' นำหน้า)
+// ข้อมูลจริงอยู่ในคอลัมน์ _ข้อมูลเต็ม(JSON) ไม่ถูกแก้
+function cell_(v) {
+  if (typeof v !== 'string' || v === '') return v;
+  // ตัวเลขล้วน (เช่น 12) ปล่อยให้เป็นตัวเลขได้ · ที่มีเครื่องหมายคั่น (1/2, 3-4, 9-3.4) หรือขึ้นต้นด้วย 0 (007) ให้เป็นข้อความ
+  if (/^[=+\-@\t\r]/.test(v) || /^[\d\s.,:\/\-+]*[.,:\/\-+][\d\s.,:\/\-+]*$/.test(v) || /^0\d+$/.test(v)) return "'" + v;
+  return v;
+}
+
 function push_(sh, records) {
   var head = headers_(sh);
   // คอลัมน์สรุปใหม่ → แทรกก่อนคอลัมน์ "ลบแล้ว?"
@@ -113,13 +122,15 @@ function push_(sh, records) {
   var tsCol = last > 1 ? sh.getRange(2, iMs + 1, last - 1, 1).getValues().map(function (x) { return Number(x[0]); }) : [];
   var saved = 0;
   records.forEach(function (r) {
+    var payload = r.deleted ? '' : JSON.stringify(r.data);
+    if (payload.length > 49000) return;                  // เกินขีดจำกัดเซลล์ของ Google Sheets (แอปตรวจก่อนส่งอยู่แล้ว)
     var row = head.map(function (h) {
       if (h === H.id) return String(r.id);
       if (h === H.at) return thaiStamp_(r.updatedAt);
       if (h === H.del) return r.deleted ? 'ใช่' : '';
       if (h === H.ms) return Number(r.updatedAt);
-      if (h === H.pay) return r.deleted ? '' : JSON.stringify(r.data);
-      var v = (r.summary || {})[h]; return v === undefined ? '' : v;
+      if (h === H.pay) return payload;
+      var v = (r.summary || {})[h]; return v === undefined ? '' : cell_(v);
     });
     var i = ids.indexOf(String(r.id));
     if (i >= 0) {

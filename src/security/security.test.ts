@@ -49,7 +49,7 @@ describe('ประวัติการแก้ไข (audit)', () => {
     s.setJson('adrCases.v1', []);
     const rows = (await s.auditAll()).map((r) => [r.user, r.action, r.collection, r.recordId]);
     expect(rows).toEqual([['ภก.ทดสอบ', 'เพิ่ม', 'adr_cases', '11'], ['ภก.ทดสอบ', 'แก้ไข', 'adr_cases', '11'], ['ภก.ทดสอบ', 'ลบ', 'adr_cases', '11']]);
-    expect(JSON.stringify(await s.auditAll())).not.toMatch(/สมชาย|99/);
+    expect(JSON.stringify(await s.auditAll())).not.toMatch(/สมชาย|HN 99|"99"/);
   });
   it('ค่าที่ไม่เปลี่ยนไม่ลงประวัติ · รับจากซิงก์ลงประวัติเป็น "ซิงก์"', async () => {
     const s = await mk();

@@ -1,59 +1,9 @@
 // ทดสอบ Code.gs (Apps Script) กับ Google Sheets จำลองในหน่วยความจำ — ตรวจชั้นข้อมูล: หัวคอลัมน์ไทย, แท็บ, อัปเดต/ลบ, ล่าสุดชนะ, ย้ายแท็บเก่า, สูตรภาพรวม
 // (การจัดรูปแบบสี/ความกว้างทดสอบไม่ได้ในที่นี้ — ต้องดูในชีตจริง)
 import { describe, it, expect, beforeEach } from 'vitest';
-import fs from 'node:fs';
-import vm from 'node:vm';
 import { SUMMARIES } from './labels';
+import { load } from './fakeSheets';
 
-const noop = (): any => new Proxy(function () {}, { get: (_t, p) => (p === 'then' ? undefined : noop()), apply: () => noop() });
-
-class Range {
-  constructor(private sh: Sheet, private r: number, private c: number, private nr: number, private nc: number) {}
-  getValues() { return Array.from({ length: this.nr }, (_, i) => Array.from({ length: this.nc }, (_, j) => this.sh.cell(this.r + i, this.c + j))); }
-  setValues(v: any[][]) { v.forEach((row, i) => row.forEach((x, j) => this.sh.put(this.r + i, this.c + j, x))); return this; }
-  setValue(x: any) { this.sh.put(this.r, this.c, x); return this; }
-  setFormula(f: string) { this.sh.put(this.r, this.c, f); return this; }
-}
-class Sheet {
-  grid: any[][] = []; maxRows = 1000; name: string;
-  constructor(name: string) { this.name = name; }
-  cell(r: number, c: number) { return this.grid[r - 1]?.[c - 1] ?? ''; }
-  put(r: number, c: number, x: any) { while (this.grid.length < r) this.grid.push([]); const row = this.grid[r - 1]; while (row.length < c) row.push(''); row[c - 1] = x; }
-  getName() { return this.name; } setName(n: string) { this.name = n; }
-  getLastRow() { return this.grid.length; }
-  getLastColumn() { return this.grid.reduce((m, r) => Math.max(m, r.length), 0); }
-  getMaxRows() { return this.maxRows; }
-  getRange(r: any, c?: number, nr = 1, nc = 1) { return new Range(this, r, c!, nr, nc); }
-  appendRow(row: any[]) { this.grid.push(row.slice()); return this; }
-  insertColumnBefore(pos: number) { this.grid.forEach((r) => { while (r.length < pos - 1) r.push(''); r.splice(pos - 1, 0, ''); }); }
-  clear() { this.grid = []; }
-  getCharts() { return []; } getProtections() { return []; } getFilter() { return null; }
-}
-const sheetProxy = (s: Sheet) => new Proxy(s, { get: (t: any, p) => (p in t ? (typeof t[p] === 'function' ? t[p].bind(t) : t[p]) : noop()) });
-
-function load() {
-  const sheets: Sheet[] = [];
-  const ss = {
-    getSheetByName: (n: string) => { const s = sheets.find((x) => x.name === n); return s ? sheetProxy(s) : null; },
-    insertSheet: (n: string) => { const s = new Sheet(n); sheets.push(s); return sheetProxy(s); },
-  };
-  const fmt = (d: Date, _tz: string, f: string) => {
-    const t = new Date(d.getTime() + 7 * 3600e3); const p = (n: number) => String(n).padStart(2, '0');
-    return f === 'd' ? String(t.getUTCDate()) : f === 'M' ? String(t.getUTCMonth() + 1) : f === 'yyyy' ? String(t.getUTCFullYear()) : f === 'HH:mm' ? p(t.getUTCHours()) + ':' + p(t.getUTCMinutes()) : f;
-  };
-  const ctx: any = {
-    console, JSON, Date, Math, Number, String, Object, Array, isFinite,
-    SpreadsheetApp: new Proxy({ getActiveSpreadsheet: () => ss }, { get: (t: any, p) => (p in t ? t[p] : noop()) }),
-    ContentService: { createTextOutput: (s: string) => ({ s, setMimeType() { return this; } }), MimeType: { JSON: 'json' } },
-    PropertiesService: { getScriptProperties: () => ({ getProperty: () => 'secret-token-1234567890abcd' }) },
-    LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
-    Utilities: { formatDate: fmt }, Charts: noop(),
-  };
-  vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync('docs/apps-script/Code.gs', 'utf8'), ctx);
-  const post = (body: any) => JSON.parse(ctx.doPost({ postData: { contents: JSON.stringify({ token: 'secret-token-1234567890abcd', ...body }) } }).s);
-  return { sheets, post, ctx };
-}
 const caseRec = (id: string, at: number, extra: any = {}) => {
   const data = { id: Number(id), cid: id, label: 'เคส ' + id, saved: '2026-05-01T10:00', data: { pt: { name: '', hn: 'sha256:abc' } },
     sum: { month: '2026-05', drugs: ['Allopurinol'], events: ['ผื่น SJS'], nj: 8, njCat: 'probable', who: 'probable', prev: 'prev', severe: true, repeat: false, type: 'Type IV', outcome: 'recovering', adrType: 'B', serious: true, medErr: 'no', hpvc: 'pending', rca: 'missing', triggers: ['x'], pharm: 'ภก.ทดสอบ' }, ...extra };
@@ -123,7 +73,7 @@ describe('Code.gs กับชีตจำลอง', () => {
     env.post({ action: 'push', collection: 'ptc_meetings', records: [{ id: '2026-11-10', updatedAt: 1, summary: SUMMARIES.ptc_meetings('2026-11-10', '2026-11-10'), data: '2026-11-10' }] });
     const by = (n: string) => { const s = env.sheets.find((x) => x.name === n)!; return Object.fromEntries(s.grid[0].map((h: string, i: number) => [h, s.grid[1][i]])); };
     expect(by('ภาระงานรายเดือน')).toMatchObject({ 'เดือน': 'มี.ค. 2569', 'ใบสั่งยาผู้ป่วยนอก (ใบ)': 1200 });
-    expect(by('ประเมินมาตรฐาน ข้อ 3 และ 9')).toMatchObject({ 'มาตรฐานข้อ': '9', 'ระดับ': '3', 'ข้อย่อย': '9-3.4', 'สถานะ': 'ดำเนินการแล้ว' });
+    expect(by('ประเมินมาตรฐาน ข้อ 3 และ 9')).toMatchObject({ 'มาตรฐานข้อ': '9', 'ระดับ': '3', 'ข้อย่อย': "'9-3.4", 'สถานะ': 'ดำเนินการแล้ว' });
     expect(by('ประเมินมาตรฐาน ข้อ 3 และ 9')['เกณฑ์']).toMatch(/preventability/);
     expect(by('วันประชุม PTC')).toMatchObject({ 'วันที่ประชุม PTC': '10 พ.ย. 2569', 'ปีงบประมาณ (พ.ศ.)': '2570' });
   });

@@ -6,6 +6,9 @@ import type { CollectionName, StorageAdapter, StoredRecord } from './types';
 
 export interface SheetsConfig { url: string; token: string; salt: string }
 
+/** ขีดจำกัดของ Google Sheets คือ 50,000 ตัวอักษรต่อเซลล์ — เผื่อไว้ */
+export const MAX_PAYLOAD_CHARS = 45_000;
+
 export class SheetsAdapter implements StorageAdapter {
   constructor(private cfg: SheetsConfig, private fetchImpl: typeof fetch = (input, init) => fetch(input, init)) {}
 
@@ -41,6 +44,8 @@ export class SheetsAdapter implements StorageAdapter {
   async put(records: StoredRecord[]) {
     if (!records.length) return;
     const out: any[] = [];
+    const tooBig: string[] = [];
+    const ok: StoredRecord[] = [];
     for (const r of records) {
       let data: any, summary: Record<string, unknown> = {};
       if (!r.deleted) {
@@ -49,13 +54,17 @@ export class SheetsAdapter implements StorageAdapter {
         }
         data = await sanitizeForRemote(r.collection, r.id, r.data, this.cfg.salt);
         summary = BY_NAME[r.collection].summary(data, r.id);
+        if (JSON.stringify(data).length > MAX_PAYLOAD_CHARS) { tooBig.push(`${r.collection}/${r.id}`); continue; }
       }
       out.push({ id: r.id, updatedAt: r.updatedAt, deleted: !!r.deleted, summary, data });
+      ok.push(r);
     }
     // แบ่งชุดตามชุดข้อมูล ครั้งละไม่เกิน 100 รายการ
     const byCol = new Map<string, any[]>();
-    records.forEach((r, i) => { const a = byCol.get(r.collection) ?? []; a.push(out[i]); byCol.set(r.collection, a); });
+    ok.forEach((r, i) => { const a = byCol.get(r.collection) ?? []; a.push(out[i]); byCol.set(r.collection, a); });
     for (const [collection, rows] of byCol) for (let i = 0; i < rows.length; i += 100) await this.call({ action: 'push', collection, records: rows.slice(i, i + 100) });
+    // รายการที่ใหญ่เกินส่งไม่ได้ แต่ไม่ให้ขวางรายการอื่น — แจ้งผู้ใช้ให้ตัดข้อความ
+    if (tooBig.length) throw new Error(`รายการ ${tooBig.join(', ')} ใหญ่เกินที่ Google Sheets เก็บได้ในเซลล์เดียว (50,000 ตัวอักษร) — ตัดข้อความยาวๆ ในรายการนั้นออก แล้วซิงก์ใหม่ (รายการอื่นส่งแล้ว)`);
   }
 
   async delete(collection: CollectionName, id: string, updatedAt: number) {

@@ -2,6 +2,7 @@
 // ห้ามมีข้อมูลระบุตัวผู้ป่วย — ฟังก์ชันรับข้อมูลที่ผ่าน sanitizeForRemote แล้วเท่านั้น
 import { WL_FIELDS } from '../data/standards';
 import { STD_2570 } from '../data/standards-2570';
+import { TRIGGERS, ALTCAUSE } from '../data/adr';
 
 const MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 // รูปแบบ "4 พ.ย. 2569" — ไม่ใช้ dd/mm/yyyy เพราะ Google Sheets แปลงเป็นวันที่เองแล้วค่าเพี้ยน
@@ -40,7 +41,7 @@ type Row = Record<string, string | number>;
 
 export const SUMMARIES: Record<string, (data: any, id: string) => Row> = {
   adr_cases: (c) => {
-    const s = c?.sum || {};
+    const s = c?.sum || {}, rep = c?.data?.rep || {};
     return {
       'วันที่บันทึกเคส': thaiDate(c?.saved), 'ไตรมาส': quarterLabel(s.month), 'เดือนที่เกิดอาการ': thaiMonth(s.month),
       'ยาที่สงสัย': (s.drugs || []).join(' · '), 'อาการที่พบ': (s.events || []).join(' · '),
@@ -49,7 +50,12 @@ export const SUMMARIES: Record<string, (data: any, id: string) => Row> = {
       'ชนิดปฏิกิริยา': s.type || '—', 'ผลลัพธ์': pick(OUT, s.outcome),
       'ประเภท ADR': s.adrType ? 'Type ' + s.adrType : '—', 'Serious ADR (ร้ายแรง)': yn(s.serious),
       'Med error (ความคลาดเคลื่อนทางยา)': pick(ME, s.medErr), 'รายงาน HPVC': pick(HP, s.hpvc), 'RCA (วิเคราะห์สาเหตุราก)': pick(RCA, s.rca),
-      'จำนวน Trigger ที่พบ': (s.triggers || []).length, 'เภสัชกรผู้ประเมิน': s.pharm || '—',
+      'เกณฑ์ Serious ที่เข้า': ((c?.data?.sev2?.serious) || []).join(' · ') || '—',
+      'เลขที่รายงาน Med error': rep.medErrNo || '—', 'วันที่ส่ง HPVC': thaiDate(rep.hpvcDate) || '—',
+      'หมวดสาเหตุ RCA': (rep.rcaCat || []).join(' · ') || '—', 'สาเหตุที่ราก (RCA)': rep.rcaCause || '—', 'แผนป้องกัน': rep.rcaPlan || '—', 'ผู้รับผิดชอบ RCA': rep.rcaOwner || '—',
+      'จำนวน Trigger ที่พบ': (s.triggers || []).length, 'Trigger ที่พบ': ((c?.data?.triggers) || []).map((t: string) => (TRIGGERS as any[]).find((x) => x.id === t)?.t ?? t).join(' · ') || '—',
+      'สาเหตุอื่นที่เป็นไปได้': ((c?.data?.altCauses) || []).map((t: string) => (ALTCAUSE as any[]).find((x) => x.id === t)?.label ?? t).join(' · ') || '—',
+      'อายุ (ปี)': c?.data?.pt?.age || '—', 'เพศ': c?.data?.pt?.sex || '—', 'เภสัชกรผู้ประเมิน': s.pharm || '—',
     };
   },
   cqi_projects: (x) => ({
