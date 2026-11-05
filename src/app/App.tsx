@@ -7,6 +7,7 @@ import { View } from '../ui/View.generated';
 import { store } from '../storage';
 import { BottomNav, AdrTabs } from '../ui/Chrome';
 import { BackupBar, userDisplay } from '../ui/Security';
+import { CaseListModal } from '../ui/CaseList';
 import { markBackup } from '../security/backupReminder';
 import { buildBackup, importBackup } from '../storage/backup';
 import { C, BARCOL, SEV } from '../data/theme';
@@ -36,7 +37,7 @@ export default class App extends React.Component<any, any> {
     weight: '55', ageGroup: 'adult', phase: 'intensive', factors: [], tbTrack: 'active',
     wDose: '21', inr: '2.4', wTarget: 'std', bleeding: 'none',
     noHalf: false, sameDaily: false, blockDays: false,
-    adrView: 'split', adrScale: 'hour', adrTab: 'fill', narrow: false,
+    adrView: 'split', adrScale: 'hour', adrTab: 'fill', narrow: false, caseListOpen: false,
     pt: {hn:'', name:'', age:'', sex:'', hx:''},
     drugs: [{id:1, name:'', dose:'', route:'', start:'', stop:'', suspect:true}],
     events: [{id:1, desc:'', onset:'', severity:'moderate', better:''}],
@@ -382,9 +383,9 @@ export default class App extends React.Component<any, any> {
     const maxM = Math.max(1, ...months.map(x => x.n));
     const count = (f) => sums.filter(f).length;
     const drugMap = {};
-    sums.forEach(x => x.drugs.forEach(d => { const k = d.toLowerCase(); drugMap[k] = drugMap[k] || {name: d, n: 0}; drugMap[k].n++; }));
+    sums.forEach(x => (x.drugs || []).forEach(d => { const k = d.toLowerCase(); drugMap[k] = drugMap[k] || {name: d, n: 0}; drugMap[k].n++; }));
     const topDrugs = Object.values(drugMap).sort((a, b) => b.n - a.n).slice(0, 6);
-    const trig = TRIGGERS.map(t => ({t: t.t, n: count(x => x.triggers.indexOf(t.id) >= 0)})).filter(t => t.n > 0).sort((a, b) => b.n - a.n);
+    const trig = TRIGGERS.map(t => ({t: t.t, n: count(x => (x.triggers || []).indexOf(t.id) >= 0)})).filter(t => t.n > 0).sort((a, b) => b.n - a.n);
     const quarter = (() => { const q = Math.floor(now.getMonth() / 3); const keys = [0,1,2].map(i => now.getFullYear() + '-' + String(q * 3 + i + 1).padStart(2, '0')); return count(x => keys.indexOf(x.month) >= 0); })();
     return {
       n, legacy: cases.length - n, quarter,
@@ -424,6 +425,14 @@ export default class App extends React.Component<any, any> {
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1500);
   }
+  /** ค่าเริ่มต้นของฟิลด์ฟอร์ม — กันเคสจากไฟล์สำรอง/เวอร์ชันเก่าที่ฟิลด์ไม่ครบ ทำให้เปิดแล้วหน้าจอพัง */
+  caseDefaults() {
+    return {pt: {hn:'', name:'', age:'', sex:'', hx:''}, drugs: [{id:1, name:'', dose:'', route:'', start:'', stop:'', suspect:true}],
+      events: [{id:1, desc:'', onset:'', severity:'moderate', better:''}], labs: [{id:1, name:'', date:'', value:''}],
+      naranjo: {}, reactionType: '', outcome: 'recovering', pharmNote: '', seq: 3, altCauses: [], altNote: '', crit: {}, prev: {}, triggers: [],
+      pharmSign: '', doctorSign: '', rep: {medErr: '', medErrNo: '', hpvc: '', hpvcDate: '', rcaCat: [], rcaCause: '', rcaPlan: '', rcaOwner: ''}, sev2: {type: '', serious: []}};
+  }
+  openCaseData(c) { this.setState(Object.assign({adrView: 'edit', adrTab: 'fill'}, this.caseDefaults(), c.data)); }
   caseSnapshot() {
     const s = this.state;
     return {pt: s.pt, drugs: s.drugs, events: s.events, labs: s.labs, naranjo: s.naranjo,
@@ -781,6 +790,10 @@ export default class App extends React.Component<any, any> {
     return (<>
       <BackupBar hasData={['adrCases.v1','adrCqi.v1','infoEval.v1','intensive.v1','ptcMeet.v1','workload.v1'].some(k => (store.getJson(k, []) || []).length > 0) || Object.keys(store.getJson('stdAssess.v1', {}) || {}).length > 0} onBackup={() => this.backupJson()} />
       <View v={this.renderVals()} />
+      <CaseListModal cases={this.state.cases || []} open={!!this.state.caseListOpen} close={() => this.setState({caseListOpen: false})}
+        onOpen={(c) => this.openCaseData(c)}
+        onDelete={(c) => this.saveCases(this.loadCases().filter(x => x.id !== c.id))}
+        onRestore={(c) => this.saveCases(this.loadCases().filter(x => x.id !== c.id).concat([c]).sort((a, b) => String(b.saved).localeCompare(String(a.saved))))} />
       <BottomNav mode={mode} go={(m) => this.setState({mode: m})} />
       {mode === 'adr' && <AdrTabs tab={this.state.adrTab || 'fill'} set={(t) => this.setState({adrTab: t})} />}
     </>);
@@ -2167,6 +2180,9 @@ export default class App extends React.Component<any, any> {
       del: () => this.saveCases(this.loadCases().filter(x => x.id !== c.id))
     }));
     v.hasCases = (st.cases || []).length > 0;
+    v.caseData = st.cases || [];
+    v.openCaseList = () => this.setState({caseListOpen: true});
+    v.openCase = (c) => this.openCaseData(c);
     v.caseCount = (st.cases || []).length + ' เคส';
 
     return v;
