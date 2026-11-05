@@ -8,6 +8,8 @@ import { store } from '../storage';
 import { BottomNav, AdrTabs } from '../ui/Chrome';
 import { BackupBar, userDisplay } from '../ui/Security';
 import { CaseListModal } from '../ui/CaseList';
+import { findSameCase, upsertCase } from '../storage/caseIdentity';
+import { loadSettings } from '../storage/settings';
 import { suggestSerious, effectiveSev2, effectiveHpvc, prevHints } from '../logic/adrAuto';
 import { markBackup } from '../security/backupReminder';
 import { buildBackup, importBackup } from '../storage/backup';
@@ -448,15 +450,13 @@ export default class App extends React.Component<any, any> {
       adrScale: s.adrScale, altCauses: s.altCauses, altNote: s.altNote, crit: s.crit,
       prev: s.prev, triggers: s.triggers, pharmSign: s.pharmSign, doctorSign: s.doctorSign, rep: s.rep, sev2: s.sev2};
   }
-  saveCase() {
+  async saveCase() {
     const s = this.state;
     const label = (s.pt.name || s.pt.hn || 'เคสไม่ระบุชื่อ') + (s.pt.hn && s.pt.name ? ' · HN ' + s.pt.hn : '');
-    const list = this.loadCases().slice();
     const entry = {id: Date.now(), label, saved: new Date().toISOString().slice(0, 16), data: this.caseSnapshot(), sum: this.caseSummary()};
-    const i = list.findIndex(c => c.label === label);
-    entry.cid = i >= 0 ? String(list[i].cid || list[i].id) : String(entry.id);   // รหัสเคสคงที่ ใช้เป็น id ตอน sync (label มีชื่อผู้ป่วย จึงใช้ไม่ได้)
-    if (i >= 0) list[i] = entry; else list.unshift(entry);
-    this.saveCases(list.slice(0, 1000));
+    // ผู้ป่วยเดิม (ป้ายชื่อตรง หรือ HN ตรง แม้เคสเดิมมาจากเครื่องอื่นที่ไม่มีชื่อ) → แก้เคสเดิม ไม่เพิ่มซ้ำ
+    const hit = await findSameCase(this.loadCases(), label, s.pt.hn, loadSettings().salt);
+    this.saveCases(upsertCase(this.loadCases(), entry, hit).slice(0, 1000));
     this.setState({savedFlash: true});
     clearTimeout(this._sf); this._sf = setTimeout(() => this.setState({savedFlash: false}), 1800);
   }

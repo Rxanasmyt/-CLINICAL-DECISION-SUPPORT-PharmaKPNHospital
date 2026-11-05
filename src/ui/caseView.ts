@@ -1,8 +1,8 @@
 // รายการเคสที่บันทึกไว้: แปลงเป็นแถวอ่านง่าย (วันที่ + HN + ยาที่สงสัย + ผลประเมิน) ค้นหา กรอง แบ่งหน้า
 import { thaiDate, quarterLabel, NJ, WHO } from '../storage/labels';
 
-export type Flag = 'all' | 'severe' | 'repeat' | 'prev' | 'hpvc' | 'rca';
-export const FLAGS: [Flag, string][] = [['all', 'ทั้งหมด'], ['severe', 'รุนแรง'], ['repeat', 'แพ้ยาซ้ำ'], ['prev', 'ป้องกันได้'], ['hpvc', 'รอส่ง HPVC'], ['rca', 'RCA ยังไม่ครบ']];
+export type Flag = 'all' | 'severe' | 'repeat' | 'prev' | 'hpvc' | 'rca' | 'dup';
+export const FLAGS: [Flag, string][] = [['all', 'ทั้งหมด'], ['severe', 'รุนแรง'], ['repeat', 'แพ้ยาซ้ำ'], ['prev', 'ป้องกันได้'], ['hpvc', 'รอส่ง HPVC'], ['rca', 'RCA ยังไม่ครบ'], ['dup', 'HN ซ้ำ']];
 
 export interface CaseRow {
   key: string; raw: any; title: string; hnShown: string; name: string; date: string; drugs: string; assess: string;
@@ -10,7 +10,9 @@ export interface CaseRow {
 }
 const short = (s: string) => s.split(' (')[0];
 
-export function toRow(c: any): CaseRow {
+/** dup = HN เดียวกันมีหลายเคส (เคสที่ซ้ำก่อนแก้ หรือบันทึกจากหลายเครื่อง) */
+export function toRow(c: any, opts: { dup?: boolean } = {}): CaseRow {
+  const dup = !!opts.dup;
   const s = c?.sum || {}, pt = c?.data?.pt || {};
   const hnRaw = String(pt.hn || '').trim(), name = String(pt.name || '').trim();
   const hnShown = !hnRaw ? 'ไม่ระบุ HN' : hnRaw.startsWith('sha256:') ? `HN เข้ารหัส …${hnRaw.slice(-6)}` : `HN ${hnRaw}`;
@@ -24,6 +26,7 @@ export function toRow(c: any): CaseRow {
   if (s.prev === 'prev') { flags.add('prev'); chips.push('ป้องกันได้'); }
   if (s.hpvc === 'pending') { flags.add('hpvc'); chips.push('รอส่ง HPVC'); }
   if (s.rca === 'missing') { flags.add('rca'); chips.push('RCA ยังไม่ครบ'); }
+  if (dup) { flags.add('dup'); chips.push('HN ซ้ำ — ตรวจและลบเคสที่ซ้ำ'); }
   return {
     key: String(c.cid ?? c.id), raw: c, hnShown, name, hnRaw,
     title: hnShown + (name ? ' · ' + name : ''),
