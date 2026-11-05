@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { FLAGS, filterRows, paginate, toRow, type Flag } from './caseView';
 import { hashHn } from '../storage/pdpa';
 import { loadSettings } from '../storage/settings';
+import { duplicateKeys, hnKey } from '../storage/caseIdentity';
 
 interface Props { cases: any[]; open: boolean; close: () => void; onOpen: (c: any) => void; onDelete: (c: any) => void; onRestore: (c: any) => void }
 
@@ -12,7 +13,17 @@ export function CaseListModal({ cases, open, close, onOpen, onDelete, onRestore 
   const [page, setPage] = useState(1); const [confirm, setConfirm] = useState<string | null>(null);
   const [undo, setUndo] = useState<any | null>(null); const [hnHash, setHnHash] = useState('');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const rows = useMemo(() => cases.map(toRow), [cases]);
+  const [dupIds, setDupIds] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      const salt = loadSettings().salt, dk = await duplicateKeys(cases, salt), ids = new Set<string>();
+      for (const c of cases) { const k = await hnKey(c?.data?.pt?.hn, salt); if (k && dk.has(k)) ids.add(String(c.cid ?? c.id)); }
+      if (live) setDupIds(ids);
+    })();
+    return () => { live = false; };
+  }, [cases]);
+  const rows = useMemo(() => cases.map((c) => toRow(c, { dup: dupIds.has(String(c.cid ?? c.id)) })), [cases, dupIds]);
   const quarters = useMemo(() => Array.from(new Set(rows.map((r) => r.quarter).filter(Boolean))), [rows]);
   // ค้นด้วย HN ได้แม้เป็นเคสจากเครื่องอื่น (ในเครื่องนี้ HN เป็นค่าเข้ารหัส): hash คำค้นด้วย salt เดียวกันแล้วเทียบ
   useEffect(() => {
@@ -73,7 +84,7 @@ export function CaseListModal({ cases, open, close, onOpen, onDelete, onRestore 
 
 /** ปุ่มแทนรายการเคสในแผงฟอร์ม + เคสล่าสุด 3 รายการ */
 export function CaseShelf({ cases, open, onOpen }: { cases: any[]; open: () => void; onOpen: (c: any) => void }) {
-  const recent = useMemo(() => cases.slice(0, 3).map(toRow), [cases]);
+  const recent = useMemo(() => cases.slice(0, 3).map((c) => toRow(c)), [cases]);
   return (
     <div className="shelf">
       <button type="button" className="shelfbtn" onClick={open}>เคสที่บันทึกไว้ ({cases.length}) — ค้นหา / เปิดดู</button>
