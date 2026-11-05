@@ -8,6 +8,14 @@ const lines = fs.readFileSync(srcFile, 'utf8').split('\n');
 const s = lines.findIndex(l => l.startsWith('<div style="min-height:100vh'));
 const e = lines.findIndex(l => l.startsWith('<script type="text/x-dc"'));
 let html = lines.slice(s, e).join('\n');
+// รายการเคสที่บันทึกไว้ในแผงฟอร์ม → ปุ่มเปิดหน้ารายการเคสแยก (src/ui/CaseList.tsx)
+{
+  const a = html.indexOf('<sc-if value="{{ hasCases }}"');
+  const endTag = '</sc-if>';
+  const b = html.indexOf(endTag, a);
+  if (a < 0 || b < 0) throw new Error('hasCases block not found');
+  html = html.slice(0, a) + '<CaseShelf></CaseShelf>' + html.slice(b + endTag.length);
+}
 // ตัดปิดท้าย </x-dc> ถ้ามี
 const doc = parseDocument(html, { lowerCaseTags: false, lowerCaseAttributeNames: false, decodeEntities: true, recognizeSelfClosing: false });
 
@@ -126,6 +134,7 @@ let body = kids(doc.children, new Set(), null);
 const MARK = 'สำหรับเภสัชกร · ใช้ภายในหน่วยงาน</span>';
 if (!body.includes(MARK)) throw new Error('marker not found');
 body = body.replace(MARK, MARK + '<SyncBadge /><SecurityBadge />');
+body = body.replace('<CaseShelf></CaseShelf>', '<CaseShelf cases={v.caseData} open={v.openCaseList} onOpen={v.openCase} />');
 // ตราแอป + ตรา รพ. ในส่วนหัวและหน้าแรก (แทนรูปโลโก้เดี่ยวของต้นแบบ)
 const swap = (re, jsx) => { if (!re.test(body)) throw new Error('logo marker not found: ' + re); body = body.replace(re, jsx); };
 swap(/<img src="assets\/kpn-logo\.png" alt="โรงพยาบาลกรงปินัง" style=\{\{"width": "40px"[^>]*\/>/, '<BrandMark />');
@@ -136,7 +145,7 @@ const out = `// สร้างอัตโนมัติจาก ${srcFile.sp
 // @ts-nocheck
 import { Fragment } from 'react';
 import { fx, K } from './runtime';
-import { SyncBadge, BrandMark, HeroMark } from './Chrome';\nimport { SecurityBadge } from './Security';
+import { SyncBadge, BrandMark, HeroMark } from './Chrome';\nimport { SecurityBadge } from './Security';\nimport { CaseShelf } from './CaseList';
 
 export function View({ v }: { v: any }) {
   return (<>${body}</>);

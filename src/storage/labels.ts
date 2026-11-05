@@ -29,8 +29,8 @@ export function fiscalYearBE(iso?: string): string {
 const yn = (b: unknown) => (b ? 'ใช่' : 'ไม่ใช่');
 const pick = (map: Record<string, string>, k: unknown, dflt = '—') => (k && map[String(k)]) || dflt;
 
-const NJ = { definite: 'Definite (ใช่แน่นอน)', probable: 'Probable (น่าจะใช่)', possible: 'Possible (อาจจะใช่)', doubtful: 'Doubtful (น่าสงสัย)' };
-const WHO = { certain: 'Certain (ใช่แน่นอน)', probable: 'Probable / Likely (น่าจะใช่)', possible: 'Possible (อาจจะใช่)', unlikely: 'Unlikely (ไม่น่าจะเกี่ยวข้อง)', cond: 'Conditional (รอข้อมูลเพิ่ม)', unclass: 'Unclassifiable (จำแนกไม่ได้)' };
+export const NJ = { definite: 'Definite (ใช่แน่นอน)', probable: 'Probable (น่าจะใช่)', possible: 'Possible (อาจจะใช่)', doubtful: 'Doubtful (น่าสงสัย)' };
+export const WHO = { certain: 'Certain (ใช่แน่นอน)', probable: 'Probable / Likely (น่าจะใช่)', possible: 'Possible (อาจจะใช่)', unlikely: 'Unlikely (ไม่น่าจะเกี่ยวข้อง)', cond: 'Conditional (รอข้อมูลเพิ่ม)', unclass: 'Unclassifiable (จำแนกไม่ได้)' };
 const PREV = { prev: 'ป้องกันได้', notprev: 'ป้องกันไม่ได้', pending: 'ยังประเมินไม่ครบ' };
 const OUT = { recovering: 'กำลังดีขึ้น', recovered: 'หายเป็นปกติ', sequelae: 'หายแต่มีความผิดปกติเหลือ', ongoing: 'ยังมีอาการ', death: 'เสียชีวิต' };
 const ME = { yes: 'รายงานแล้ว', no: 'ยังไม่รายงาน', na: 'ไม่เข้าข่าย' };
