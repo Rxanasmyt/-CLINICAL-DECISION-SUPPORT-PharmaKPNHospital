@@ -5,7 +5,13 @@ import vm from 'node:vm';
 const noop = (): any => new Proxy(function () {}, { get: (_t, p) => (p === 'then' ? undefined : noop()), apply: () => noop() });
 
 class Range {
-  constructor(private sh: Sheet, private r: number, private c: number, private nr: number, private nc: number) {}
+  constructor(public sh: Sheet, public r: number, public c: number, public nr: number, public nc: number) {}
+  sort(spec: { column: number; ascending?: boolean } | { column: number; ascending?: boolean }[]) {
+    const specs = Array.isArray(spec) ? spec : [spec];
+    const rows = this.getValues();
+    rows.sort((a, b) => { for (const sp of specs) { const k = sp.column - this.c, dir = sp.ascending === false ? -1 : 1; const x = a[k], y = b[k]; if (x !== y) return (x > y ? 1 : -1) * dir; } return 0; });
+    this.setValues(rows); return this;
+  }
   getValues() { return Array.from({ length: this.nr }, (_, i) => Array.from({ length: this.nc }, (_, j) => this.sh.cell(this.r + i, this.c + j))); }
   setValues(v: any[][]) { v.forEach((row, i) => row.forEach((x, j) => this.sh.put(this.r + i, this.c + j, x))); return this; }
   setValue(x: any) { this.sh.put(this.r, this.c, x); return this; }
@@ -20,13 +26,31 @@ class Sheet {
   getLastRow() { return this.grid.length; }
   getLastColumn() { return this.grid.reduce((m, r) => Math.max(m, r.length), 0); }
   getMaxRows() { return this.maxRows; }
-  getRange(r: any, c?: number, nr = 1, nc = 1) { return new Range(this, r, c!, nr, nc); }
-  appendRow(row: any[]) { this.grid.push(row.slice()); return this; }
+  log: any[][] = []; rules: any[] = []; appended = 0;
+  getRange(r: any, c?: number, nr = 1, nc = 1) {
+    const rg = new Range(this, r, c!, nr, nc);
+    // เมธอดจัดรูปแบบที่ไม่ได้จำลอง: บันทึกการเรียกไว้ให้เทสต์ตรวจ และคืนตัวเองเพื่อให้เรียกต่อกันเป็นลูกโซ่ได้
+    const px: any = new Proxy(rg, { get: (t: any, p) => (p in t ? (typeof t[p] === 'function' ? t[p].bind(t) : t[p]) : p === 'then' ? undefined : (...a: any[]) => { this.log.push([String(p), t.c, t.r, ...a]); return px; }) });
+    return px;
+  }
+  setConditionalFormatRules(rules: any[]) { this.rules = rules; }
+  setColumnWidth(c: number, w: number) { this.log.push(['setColumnWidth', c, 0, w]); }
+  appendRow(row: any[]) { this.appended++; this.grid.push(row.slice()); return this; }
   insertColumnBefore(pos: number) { this.grid.forEach((r) => { while (r.length < pos - 1) r.push(''); r.splice(pos - 1, 0, ''); }); }
   clear() { this.grid = []; }
   getCharts() { return []; } getProtections() { return []; } getFilter() { return null; }
 }
 const sheetProxy = (s: Sheet) => new Proxy(s, { get: (t: any, p) => (p in t ? (typeof t[p] === 'function' ? t[p].bind(t) : t[p]) : noop()) });
+
+class RuleBuilder {
+  cfg: any = {};
+  whenTextEqualTo(t: string) { this.cfg.text = t; return this; }
+  whenFormulaSatisfied(f: string) { this.cfg.formula = f; return this; }
+  setBackground(c: string) { this.cfg.bg = c; return this; } setFontColor(c: string) { this.cfg.fg = c; return this; }
+  setBold(b: boolean) { this.cfg.bold = b; return this; } setStrikethrough(b: boolean) { this.cfg.strike = b; return this; }
+  setRanges(r: any[]) { this.cfg.ranges = r; return this; }
+  build() { return this.cfg; }
+}
 
 export function load() {
   const sheets: Sheet[] = [];
@@ -40,7 +64,7 @@ export function load() {
   };
   const ctx: any = {
     console, JSON, Date, Math, Number, String, Object, Array, isFinite,
-    SpreadsheetApp: new Proxy({ getActiveSpreadsheet: () => ss }, { get: (t: any, p) => (p in t ? t[p] : noop()) }),
+    SpreadsheetApp: new Proxy({ getActiveSpreadsheet: () => ss, newConditionalFormatRule: () => new RuleBuilder() }, { get: (t: any, p) => (p in t ? t[p] : noop()) }),
     ContentService: { createTextOutput: (s: string) => ({ s, setMimeType() { return this; } }), MimeType: { JSON: 'json' } },
     PropertiesService: { getScriptProperties: () => ({ getProperty: () => 'secret-token-1234567890abcd' }) },
     LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },

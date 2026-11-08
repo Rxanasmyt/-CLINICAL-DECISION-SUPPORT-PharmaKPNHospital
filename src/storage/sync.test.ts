@@ -6,6 +6,7 @@ import { SyncEngine } from './syncEngine';
 import { SheetsAdapter } from './sheetsAdapter';
 import { buildBackup, importBackup } from './backup';
 import { hashHn } from './pdpa';
+import { REQUIRED_SCRIPT_VERSION as REQUIRED } from './scriptVersion';
 
 /** จำลอง Apps Script: ตรวจ token ทุกคำขอ เก็บแถวละหนึ่งรายการ (ล่าสุดชนะ) และบันทึกคำขอดิบไว้ตรวจ PDPA */
 function fakeServer(token = 'secret-token') {
@@ -229,5 +230,40 @@ describe('ส่งข้อมูลทั้งหมดใหม่', () => {
     expect(A.store.pendingCount()).toBe(2);
     await A.engine.syncNow();
     expect(server.rows.size).toBe(2);
+  });
+});
+
+
+describe('เตือนเวอร์ชันโค้ด Apps Script', () => {
+  const withVersion = (version?: number) => {
+    const server = fakeServer();
+    const base = server.fetchImpl;
+    const fetchImpl = (async (u: any, init: any) => {
+      const req = JSON.parse(init.body);
+      if (req.action === 'ping' && req.token === 'secret-token') return { ok: true, status: 200, json: async () => (version === undefined ? { ok: true } : { ok: true, version }) } as any;
+      return base(u, init);
+    }) as unknown as typeof fetch;
+    return { ...server, fetchImpl };
+  };
+  it('โค้ดเก่า (ไม่มีเลขเวอร์ชัน หรือเลขต่ำกว่า) → ซิงก์ได้แต่ขึ้น outdated', async () => {
+    for (const v of [undefined, 2]) {
+      const A = await device(withVersion(v));
+      await A.engine.syncNow();
+      expect(A.engine.state).toMatchObject({ kind: 'synced', outdated: true });
+      expect(A.engine.outdated).toBe(true); expect(A.engine.scriptVersion).toBe(v ?? 0);
+    }
+  });
+  it('โค้ดตรงเวอร์ชัน/ใหม่กว่า → ไม่เตือน', async () => {
+    for (const v of [REQUIRED, REQUIRED + 1]) {
+      const A = await device(withVersion(v));
+      await A.engine.syncNow();
+      expect(A.engine.state).toMatchObject({ kind: 'synced', outdated: false });
+    }
+  });
+  it('ปุ่มจัดชีตใหม่: โค้ดเก่าไม่รู้จักคำสั่ง → ข้อความบอกให้อัปเดตโค้ด · โค้ดใหม่ → สำเร็จ', async () => {
+    const mk = (answer: any) => { const server = fakeServer(); const base = server.fetchImpl; return ((async (u: any, init: any) => { const r = JSON.parse(init.body); return r.action === 'setup' ? ({ ok: true, status: 200, json: async () => answer }) as any : base(u, init); }) as unknown as typeof fetch); };
+    const mkDev = async (f: typeof fetch) => { const store = new Store(new AppDb('su' + ++n + Math.random()), null); await store.init(); const engine = new SyncEngine(store, () => true); engine.setRemote(new SheetsAdapter({ url: 'x', token: 'secret-token', salt: 's' }, f)); return engine; };
+    await expect((await mkDev(mk({ ok: false, error: 'ไม่รู้จักชุดข้อมูล' }))).setupRemote()).rejects.toThrow(/เวอร์ชันเก่า/);
+    await expect((await mkDev(mk({ ok: true, tabs: ['a', 'b', 'c'] }))).setupRemote()).resolves.toMatch(/3 แท็บ/);
   });
 });

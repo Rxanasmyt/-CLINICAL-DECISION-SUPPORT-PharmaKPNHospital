@@ -3,6 +3,7 @@
 import { WL_FIELDS } from '../data/standards';
 import { STD_2570 } from '../data/standards-2570';
 import { TRIGGERS, ALTCAUSE } from '../data/adr';
+import { latency } from '../logic/causality';
 
 const MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 // รูปแบบ "4 พ.ย. 2569" — ไม่ใช้ dd/mm/yyyy เพราะ Google Sheets แปลงเป็นวันที่เองแล้วค่าเพี้ยน
@@ -26,6 +27,20 @@ export function fiscalYearBE(iso?: string): string {
   const m = String(iso || '').match(/^(\d{4})-(\d{2})/);
   return m ? String(Number(m[1]) + 543 + (Number(m[2]) >= 10 ? 1 : 0)) : '';
 }
+/** ยาที่สงสัย + เหตุการณ์แรกที่มีวันเกิดอาการ → ข้อมูลลำดับเวลาสำหรับอ่านในชีต */
+function timeline(c: any) {
+  const drugs = ((c?.data?.drugs) || []).filter((d: any) => d.suspect && d.name);
+  const events = ((c?.data?.events) || []).filter((e: any) => e.desc);
+  const ev = events.find((e: any) => e.onset);
+  const dr = drugs.find((d: any) => d.start);
+  const lat = dr && ev ? latency(dr, ev) : null;
+  return {
+    dose: drugs.map((d: any) => [d.name, d.dose, d.route].filter(Boolean).join(' ')).join(' ; '),
+    start: thaiDate(dr?.start), stop: thaiDate(drugs.find((d: any) => d.stop)?.stop), onset: thaiDate(ev?.onset),
+    lat: lat ? lat.txt : '',
+    labs: ((c?.data?.labs) || []).filter((l: any) => l.name && String(l.value || '').trim()).map((l: any) => `${l.name} ${l.value}`).join(' ; '),
+  };
+}
 const yn = (b: unknown) => (b ? 'ใช่' : 'ไม่ใช่');
 const pick = (map: Record<string, string>, k: unknown, dflt = '—') => (k && map[String(k)]) || dflt;
 
@@ -41,10 +56,12 @@ type Row = Record<string, string | number>;
 
 export const SUMMARIES: Record<string, (data: any, id: string) => Row> = {
   adr_cases: (c) => {
-    const s = c?.sum || {}, rep = c?.data?.rep || {};
+    const s = c?.sum || {}, rep = c?.data?.rep || {}, tl = timeline(c);
     return {
       'วันที่บันทึกเคส': thaiDate(c?.saved), 'ไตรมาส': quarterLabel(s.month), 'เดือนที่เกิดอาการ': thaiMonth(s.month),
-      'ยาที่สงสัย': (s.drugs || []).join(' · '), 'อาการที่พบ': (s.events || []).join(' · '),
+      'ยาที่สงสัย': (s.drugs || []).join(' · '), 'ขนาดยา/วิธีให้ (ยาที่สงสัย)': tl.dose || '—', 'วันที่เริ่มยา': tl.start || '—', 'วันที่หยุดยา': tl.stop || '—',
+      'อาการที่พบ': (s.events || []).join(' · '), 'วันที่เริ่มมีอาการ': tl.onset || '—', 'ระยะเวลาจากเริ่มยาถึงเกิดอาการ': tl.lat || '—', 'ผลแลปที่บันทึก': tl.labs || '—',
+      'ประวัติแพ้ยาเดิม': (c?.data?.pt?.hx || '').trim() || '—',
       'คะแนน Naranjo': s.nj ?? '', 'ระดับ Naranjo': pick(NJ, s.njCat), 'ผลประเมิน WHO-UMC': pick(WHO, s.who),
       'ป้องกันได้หรือไม่ (Schumock)': pick(PREV, s.prev), 'เคสรุนแรง': yn(s.severe), 'แพ้ยาซ้ำ': yn(s.repeat),
       'ชนิดปฏิกิริยา': s.type || '—', 'ผลลัพธ์': pick(OUT, s.outcome),
@@ -59,7 +76,7 @@ export const SUMMARIES: Record<string, (data: any, id: string) => Row> = {
     };
   },
   cqi_projects: (x) => ({
-    'ชื่อโครงการ': x.title ?? '', 'ประเภท': x.type ?? '', 'ปัญหาที่พบ': x.problem ?? '', 'ตัวชี้วัด': x.indicator ?? '',
+    'ชื่อโครงการ': x.title ?? '', 'ประเภท': x.type ?? '', 'ปัญหาที่พบ': x.problem ?? '', 'การวัดผล': x.measure ?? '', 'ตัวชี้วัด': x.indicator ?? '',
     'ผลก่อนดำเนินการ': x.before ?? '', 'ผลหลังดำเนินการ': x.after ?? '', 'วันที่เริ่ม': thaiDate(x.start), 'สถานะ': x.status ?? '',
   }),
   intensive_monitoring: (x) => ({
@@ -79,7 +96,7 @@ export const SUMMARIES: Record<string, (data: any, id: string) => Row> = {
   std_assessment: (x, id) => {
     const item = STD_2570.flatMap((s) => s.levels.flatMap((L) => L.items.map((i) => ({ ...i, no: s.no, lv: L.lv })))).find((i) => i.id === id);
     return {
-      'มาตรฐานข้อ': item ? String(item.no) : id.split('-')[0], 'ระดับ': item ? String(item.lv) : '', 'ข้อย่อย': id,
+      'มาตรฐานข้อ': item ? String(item.no) : id.split('-')[0], 'ระดับ': item ? String(item.lv) : '',
       'เกณฑ์': item?.t ?? '', 'สถานะ': x?.st === 'done' ? 'ดำเนินการแล้ว' : x?.st === 'doing' ? 'กำลังดำเนินการ' : 'ยังไม่ดำเนินการ', 'หมายเหตุ': x?.note ?? '',
     };
   },

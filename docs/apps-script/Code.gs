@@ -5,15 +5,18 @@
  * ติดตั้ง:
  *  1) สร้าง Google Sheets ใหม่ → ส่วนขยาย → Apps Script → วางไฟล์นี้ทั้งไฟล์ (ทับของเดิม)
  *  2) Project Settings → Script properties → เพิ่ม TOKEN = (ข้อความลับที่ตั้งเอง ยาว ≥ 24 ตัวอักษร)
- *  3) เลือกฟังก์ชัน setup แล้วกด Run หนึ่งครั้ง (อนุญาตสิทธิ์) — จะสร้างแท็บ "อ่านก่อน" "ภาพรวม" และแท็บข้อมูลทั้งหมด
- *  4) Deploy → New deployment → Web app · Execute as: Me · Who has access: Anyone
- *     (แก้โค้ดภายหลังต้อง Deploy → Manage deployments → แก้เป็นเวอร์ชันใหม่ ไม่เช่นนั้นยังใช้โค้ดเดิม)
- *  5) คัดลอก URL (ลงท้าย /exec) ใส่ในแอป: ปุ่มสถานะซิงก์ → URL / token / salt
- *  6) ถ้าเคยซิงก์ด้วยโค้ดเวอร์ชันเก่า: แอปกด "ส่งข้อมูลทั้งหมดใหม่" หนึ่งครั้ง แล้วลบแท็บเก่าที่ขึ้นต้นด้วย "เก่า-"
+ *  3) Deploy → New deployment → Web app · Execute as: Me · Who has access: Anyone (ครั้งแรกจะขออนุญาตสิทธิ์)
+ *     (แก้โค้ดภายหลังต้อง Deploy → Manage deployments → ไอคอนดินสอ → New version ไม่เช่นนั้นยังใช้โค้ดเดิม)
+ *  4) คัดลอก URL (ลงท้าย /exec) ใส่ในแอป: ปุ่มสถานะซิงก์ → URL / token / salt
+ *  5) ในแอป กด "จัดชีตใหม่" หนึ่งครั้ง (สร้างแท็บ "อ่านก่อน" "ภาพรวม" และแท็บข้อมูลทั้งหมด) แล้วกด "ส่งข้อมูลทั้งหมดใหม่"
+ *  แอปจะเตือนเมื่อโค้ดนี้เก่ากว่าที่แอปต้องการ (เทียบ SCRIPT_VERSION) — ถ้าเตือน ให้วางโค้ดใหม่ทั้งไฟล์และ Deploy เวอร์ชันใหม่
+ *  (ทางเลือกเดิม: เลือกฟังก์ชัน setup ในตัวแก้ไขแล้วกด Run ก็ได้ผลเหมือนปุ่มในแอป)
  *
  * PDPA: แอปส่งเฉพาะรหัสเคส และ HN ที่ผ่าน hash (SHA-256 + salt) — ไม่ส่งชื่อผู้ป่วย
  * แต่ละแท็บ = หนึ่งชุดข้อมูล แถวละหนึ่งรายการ คอลัมน์ที่อ่านได้อยู่ซ้าย · คอลัมน์เทคนิค (ซ่อน) อยู่ขวาสุด
  */
+// เลขเวอร์ชันของโค้ดนี้ — แอปเทียบกับเลขที่ต้องการ (src/storage/scriptVersion.ts) แล้วเตือนเมื่อโค้ดในชีตเก่ากว่า เพิ่มเลขทุกครั้งที่แก้ไฟล์นี้
+var SCRIPT_VERSION = 3;
 var H = { id: 'รหัสรายการ', at: 'แก้ไขล่าสุด', del: 'ลบแล้ว?', ms: '_เวลา(ms) ห้ามแก้', pay: '_ข้อมูลเต็ม(JSON) ห้ามแก้' };
 var TZ = 'Asia/Bangkok';
 var MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
@@ -60,7 +63,9 @@ function doGet(e) {
 }
 
 function handle_(req) {
-  if (req.action === 'ping') return { ok: true, time: Date.now() };
+  if (req.action === 'ping') return { ok: true, time: Date.now(), version: SCRIPT_VERSION };
+  // จัดแท็บและรูปแบบใหม่ทั้งหมด (เรียกจากปุ่ม "จัดชีตใหม่" ในแอป — ไม่ต้องเปิดตัวแก้ไข Apps Script)
+  if (req.action === 'setup') { setup(); return { ok: true, version: SCRIPT_VERSION, tabs: Object.keys(TABS).map(function (k) { return TABS[k].tab; }) }; }
   if (!TABS[req.collection]) return { ok: false, error: 'ไม่รู้จักชุดข้อมูล' };
   var sh = sheet_(req.collection);
   if (req.action === 'push') { var r = push_(sh, req.records || []); try { refreshOverview_(); } catch (e) {} return r; }
@@ -120,7 +125,7 @@ function push_(sh, records) {
   var last = sh.getLastRow();
   var ids = last > 1 ? sh.getRange(2, iId + 1, last - 1, 1).getValues().map(function (x) { return String(x[0]); }) : [];
   var tsCol = last > 1 ? sh.getRange(2, iMs + 1, last - 1, 1).getValues().map(function (x) { return Number(x[0]); }) : [];
-  var saved = 0;
+  var saved = 0, newRows = [];
   records.forEach(function (r) {
     var payload = r.deleted ? '' : JSON.stringify(r.data);
     if (payload.length > 49000) return;                  // เกินขีดจำกัดเซลล์ของ Google Sheets (แอปตรวจก่อนส่งอยู่แล้ว)
@@ -136,9 +141,14 @@ function push_(sh, records) {
     if (i >= 0) {
       if (Number(r.updatedAt) < tsCol[i]) return;        // ของในชีตใหม่กว่า — ล่าสุดชนะ
       sh.getRange(i + 2, 1, 1, row.length).setValues([row]);
-    } else { sh.appendRow(row); ids.push(String(r.id)); tsCol.push(Number(r.updatedAt)); }
+    } else { newRows.push(row); ids.push(String(r.id)); tsCol.push(Number(r.updatedAt)); }
     saved++;
   });
+  // เพิ่มแถวใหม่ทีเดียว (เร็วกว่า appendRow ทีละแถวมากเมื่อส่งข้อมูลทั้งหมดใหม่)
+  if (newRows.length) sh.getRange(sh.getLastRow() + 1, 1, newRows.length, head.length).setValues(newRows);
+  // เรียงใหม่สุดไว้บน (ตามเวลาแก้ไขล่าสุด) — คอลัมน์วันที่เป็นข้อความภาษาไทย จึงเรียงเองในตัวกรองไม่ได้
+  // รายการที่ลบแล้วไว้ล่างสุด
+  try { var n = sh.getLastRow(); if (n > 2) sh.getRange(2, 1, n - 1, head.length).sort([{ column: head.indexOf(H.del) + 1, ascending: true }, { column: iMs + 1, ascending: false }]); } catch (e) {}
   return { ok: true, saved: saved };
 }
 
@@ -161,23 +171,70 @@ function pull_(sh, since) {
 }
 
 // ---------- หน้าตา ----------
+// ความกว้างคอลัมน์ตามชนิดเนื้อหา และสีสถานะ (ข้อความตรงกับค่าที่แอปส่งมา)
+var WIDE = ['อาการที่พบ', 'สาเหตุที่ราก (RCA)', 'แผนป้องกัน', 'เกณฑ์', 'ปัญหาที่พบ', 'การวัดผล', 'ผลก่อนดำเนินการ', 'ผลหลังดำเนินการ', 'หัวข้อ', 'หมายเหตุ',
+  'Trigger ที่พบ', 'เกณฑ์ Serious ที่เข้า', 'สาเหตุอื่นที่เป็นไปได้', 'ผลแลปที่บันทึก', 'ขนาดยา/วิธีให้ (ยาที่สงสัย)', 'ประวัติแพ้ยาเดิม', 'ชื่อโครงการ', 'หมวดสาเหตุ RCA', 'ยาที่สงสัย', 'กลุ่มยา', 'ชนิดปฏิกิริยา'];
+var NARROW = ['ไตรมาส', 'คะแนน Naranjo', 'เคสรุนแรง', 'แพ้ยาซ้ำ', 'Serious ADR (ร้ายแรง)', 'ประเภท ADR', 'อายุ (ปี)', 'เพศ', 'มาตรฐานข้อ', 'ระดับ', 'ข้อย่อย',
+  'ปีงบประมาณ (พ.ศ.)', 'จำนวน Trigger ที่พบ', 'ความเข้าใจ (เต็ม 5)', 'ความพึงพอใจ (เต็ม 5)', 'ลบแล้ว?'];
+var AMBER = ['#FBF1DE', '#7A5200'], GREEN = ['#EAF4EE', '#1E6B47'], RED = ['#FBEAE8', '#7A2A24'];
+var STATUS = [
+  ['รายงาน HPVC', 'รอส่ง', AMBER], ['รายงาน HPVC', 'ส่งแล้ว', GREEN],
+  ['เคสรุนแรง', 'ใช่', RED], ['แพ้ยาซ้ำ', 'ใช่', RED], ['Serious ADR (ร้ายแรง)', 'ใช่', RED],
+  ['ป้องกันได้หรือไม่ (Schumock)', 'ป้องกันได้', AMBER],
+  ['RCA (วิเคราะห์สาเหตุราก)', 'ยังไม่ครบ', AMBER], ['RCA (วิเคราะห์สาเหตุราก)', 'ทำครบ', GREEN],
+  ['Med error (ความคลาดเคลื่อนทางยา)', 'ยังไม่รายงาน', AMBER], ['Med error (ความคลาดเคลื่อนทางยา)', 'รายงานแล้ว', GREEN],
+  ['สถานะ', 'พบ ADR', RED], ['สถานะ', 'ติดตามอยู่', AMBER], ['สถานะ', 'กำลังดำเนินการ', AMBER], ['สถานะ', 'ดำเนินการแล้ว', GREEN], ['สถานะ', 'เสร็จสิ้น', GREEN]
+];
+// คำอธิบายหัวคอลัมน์ (เลื่อนเมาส์ไปที่หัวคอลัมน์หรือกดดูโน้ต)
+var HELP = {
+  'ไตรมาส': 'ไตรมาสปฏิทินของเดือนที่เกิดอาการ เช่น Q2/69 = เม.ย.–มิ.ย. 2569',
+  'คะแนน Naranjo': 'คะแนนรวมของ Naranjo ADR probability scale (-4 ถึง 13)',
+  'ระดับ Naranjo': '9 ขึ้นไป = Definite · 5–8 = Probable · 1–4 = Possible · 0 หรือต่ำกว่า = Doubtful',
+  'ผลประเมิน WHO-UMC': 'การจำแนกความสัมพันธ์ระหว่างยากับอาการตามเกณฑ์ WHO-UMC',
+  'ป้องกันได้หรือไม่ (Schumock)': 'ตามเกณฑ์ Schumock & Thornton: ตอบ "ใช่" ข้อใดข้อหนึ่ง = ป้องกันได้ (ต้องทำ RCA)',
+  'เคสรุนแรง': 'มีอาการระดับ severe หรือเข้าเกณฑ์ SJS/TEN, DRESS, anaphylaxis',
+  'แพ้ยาซ้ำ': 'ผู้ป่วยแพ้ยาเดิมซ้ำ (เป้าหมาย = 0)',
+  'ประเภท ADR': 'Type A = เกี่ยวกับฤทธิ์ยา · Type B = ภูมิคุ้มกัน/idiosyncratic (ต้องรายงาน HPVC)',
+  'Serious ADR (ร้ายแรง)': 'เข้าเกณฑ์ serious ข้อใดข้อหนึ่ง เช่น เสียชีวิต อันตรายถึงชีวิต ต้องนอนโรงพยาบาล',
+  'รายงาน HPVC': 'สถานะการรายงานศูนย์ HPVC · รอส่ง = เป็น type B หรือ serious แต่ยังไม่ส่ง',
+  'RCA (วิเคราะห์สาเหตุราก)': 'ใช้กับเคสที่ป้องกันได้: ทำครบ = ระบุสาเหตุที่รากและแผนป้องกันแล้ว',
+  'Med error (ความคลาดเคลื่อนทางยา)': 'สถานะการรายงานความคลาดเคลื่อนทางยาที่เกี่ยวข้อง',
+  'ระยะเวลาจากเริ่มยาถึงเกิดอาการ': 'คำนวณจากวันเริ่มยาที่สงสัยถึงวันเริ่มมีอาการ (ใช้ประเมินความสัมพันธ์ด้านเวลา)',
+  'HN (เข้ารหัส)': 'HN ผ่าน SHA-256 + salt ของ รพ. ไม่ใช่ HN จริง',
+  'ปีงบประมาณ (พ.ศ.)': 'ปีงบประมาณเริ่ม 1 ต.ค.',
+  'ความเข้าใจ (เต็ม 5)': 'คะแนนความเข้าใจของผู้รับข้อมูล', 'ความพึงพอใจ (เต็ม 5)': 'คะแนนความพึงพอใจของผู้รับข้อมูล',
+  'ลบแล้ว?': 'ใช่ = รายการนี้ถูกลบในแอปแล้ว (เก็บแถวไว้ให้เครื่องอื่นซิงก์การลบ) ห้ามลบแถวเอง'
+};
+
 function style_(sh) {
   try {
     var head = headers_(sh), n = head.length;
     var iId = head.indexOf(H.id), iDel = head.indexOf(H.del), iMs = head.indexOf(H.ms), iPay = head.indexOf(H.pay);
+    var rows = Math.max(2, sh.getMaxRows());
     var hr = sh.getRange(1, 1, 1, n);
-    hr.setBackground('#0F5D57').setFontColor('#FFFFFF').setFontWeight('bold').setWrap(true).setVerticalAlignment('middle');
-    sh.setRowHeight(1, 48);
+    hr.setBackground('#0F5D57').setFontColor('#FFFFFF').setFontWeight('bold').setWrap(true).setVerticalAlignment('middle').setHorizontalAlignment('center');
+    sh.setRowHeight(1, 52);
     sh.setFrozenRows(1); sh.setFrozenColumns(2);
-    sh.getRange(1, iId + 1, sh.getMaxRows(), 1).setNumberFormat('@');           // รหัสเป็นข้อความ (กันถูกแปลงเป็นตัวเลข/วันที่)
-    for (var c = 1; c <= n; c++) { if (c - 1 !== iMs && c - 1 !== iPay) sh.setColumnWidth(c, c - 1 === iId ? 120 : (c - 1 === iDel ? 80 : 170)); }
+    sh.getRange(1, iId + 1, rows, 1).setNumberFormat('@');                       // รหัสเป็นข้อความ (กันถูกแปลงเป็นตัวเลข/วันที่)
+    for (var c = 1; c <= n; c++) {
+      var h = head[c - 1];
+      if (c - 1 === iMs || c - 1 === iPay) continue;
+      sh.setColumnWidth(c, c - 1 === iId ? 120 : (h === H.at ? 150 : (h === 'เกณฑ์' ? 440 : (WIDE.indexOf(h) >= 0 ? 300 : (NARROW.indexOf(h) >= 0 ? 95 : 150)))));
+      if (HELP[h]) sh.getRange(1, c).setNote(HELP[h]);
+    }
     sh.hideColumns(iMs + 1, 2);                                                  // ซ่อน _เวลา และ _ข้อมูลเต็ม
-    sh.getRange(2, 1, Math.max(1, sh.getMaxRows() - 1), n).setWrap(true).setVerticalAlignment('top');
-    // รายการที่ลบแล้ว = ตัวอักษรเทาและขีดฆ่า
-    var col = letter_(iDel);
-    var rule = SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$' + col + '2="ใช่"').setFontColor('#9AA5A2').setStrikethrough(true).setRanges([sh.getRange(2, 1, sh.getMaxRows() - 1, n)]).build();
-    sh.setConditionalFormatRules([rule]);
-    if (!sh.getFilter()) sh.getRange(1, 1, Math.max(2, sh.getMaxRows()), iDel + 1).createFilter();
+    var body = sh.getRange(2, 1, rows - 1, n);
+    body.setWrap(true).setVerticalAlignment('top').setFontSize(10);
+    // ตัวเลขตรงกลาง คอลัมน์สั้นตรงกลาง
+    head.forEach(function (h, i) { if (NARROW.indexOf(h) >= 0) sh.getRange(2, i + 1, rows - 1, 1).setHorizontalAlignment('center'); });
+    // สีสถานะ + รายการที่ลบแล้ว (เทาขีดฆ่า — วางไว้ก่อนเพื่อให้มีลำดับความสำคัญสูงสุด)
+    var rules = [SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=$' + letter_(iDel) + '2="ใช่"').setFontColor('#9AA5A2').setBackground('#F4F4F2').setStrikethrough(true).setRanges([body]).build()];
+    STATUS.forEach(function (st) {
+      var i = head.indexOf(st[0]); if (i < 0) return;
+      rules.push(SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(st[1]).setBackground(st[2][0]).setFontColor(st[2][1]).setBold(true).setRanges([sh.getRange(2, i + 1, rows - 1, 1)]).build());
+    });
+    sh.setConditionalFormatRules(rules);
+    if (!sh.getFilter()) sh.getRange(1, 1, rows, iDel + 1).createFilter();
     if (sh.getProtections(SpreadsheetApp.ProtectionType.SHEET).length === 0) sh.protect().setWarningOnly(true).setDescription('ข้อมูลมาจากแอป — แก้ในแอปเท่านั้น');
   } catch (e) { /* การจัดรูปแบบล้มเหลวไม่กระทบข้อมูล */ }
 }

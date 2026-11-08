@@ -28,7 +28,18 @@ export class SheetsAdapter implements StorageAdapter {
     return json;
   }
 
-  async sync() { await this.call({ action: 'ping' }); }
+  /** เลขเวอร์ชันโค้ด Apps Script ที่ตอบกลับล่าสุด (โค้ดเก่าไม่ส่งเลข = 0) */
+  scriptVersion: number | null = null;
+  async sync() { const j = await this.call({ action: 'ping' }); this.scriptVersion = Number(j.version) || 0; }
+
+  /** สั่งให้ Apps Script จัดแท็บและรูปแบบใหม่ทั้งหมด — คืนรายชื่อแท็บ */
+  async setup(): Promise<string[]> {
+    try { return (await this.call({ action: 'setup' })).tabs || []; }
+    catch (e: any) {
+      if (/ไม่รู้จัก/.test(String(e?.message))) throw new Error('โค้ด Apps Script ยังเป็นเวอร์ชันเก่า ไม่มีคำสั่งนี้ — วางโค้ดใหม่ทั้งไฟล์และ Deploy เวอร์ชันใหม่ก่อน');
+      throw e;
+    }
+  }
 
   async list(collection: CollectionName, since = 0): Promise<StoredRecord[]> {
     const j = await this.call({ action: 'pull', collection, since });
