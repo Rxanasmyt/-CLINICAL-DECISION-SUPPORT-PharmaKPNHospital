@@ -53,7 +53,7 @@ describe('Code.gs กับชีตจำลอง', () => {
   it('pull: คืน id/เวลา/ลบ/ข้อมูลเต็ม ตาม since', () => {
     env.post({ action: 'push', collection: 'adr_cases', records: [caseRec('1', 1000), caseRec('2', 5000)] });
     const all = env.post({ action: 'pull', collection: 'adr_cases', since: 0 }).records;
-    expect(all.map((r: any) => [r.id, r.updatedAt, r.deleted])).toEqual([['1', 1000, false], ['2', 5000, false]]);
+    expect(all.map((r: any) => [r.id, r.updatedAt, r.deleted])).toEqual([['2', 5000, false], ['1', 1000, false]]);   // ชีตเรียงใหม่สุดไว้บน
     expect(all[0].data.sum.drugs).toEqual(['Allopurinol']);
     expect(env.post({ action: 'pull', collection: 'adr_cases', since: 2000 }).records.map((r: any) => r.id)).toEqual(['2']);
     expect(env.post({ action: 'get', collection: 'adr_cases', id: '2' }).record.id).toBe('2');
@@ -73,9 +73,46 @@ describe('Code.gs กับชีตจำลอง', () => {
     env.post({ action: 'push', collection: 'ptc_meetings', records: [{ id: '2026-11-10', updatedAt: 1, summary: SUMMARIES.ptc_meetings('2026-11-10', '2026-11-10'), data: '2026-11-10' }] });
     const by = (n: string) => { const s = env.sheets.find((x) => x.name === n)!; return Object.fromEntries(s.grid[0].map((h: string, i: number) => [h, s.grid[1][i]])); };
     expect(by('ภาระงานรายเดือน')).toMatchObject({ 'เดือน': 'มี.ค. 2569', 'ใบสั่งยาผู้ป่วยนอก (ใบ)': 1200 });
-    expect(by('ประเมินมาตรฐาน ข้อ 3 และ 9')).toMatchObject({ 'มาตรฐานข้อ': '9', 'ระดับ': '3', 'ข้อย่อย': "'9-3.4", 'สถานะ': 'ดำเนินการแล้ว' });
+    expect(by('ประเมินมาตรฐาน ข้อ 3 และ 9')).toMatchObject({ 'รหัสรายการ': '9-3.4', 'มาตรฐานข้อ': '9', 'ระดับ': '3', 'สถานะ': 'ดำเนินการแล้ว' });
     expect(by('ประเมินมาตรฐาน ข้อ 3 และ 9')['เกณฑ์']).toMatch(/preventability/);
     expect(by('วันประชุม PTC')).toMatchObject({ 'วันที่ประชุม PTC': '10 พ.ย. 2569', 'ปีงบประมาณ (พ.ศ.)': '2570' });
+  });
+
+  it('เรียงใหม่สุดไว้บน และเพิ่มแถวใหม่แบบชุดเดียว (ไม่ appendRow ทีละแถว)', () => {
+    env.post({ action: 'push', collection: 'adr_cases', records: [caseRec('1', 1000), caseRec('2', 3000), caseRec('3', 2000)] });
+    const sh = env.sheets.find((s) => s.name === 'เคสแพ้ยา (ADR)')!;
+    expect(sh.grid.slice(1).map((r) => r[0])).toEqual(['2', '3', '1']);
+    expect(sh.appended).toBe(1);                                   // มีแค่แถวหัว
+    const many = Array.from({ length: 150 }, (_, i) => caseRec(String(500 + i), 10_000 + i));
+    env.post({ action: 'push', collection: 'adr_cases', records: many });
+    expect(sh.grid.length).toBe(1 + 3 + 150); expect(sh.appended).toBe(1);
+    expect(sh.grid[1][0]).toBe('649');                              // ใหม่สุดบนสุด
+    env.post({ action: 'push', collection: 'adr_cases', records: [caseRec('3', 99_999)] });
+    expect(sh.grid[1][0]).toBe('3');                                // แก้แล้วขึ้นบนสุด
+  });
+
+  it('รายการที่ลบแล้วอยู่ล่างสุด ไม่รบกวนรายการใช้งาน', () => {
+    env.post({ action: 'push', collection: 'adr_cases', records: [caseRec('1', 1000), caseRec('2', 2000), caseRec('3', 3000)] });
+    env.post({ action: 'push', collection: 'adr_cases', records: [{ id: '3', updatedAt: 9000, deleted: true, summary: {} }] });
+    const sh = env.sheets.find((s) => s.name === 'เคสแพ้ยา (ADR)')!;
+    expect(sh.grid.slice(1).map((r) => r[0])).toEqual(['2', '1', '3']);
+  });
+
+  it('หน้าตา: ความกว้างตามชนิดคอลัมน์ · สีสถานะ · คำอธิบายหัวคอลัมน์ · รายการลบแล้วมีลำดับความสำคัญสูงสุด', () => {
+    env.post({ action: 'push', collection: 'adr_cases', records: [caseRec('1', 1000)] });
+    const sh = env.sheets.find((s) => s.name === 'เคสแพ้ยา (ADR)')!;
+    const head: string[] = sh.grid[0]; const col = (h: string) => head.indexOf(h) + 1;
+    const width = (h: string) => sh.log.filter((l) => l[0] === 'setColumnWidth' && l[1] === col(h)).pop()?.[3];
+    expect(width('สาเหตุที่ราก (RCA)')).toBe(300); expect(width('คะแนน Naranjo')).toBe(95); expect(width('ยาที่สงสัย')).toBe(300); expect(width('แก้ไขล่าสุด')).toBe(150);
+    expect(sh.rules[0].formula).toMatch(/="ใช่"$/); expect(sh.rules[0].strike).toBe(true);
+    const rule = (h: string, t: string) => sh.rules.find((r: any) => r.text === t && r.ranges[0].c === col(h));
+    expect(rule('รายงาน HPVC', 'รอส่ง')?.bg).toBe('#FBF1DE'); expect(rule('รายงาน HPVC', 'ส่งแล้ว')?.bg).toBe('#EAF4EE');
+    expect(rule('เคสรุนแรง', 'ใช่')?.bg).toBe('#FBEAE8'); expect(rule('RCA (วิเคราะห์สาเหตุราก)', 'ยังไม่ครบ')).toBeTruthy();
+    const note = (h: string) => sh.log.find((l) => l[0] === 'setNote' && l[1] === col(h))?.[3];
+    expect(note('ระดับ Naranjo')).toMatch(/Definite/); expect(note('ประเภท ADR')).toMatch(/HPVC/); expect(note('ลบแล้ว?')).toMatch(/ห้ามลบแถวเอง/);
+    // หัวคอลัมน์ทุกตัวที่แอปส่งมีความกว้างที่กำหนด (ไม่มีคอลัมน์ลืมตั้ง) ยกเว้นคอลัมน์ซ่อน
+    const hidden = new Set(['_เวลา(ms) ห้ามแก้', '_ข้อมูลเต็ม(JSON) ห้ามแก้']);
+    expect(head.filter((h) => !hidden.has(h) && width(h) === undefined)).toEqual([]);
   });
 
   it('setup(): สร้างแท็บ อ่านก่อน/ภาพรวม และสูตรชี้คอลัมน์ถูกต้อง', () => {
