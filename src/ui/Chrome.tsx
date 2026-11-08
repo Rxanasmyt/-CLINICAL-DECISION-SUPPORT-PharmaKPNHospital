@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { engine, store, applySettings, loadSettings, saveSettings } from '../storage';
 import type { SyncSettings, SyncState } from '../storage/types';
+import { REQUIRED_SCRIPT_VERSION } from '../storage/scriptVersion';
 
 const TABS: [string, string, string][] = [
   ['home', 'หน้าแรก', '⌂'], ['tb', 'TB', '💊'], ['warf', 'Warfarin', '⚖'], ['ped', 'ยาน้ำเด็ก', '🧴'],
@@ -37,7 +38,7 @@ function label(s: SyncState) {
     case 'offline': return ['#A66A00', 'ออฟไลน์' + (s.pending ? ` · รอส่ง ${s.pending} รายการ` : '')];
     case 'syncing': return ['#2F6DA8', 'กำลังซิงก์…'];
     case 'pending': return ['#A66A00', s.pending ? `รอส่ง ${s.pending} รายการ` : 'รอซิงก์'];
-    case 'synced': return ['#7FC7B6', 'ซิงก์แล้ว'];
+    case 'synced': return s.outdated ? ['#E0A53A', 'ซิงก์แล้ว · ต้องอัปเดตโค้ด Apps Script'] : ['#7FC7B6', 'ซิงก์แล้ว'];
     case 'error': return ['#E0786F', 'ซิงก์ไม่สำเร็จ'];
   }
 }
@@ -59,6 +60,8 @@ export function SyncBadge() {
 
 function SyncPanel({ state, close }: { state: SyncState; close: () => void }) {
   const [s, setS] = useState<SyncSettings>(loadSettings());
+  const [setupMsg, setSetupMsg] = useState('');
+  const [busy, setBusy] = useState(false);
   const set = (k: keyof SyncSettings, v: any) => setS({ ...s, [k]: v });
   const save = () => { saveSettings(s); applySettings(s); };
   const field = (k: 'url' | 'token' | 'salt', lab: string, ph: string, type = 'text') => (
@@ -76,10 +79,18 @@ function SyncPanel({ state, close }: { state: SyncState; close: () => void }) {
         {field('url', 'URL ของ Apps Script Web App', 'https://script.google.com/macros/s/…/exec')}
         {field('token', 'Token (ตรงกับ TOKEN ใน Apps Script)', 'ข้อความลับของกลุ่มงาน', 'password')}
         {field('salt', 'Salt ของ รพ. สำหรับ hash HN', 'ต้องตรงกันทุกเครื่อง · ห้ามเปลี่ยนภายหลัง', 'password')}
+        {engine.outdated && (
+          <div className="warnbox" role="alert">
+            <b>โค้ด Apps Script ในชีตเก่ากว่าที่แอปต้องการ</b>{engine.scriptVersion != null ? ` (ชีตเป็นเวอร์ชัน ${engine.scriptVersion} · แอปต้องการ ${REQUIRED_SCRIPT_VERSION})` : ''}
+            <br />การซิงก์ยังใช้ได้ แต่คอลัมน์/หน้าตาชีตอาจไม่ครบ วิธีอัปเดต: เปิด Apps Script ของชีต → วางโค้ดจาก <code>docs/apps-script/Code.gs</code> ทั้งไฟล์ทับของเดิม → Deploy → Manage deployments → ไอคอนดินสอ → New version → Deploy แล้วกด "จัดชีตใหม่" ด้านล่าง
+          </div>
+        )}
         <p className="muted">สถานะ: {label(state)[1]}{state.kind === 'error' ? ` — ${state.message}` : ''} · ค้างส่ง {store.pendingCount()} รายการ</p>
+        {setupMsg && <p className="muted" role="status">{setupMsg}</p>}
         <div className="row">
           <button type="button" className="pri" onClick={() => { save(); void engine.syncNow(); }}>บันทึกและซิงก์</button>
           <button type="button" onClick={() => { save(); }}>บันทึก</button>
+          <button type="button" disabled={busy || !(s.enabled && s.approved && s.url && s.token)} title="สร้างแท็บ อ่านก่อน/ภาพรวม และจัดรูปแบบชีตใหม่ (ใช้หลังอัปเดตโค้ด Apps Script)" onClick={() => { save(); setBusy(true); setSetupMsg(''); engine.setupRemote().then((m) => setSetupMsg(m)).catch((e) => setSetupMsg('ไม่สำเร็จ: ' + (e?.message || e))).finally(() => setBusy(false)); }}>{busy ? 'กำลังจัดชีต…' : 'จัดชีตใหม่'}</button>
           <button type="button" title="ใช้หลังสร้างชีตใหม่หรือเปลี่ยนโครงสร้างชีต" onClick={() => { if (window.confirm('ส่งข้อมูลทั้งหมดในเครื่องขึ้น Google Sheets ใหม่ใช่ไหม? (รายการเดิมในชีตจะถูกเขียนทับด้วยข้อมูลล่าสุดของเครื่องนี้)')) { save(); store.resetPushed(); void engine.syncNow(); } }}>ส่งข้อมูลทั้งหมดใหม่</button>
           <button type="button" onClick={close}>ปิด</button>
         </div>

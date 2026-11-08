@@ -5,15 +5,18 @@
  * ติดตั้ง:
  *  1) สร้าง Google Sheets ใหม่ → ส่วนขยาย → Apps Script → วางไฟล์นี้ทั้งไฟล์ (ทับของเดิม)
  *  2) Project Settings → Script properties → เพิ่ม TOKEN = (ข้อความลับที่ตั้งเอง ยาว ≥ 24 ตัวอักษร)
- *  3) เลือกฟังก์ชัน setup แล้วกด Run หนึ่งครั้ง (อนุญาตสิทธิ์) — จะสร้างแท็บ "อ่านก่อน" "ภาพรวม" และแท็บข้อมูลทั้งหมด
- *  4) Deploy → New deployment → Web app · Execute as: Me · Who has access: Anyone
- *     (แก้โค้ดภายหลังต้อง Deploy → Manage deployments → แก้เป็นเวอร์ชันใหม่ ไม่เช่นนั้นยังใช้โค้ดเดิม)
- *  5) คัดลอก URL (ลงท้าย /exec) ใส่ในแอป: ปุ่มสถานะซิงก์ → URL / token / salt
- *  6) ถ้าเคยซิงก์ด้วยโค้ดเวอร์ชันเก่า: แอปกด "ส่งข้อมูลทั้งหมดใหม่" หนึ่งครั้ง แล้วลบแท็บเก่าที่ขึ้นต้นด้วย "เก่า-"
+ *  3) Deploy → New deployment → Web app · Execute as: Me · Who has access: Anyone (ครั้งแรกจะขออนุญาตสิทธิ์)
+ *     (แก้โค้ดภายหลังต้อง Deploy → Manage deployments → ไอคอนดินสอ → New version ไม่เช่นนั้นยังใช้โค้ดเดิม)
+ *  4) คัดลอก URL (ลงท้าย /exec) ใส่ในแอป: ปุ่มสถานะซิงก์ → URL / token / salt
+ *  5) ในแอป กด "จัดชีตใหม่" หนึ่งครั้ง (สร้างแท็บ "อ่านก่อน" "ภาพรวม" และแท็บข้อมูลทั้งหมด) แล้วกด "ส่งข้อมูลทั้งหมดใหม่"
+ *  แอปจะเตือนเมื่อโค้ดนี้เก่ากว่าที่แอปต้องการ (เทียบ SCRIPT_VERSION) — ถ้าเตือน ให้วางโค้ดใหม่ทั้งไฟล์และ Deploy เวอร์ชันใหม่
+ *  (ทางเลือกเดิม: เลือกฟังก์ชัน setup ในตัวแก้ไขแล้วกด Run ก็ได้ผลเหมือนปุ่มในแอป)
  *
  * PDPA: แอปส่งเฉพาะรหัสเคส และ HN ที่ผ่าน hash (SHA-256 + salt) — ไม่ส่งชื่อผู้ป่วย
  * แต่ละแท็บ = หนึ่งชุดข้อมูล แถวละหนึ่งรายการ คอลัมน์ที่อ่านได้อยู่ซ้าย · คอลัมน์เทคนิค (ซ่อน) อยู่ขวาสุด
  */
+// เลขเวอร์ชันของโค้ดนี้ — แอปเทียบกับเลขที่ต้องการ (src/storage/scriptVersion.ts) แล้วเตือนเมื่อโค้ดในชีตเก่ากว่า เพิ่มเลขทุกครั้งที่แก้ไฟล์นี้
+var SCRIPT_VERSION = 3;
 var H = { id: 'รหัสรายการ', at: 'แก้ไขล่าสุด', del: 'ลบแล้ว?', ms: '_เวลา(ms) ห้ามแก้', pay: '_ข้อมูลเต็ม(JSON) ห้ามแก้' };
 var TZ = 'Asia/Bangkok';
 var MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
@@ -60,7 +63,9 @@ function doGet(e) {
 }
 
 function handle_(req) {
-  if (req.action === 'ping') return { ok: true, time: Date.now() };
+  if (req.action === 'ping') return { ok: true, time: Date.now(), version: SCRIPT_VERSION };
+  // จัดแท็บและรูปแบบใหม่ทั้งหมด (เรียกจากปุ่ม "จัดชีตใหม่" ในแอป — ไม่ต้องเปิดตัวแก้ไข Apps Script)
+  if (req.action === 'setup') { setup(); return { ok: true, version: SCRIPT_VERSION, tabs: Object.keys(TABS).map(function (k) { return TABS[k].tab; }) }; }
   if (!TABS[req.collection]) return { ok: false, error: 'ไม่รู้จักชุดข้อมูล' };
   var sh = sheet_(req.collection);
   if (req.action === 'push') { var r = push_(sh, req.records || []); try { refreshOverview_(); } catch (e) {} return r; }

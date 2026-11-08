@@ -3,6 +3,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { SUMMARIES } from './labels';
 import { load } from './fakeSheets';
+import { REQUIRED_SCRIPT_VERSION } from './scriptVersion';
 
 const caseRec = (id: string, at: number, extra: any = {}) => {
   const data = { id: Number(id), cid: id, label: 'เคส ' + id, saved: '2026-05-01T10:00', data: { pt: { name: '', hn: 'sha256:abc' } },
@@ -17,6 +18,23 @@ describe('Code.gs กับชีตจำลอง', () => {
   it('ปฏิเสธ token ผิด', () => {
     const r = JSON.parse(env.ctx.doPost({ postData: { contents: JSON.stringify({ token: 'x', action: 'ping' }) } }).s);
     expect(r).toEqual({ ok: false, error: 'token ไม่ถูกต้อง' });
+  });
+
+  it('ping ตอบเลขเวอร์ชันโค้ด และตรงกับที่แอปต้องการ (กันลืมเพิ่มเลขทั้งสองที่)', () => {
+    const r = env.post({ action: 'ping' });
+    expect(r).toMatchObject({ ok: true, version: env.ctx.SCRIPT_VERSION });
+    expect(env.ctx.SCRIPT_VERSION).toBe(REQUIRED_SCRIPT_VERSION);
+  });
+
+  it('คำสั่ง setup (ปุ่ม "จัดชีตใหม่"): ต้องมี token · สร้างทุกแท็บ อ่านก่อน และภาพรวม', () => {
+    const bad = JSON.parse(env.ctx.doPost({ postData: { contents: JSON.stringify({ token: 'x', action: 'setup' }) } }).s);
+    expect(bad).toEqual({ ok: false, error: 'token ไม่ถูกต้อง' });
+    expect(env.sheets).toHaveLength(0);
+    const r = env.post({ action: 'setup' });
+    expect(r.ok).toBe(true); expect(r.tabs).toHaveLength(7); expect(r.tabs).toContain('เคสแพ้ยา (ADR)');
+    expect(env.sheets.map((x) => x.name)).toEqual(expect.arrayContaining(['อ่านก่อน', 'ภาพรวม', ...r.tabs]));
+    expect(env.post({ action: 'setup' }).ok).toBe(true);        // รันซ้ำได้ ไม่สร้างแท็บซ้ำ
+    expect(env.sheets.filter((x) => x.name === 'อ่านก่อน')).toHaveLength(1);
   });
 
   it('push: แท็บชื่อไทย หัวคอลัมน์ไทย ค่าอ่านรู้เรื่อง คอลัมน์เทคนิคอยู่ท้าย', () => {

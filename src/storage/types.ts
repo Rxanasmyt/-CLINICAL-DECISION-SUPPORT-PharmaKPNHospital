@@ -45,5 +45,5 @@ export type SyncState =
   | { kind: 'offline'; pending: number }
   | { kind: 'syncing'; pending: number }
   | { kind: 'pending'; pending: number }
-  | { kind: 'synced'; at: number }
+  | { kind: 'synced'; at: number; /** โค้ด Apps Script เก่ากว่าที่แอปต้องการ */ outdated?: boolean }
   | { kind: 'error'; message: string; pending: number };

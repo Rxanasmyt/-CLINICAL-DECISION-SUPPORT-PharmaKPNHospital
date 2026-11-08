@@ -3,6 +3,7 @@
 import { COLLECTIONS } from './collections';
 import type { Store } from './store';
 import type { StorageAdapter, SyncState } from './types';
+import { REQUIRED_SCRIPT_VERSION } from './scriptVersion';
 
 export class SyncEngine {
   state: SyncState = { kind: 'off' };
@@ -10,6 +11,9 @@ export class SyncEngine {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private running: Promise<void> | null = null;
   private lastOk: number | null = null;
+  /** โค้ด Apps Script ของปลายทางเก่ากว่าที่แอปต้องการหรือไม่ (null = ยังไม่ทราบ / ปลายทางไม่มีเลขเวอร์ชัน) */
+  outdated: boolean | null = null;
+  scriptVersion: number | null = null;
   private listeners = new Set<(s: SyncState) => void>();
   private cleanup: (() => void)[] = [];
 
@@ -51,7 +55,7 @@ export class SyncEngine {
     const pending = this.store.pendingCount();
     if (!this.isOnline()) return this.set({ kind: 'offline', pending });
     if (pending > 0) return this.set({ kind: 'pending', pending });
-    if (this.lastOk) return this.set({ kind: 'synced', at: this.lastOk });
+    if (this.lastOk) return this.set({ kind: 'synced', at: this.lastOk, outdated: !!this.outdated });
     return this.set({ kind: 'pending', pending: 0 });
   }
 
@@ -59,6 +63,15 @@ export class SyncEngine {
     if (!this.remote) return;
     if (this.timer) clearTimeout(this.timer);
     this.timer = setTimeout(() => { void this.syncNow(); }, delay);
+  }
+
+  /** จัดแท็บและรูปแบบใน Google Sheets ใหม่ (ปุ่ม "จัดชีตใหม่") — คืนข้อความผลลัพธ์ */
+  async setupRemote(): Promise<string> {
+    const remote: any = this.remote;
+    if (!remote) throw new Error('ยังไม่ได้ตั้งค่าและเปิดการซิงก์');
+    if (typeof remote.setup !== 'function') throw new Error('ปลายทางนี้ไม่รองรับคำสั่งจัดชีต');
+    const tabs: string[] = await remote.setup();
+    return `จัดชีตเรียบร้อย (${tabs.length} แท็บ) — ถ้าเพิ่งอัปเดตโค้ด ให้กด "ส่งข้อมูลทั้งหมดใหม่" ด้วย`;
   }
 
   /** ส่งคิวค้างแล้วดึงข้อมูลล่าสุดมารวม */
@@ -71,6 +84,9 @@ export class SyncEngine {
       this.set({ kind: 'syncing', pending: this.store.pendingCount() });
       try {
         await remote.sync();
+        const v = (remote as any).scriptVersion;
+        this.scriptVersion = typeof v === 'number' ? v : null;
+        this.outdated = typeof v === 'number' ? v < REQUIRED_SCRIPT_VERSION : null;
         // 1) ส่งคิวค้าง
         const rows = this.store.pendingRows();
         if (rows.length) {
