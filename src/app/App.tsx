@@ -7,9 +7,12 @@ import { View } from '../ui/View.generated';
 import { store } from '../storage';
 import { BottomNav, AdrTabs } from '../ui/Chrome';
 import { BackupBar, userDisplay } from '../ui/Security';
+import { DraftBanner } from '../ui/Chrome';
 import { CaseListModal } from '../ui/CaseList';
 import { findSameCase, upsertCase } from '../storage/caseIdentity';
+import { buildTodos, localToday } from '../ui/todos';
 import { loadSettings } from '../storage/settings';
+import { DRAFT_KEY, isMeaningful, parseDraft, serializeDraft } from '../storage/draft';
 import { suggestSerious, effectiveSev2, effectiveHpvc, prevHints } from '../logic/adrAuto';
 import { markBackup } from '../security/backupReminder';
 import { buildBackup, importBackup } from '../storage/backup';
@@ -40,7 +43,7 @@ export default class App extends React.Component<any, any> {
     weight: '55', ageGroup: 'adult', phase: 'intensive', factors: [], tbTrack: 'active',
     wDose: '21', inr: '2.4', wTarget: 'std', bleeding: 'none',
     noHalf: false, sameDaily: false, blockDays: false,
-    adrView: 'split', adrScale: 'hour', adrTab: 'fill', narrow: false, caseListOpen: false,
+    adrView: 'split', adrScale: 'hour', adrTab: 'fill', narrow: false, caseListOpen: false, caseListFlag: 'all', draftOffer: null,
     pt: {hn:'', name:'', age:'', sex:'', hx:''},
     drugs: [{id:1, name:'', dose:'', route:'', start:'', stop:'', suspect:true}],
     events: [{id:1, desc:'', onset:'', severity:'moderate', better:''}],
@@ -86,6 +89,9 @@ export default class App extends React.Component<any, any> {
       this._unsub = store.subscribe(() => this.refreshFromStore());
       window.localStorage.removeItem('adrDraft.v2');
       window.localStorage.removeItem('adrDraft.v3');
+      const dr = this.readDraft();
+      this._draftReady = !dr;                          // มีร่างค้าง → ยังไม่บันทึกทับจนกว่าผู้ใช้เลือกกู้คืน/ทิ้ง
+      if (dr) this.setState({draftOffer: dr}); else this.clearDraft();
       this.setState({
         pt: {hn:'', name:'', age:'', sex:'', hx:''},
         drugs: [{id:1, name:'', dose:'', route:'', start:'', stop:'', suspect:true}],
@@ -98,17 +104,29 @@ export default class App extends React.Component<any, any> {
   }
   componentDidUpdate() {
     this.measureSheet();
-    const s = this.state;
-    try {
-      window.localStorage.setItem('adrDraft.v3', JSON.stringify({
-        pt: s.pt, drugs: s.drugs, events: s.events, labs: s.labs,
-        naranjo: s.naranjo, reactionType: s.reactionType, outcome: s.outcome,
-        altCauses: s.altCauses, altNote: s.altNote, crit: s.crit,
-        pharmSign: s.pharmSign, doctorSign: s.doctorSign,
-        pharmNote: s.pharmNote, seq: s.seq, adrScale: s.adrScale
-      }));
-    } catch (e) {}
+    this.scheduleDraft();
   }
+  /* ---------- ร่างฟอร์ม ---------- */
+  readDraft() { try { const d = parseDraft(window.localStorage.getItem(DRAFT_KEY)); if (!d) window.localStorage.removeItem(DRAFT_KEY); return d; } catch (e) { return null; } }
+  clearDraft() { try { window.localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+  scheduleDraft() {
+    if (!this._draftReady) return;
+    clearTimeout(this._draftT);
+    this._draftT = setTimeout(() => {
+      try {
+        const snap = this.caseSnapshot();
+        // ฟอร์มตรงกับเคสที่เพิ่งบันทึก/เปิดมา (ยังไม่มีการแก้) ไม่ต้องเก็บเป็นร่าง
+        if (isMeaningful(snap) && JSON.stringify(snap) !== this._savedSig) window.localStorage.setItem(DRAFT_KEY, serializeDraft(snap)); else window.localStorage.removeItem(DRAFT_KEY);
+      } catch (e) {}
+    }, 700);
+  }
+  restoreDraft() {
+    const d = this.state.draftOffer;
+    if (!d) return;
+    this._draftReady = true;
+    this.setState(Object.assign({mode: 'adr', adrView: 'edit', adrTab: 'fill', draftOffer: null}, this.caseDefaults(), d.data));
+  }
+  discardDraft() { this.clearDraft(); this._draftReady = true; this.setState({draftOffer: null}); }
   observeWrap() {
     if (!this._wrapEl) return;
     if (!this._ro && window.ResizeObserver) this._ro = new window.ResizeObserver(() => this.measureSheet());
@@ -435,7 +453,7 @@ export default class App extends React.Component<any, any> {
       naranjo: {}, reactionType: '', outcome: 'recovering', pharmNote: '', seq: 3, altCauses: [], altNote: '', crit: {}, prev: {}, triggers: [],
       pharmSign: '', doctorSign: '', rep: {medErr: '', medErrNo: '', hpvc: '', hpvcDate: '', rcaCat: [], rcaCause: '', rcaPlan: '', rcaOwner: ''}, sev2: {type: '', serious: []}};
   }
-  openCaseData(c) { this.setState(Object.assign({adrView: 'edit', adrTab: 'fill'}, this.caseDefaults(), c.data)); }
+  openCaseData(c) { this.setState(Object.assign({adrView: 'edit', adrTab: 'fill'}, this.caseDefaults(), c.data), () => { this._savedSig = JSON.stringify(this.caseSnapshot()); }); }
   /** ค่าที่ใช้จริงของ ชนิด ADR / serious / HPVC (เภสัชกรเลือกเองมีผลเหนือค่าอัตโนมัติ) */
   sev2Eff() {
     const st = this.state;
@@ -457,6 +475,8 @@ export default class App extends React.Component<any, any> {
     // ผู้ป่วยเดิม (ป้ายชื่อตรง หรือ HN ตรง แม้เคสเดิมมาจากเครื่องอื่นที่ไม่มีชื่อ) → แก้เคสเดิม ไม่เพิ่มซ้ำ
     const hit = await findSameCase(this.loadCases(), label, s.pt.hn, loadSettings().salt);
     this.saveCases(upsertCase(this.loadCases(), entry, hit).slice(0, 1000));
+    this.clearDraft();                                  // บันทึกเคสแล้ว ร่างไม่จำเป็นอีก
+    this._savedSig = JSON.stringify(entry.data);
     this.setState({savedFlash: true});
     clearTimeout(this._sf); this._sf = setTimeout(() => this.setState({savedFlash: false}), 1800);
   }
@@ -796,9 +816,10 @@ export default class App extends React.Component<any, any> {
   render() {
     const mode = this.mode();
     return (<>
+      <DraftBanner offer={this.state.draftOffer} onRestore={() => this.restoreDraft()} onDiscard={() => this.discardDraft()} />
       <BackupBar hasData={['adrCases.v1','adrCqi.v1','infoEval.v1','intensive.v1','ptcMeet.v1','workload.v1'].some(k => (store.getJson(k, []) || []).length > 0) || Object.keys(store.getJson('stdAssess.v1', {}) || {}).length > 0} onBackup={() => this.backupJson()} />
       <View v={this.renderVals()} />
-      <CaseListModal cases={this.state.cases || []} open={!!this.state.caseListOpen} close={() => this.setState({caseListOpen: false})}
+      <CaseListModal cases={this.state.cases || []} initialFlag={this.state.caseListFlag || 'all'} open={!!this.state.caseListOpen} close={() => this.setState({caseListOpen: false})}
         onOpen={(c) => this.openCaseData(c)}
         onDelete={(c) => this.saveCases(this.loadCases().filter(x => x.id !== c.id))}
         onRestore={(c) => this.saveCases(this.loadCases().filter(x => x.id !== c.id).concat([c]).sort((a, b) => String(b.saved).localeCompare(String(a.saved))))} />
@@ -1926,7 +1947,7 @@ export default class App extends React.Component<any, any> {
       labs: [{id:1, name:'', date:'', value:''}],
       naranjo: {}, reactionType: '', outcome: 'recovering', pharmNote: '', seq: 3,
       altCauses: [], altNote: '', crit: {}, critOpen: '', pharmSign: '', doctorSign: '', prev: {}, triggers: [], rep: {medErr: '', medErrNo: '', hpvc: '', hpvcDate: '', rcaCat: [], rcaCause: '', rcaPlan: '', rcaOwner: ''}, sev2: {type: '', serious: []}
-    }, () => { try { window.localStorage.removeItem('adrDraft.v2'); } catch (e) {} });
+    }, () => { this.clearDraft(); });
     let secN = 0;
     const nextSec = () => { secN += 1; return secN + '. '; };
     v.secDrugs = nextSec();
@@ -2204,7 +2225,10 @@ export default class App extends React.Component<any, any> {
     }));
     v.hasCases = (st.cases || []).length > 0;
     v.caseData = st.cases || [];
-    v.openCaseList = () => this.setState({caseListOpen: true});
+    v.openCaseList = () => this.setState({caseListOpen: true, caseListFlag: 'all'});
+    v.todos = buildTodos(st.cases || [], st.intLog || [], localToday());
+    v.openCasesFlag = (f) => this.setState({mode: 'adr', caseListOpen: true, caseListFlag: f});
+    v.openIntensive = () => this.setState({mode: 'adr', regOpen: true, regTab: 'intensive'});
     v.openCase = (c) => this.openCaseData(c);
     v.caseCount = (st.cases || []).length + ' เคส';
 
