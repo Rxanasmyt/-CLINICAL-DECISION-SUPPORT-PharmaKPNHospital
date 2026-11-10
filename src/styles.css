@@ -130,3 +130,43 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .tdcard b{font-family:'IBM Plex Mono',monospace;font-size:24px;line-height:1.1;min-width:30px}
 .tdcard span{display:flex;flex-direction:column;gap:2px;min-width:0}.tdcard strong{font-size:12.5px}
 .tdcard em{font-style:normal;font-size:11.5px;color:#3E4F4C;overflow-wrap:anywhere}
+
+/* ---------- คลังแนวทางการรักษา ---------- */
+.gllib,.glcard{display:flex;flex-direction:column;gap:14px;animation:rise .3s ease both}
+.gllib h2,.glcard h2{margin:0;font-size:19px}.glcard h3,.gllib h3{margin:0 0 6px;font-size:14.5px}
+.glgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.glitem{display:flex;flex-direction:column;gap:6px;text-align:left;background:#fff;border:1px solid rgba(22,33,31,.11);border-top:3px solid #0F5D57;border-radius:14px;padding:14px 16px;cursor:pointer}
+.glitem b{font-size:15px}.glitem span{font-size:12px;color:#6B7B77;line-height:1.5}
+.glcat2{font-size:12px!important;font-weight:700;letter-spacing:.04em;color:#0F5D57}
+.glreview{font-size:11px;font-style:normal;font-weight:600;border-radius:7px;padding:3px 9px;align-self:flex-start}
+.glreview.pending{background:#FBF1DE;color:#7A5200}.glreview.ok{background:#EAF4EE;color:#1E6B47}.glreview.overdue{background:#FBEAE8;color:#7A2A24}
+.glhead{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.glcat{font-size:11px;font-weight:700;color:#0F5D57;letter-spacing:.04em}
+.glwarn{margin:0;font-size:12px;line-height:1.6;background:#FBF1DE;color:#6B4A0F;border-radius:12px;padding:9px 12px}
+.glback{align-self:flex-start;border:none;background:transparent;color:#0F5D57;font-size:13px;cursor:pointer;padding:6px 0}
+.glbtn{align-self:flex-start;border:1px solid rgba(22,33,31,.15);background:#fff;border-radius:11px;padding:10px 16px;font-size:13px;cursor:pointer}
+.glbtn.pri{background:#0F5D57;color:#fff;border-color:#0F5D57;font-weight:600}
+.gltabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0;position:sticky;top:0;background:#F4F1EA;z-index:5}
+.gltabs button{flex:none;border:1px solid rgba(22,33,31,.13);background:#fff;border-radius:999px;padding:8px 14px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.gltabs button.on{background:#0F5D57;color:#fff;border-color:#0F5D57}
+.glsec{background:#fff;border:1px solid rgba(22,33,31,.10);border-radius:16px;padding:16px 18px}
+.glov{display:flex;flex-direction:column;gap:14px}.glov section{background:#fff;border:1px solid rgba(22,33,31,.10);border-radius:16px;padding:16px 18px}
+.glchips{display:flex;flex-wrap:wrap;gap:8px}.glchip{display:flex;flex-direction:column;gap:2px;background:#E4EFEC;border-radius:11px;padding:8px 11px;font-size:12px;max-width:280px}.glchip b{font-family:'IBM Plex Mono',monospace;color:#0F5D57}
+.glkv{display:flex;flex-direction:column;gap:8px}.glkvrow{display:grid;grid-template-columns:minmax(120px,200px) 1fr;gap:12px;padding-bottom:8px;border-bottom:1px solid rgba(22,33,31,.06);font-size:13px;line-height:1.6}
+.glkvrow em{display:block;font-style:normal;font-size:12px;color:#6B7B77;margin-top:2px}
+.gllist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.65}.gllist.danger{background:#FBEAE8;border-radius:12px;padding:12px 12px 12px 30px}
+.gldrugs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.gldrug{border:1px solid rgba(22,33,31,.11);border-left:4px solid #0F5D57;border-radius:12px;padding:12px 14px}.gldrug h4{margin:0 0 6px;font-size:14px}
+.gldrug dl{margin:0;display:grid;grid-template-columns:90px 1fr;gap:4px 10px;font-size:12.5px;line-height:1.55}.gldrug dt{color:#6B7B77}.gldrug dd{margin:0}.gldrug small{color:#6B7B77}
+.gltable{overflow-x:auto}.gltable table{border-collapse:collapse;width:100%;font-size:12.5px}
+.gltable th{background:#E4EFEC;text-align:left;padding:8px 10px;border:1px solid #d9e5e2}.gltable td{padding:8px 10px;border:1px solid rgba(22,33,31,.1);vertical-align:top;line-height:1.55}
+.gltable table.danger th{background:#FBEAE8}.glfoot{font-size:12px;color:#6B7B77;line-height:1.6;margin:8px 0 0}
+.glcites{font-size:12px;line-height:1.7;color:#3E4F4C;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.glres{background:#fff;border:1px solid rgba(22,33,31,.1);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.glrestitle{border:none;background:transparent;text-align:left;font-size:15px;font-weight:700;color:#0F5D57;cursor:pointer;padding:0}.glrestitle small{font-weight:500;color:#6B7B77;margin-left:8px}
+.glhit{display:flex;flex-direction:column;gap:2px;text-align:left;border:none;border-top:1px solid rgba(22,33,31,.06);background:transparent;padding:8px 0;cursor:pointer;font-size:12.5px;line-height:1.55}.glhit small{color:#6B7B77}.glhit mark{background:#FFE9A8}
+.glatt{display:flex;flex-direction:column;gap:10px;background:#fff;border:1px solid rgba(22,33,31,.10);border-radius:16px;padding:16px 18px}
+.glfile{display:flex;align-items:center;gap:8px;border:1px solid rgba(22,33,31,.1);border-radius:12px;background:#FBFAF7}
+.glfile>button:first-child{flex:1;min-width:0;text-align:left;border:none;background:transparent;cursor:pointer;padding:10px 12px;display:flex;flex-direction:column;gap:2px}.glfile span{font-size:11.5px;color:#6B7B77}
+@media (max-width:700px){.glkvrow{grid-template-columns:1fr;gap:3px}.gldrug dl{grid-template-columns:1fr}}
+@media print{.gllib,.glcard{display:none!important}}

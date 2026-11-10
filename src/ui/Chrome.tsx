@@ -7,7 +7,7 @@ import { REQUIRED_SCRIPT_VERSION } from '../storage/scriptVersion';
 
 const TABS: [string, string, string][] = [
   ['home', 'หน้าแรก', '⌂'], ['tb', 'TB', '💊'], ['warf', 'Warfarin', '⚖'], ['ped', 'ยาน้ำเด็ก', '🧴'],
-  ['adr', 'แพ้ยา', '⚠'], ['calc', 'เครื่องมือ', '🧮'], ['std', 'มาตรฐาน', '✓'],
+  ['adr', 'แพ้ยา', '⚠'], ['gl', 'แนวทาง', '📋'], ['calc', 'เครื่องมือ', '🧮'], ['std', 'มาตรฐาน', '✓'],
 ];
 
 export function BottomNav({ mode, go }: { mode: string; go: (m: string) => void }) {

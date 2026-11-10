@@ -835,7 +835,7 @@ export default class App extends React.Component<any, any> {
       clinicName: this.props.clinicName || 'ระบบสนับสนุนการตัดสินใจด้านยาสำหรับเภสัชกร',
       showDisclaimer: this.props.showDisclaimer !== false,
       isHome: mode === 'home',
-      isCalc: mode === 'calc', isTB: mode === 'tb', isWarf: mode === 'warf', isADR: mode === 'adr', isPed: mode === 'ped', isStd: mode === 'std',
+      isCalc: mode === 'calc', isTB: mode === 'tb', isWarf: mode === 'warf', isADR: mode === 'adr', isPed: mode === 'ped', isStd: mode === 'std', isGuide: mode === 'gl',
       goHome: () => this.setState({mode: 'home'}),
       homeCalc: [
         {id:'tb', code:'M-01', title:'ขนาดยาวัณโรค', sub:'Active TB สูตร 2HRZE/4HR และวัณโรคระยะแฝง 3HP คำนวณจำนวนเม็ดตามน้ำหนัก', ref:'แนวทางวัณโรคไทย 2564', accent:'#0F5D57', tint:'#E4EFEC', glyph:'TB'},
@@ -852,7 +852,7 @@ export default class App extends React.Component<any, any> {
       hospitalName: this.props.hospitalName || 'โรงพยาบาลกรงปินัง',
       deptName: this.props.deptName || 'กลุ่มงานเภสัชกรรมและคุ้มครองผู้บริโภค',
       tbCols: st.narrow ? 'minmax(0,1fr)' : 'minmax(0,340px) minmax(0,1fr)',
-      tabs: [['home','หน้าแรก'],['tb','ขนาดยา TB'],['warf','Warfarin'],['ped','ยาน้ำเด็ก'],['adr','ประเมินแพ้ยา'],['calc','เครื่องมือ'],['std','มาตรฐาน']].map(([id, label]) => {
+      tabs: [['home','หน้าแรก'],['tb','ขนาดยา TB'],['warf','Warfarin'],['ped','ยาน้ำเด็ก'],['adr','ประเมินแพ้ยา'],['gl','แนวทางรักษา'],['calc','เครื่องมือ'],['std','มาตรฐาน']].map(([id, label]) => {
         const a = mode === id;
         return {label, go: () => this.setState({mode: id}), fw: a ? '600' : '500',
           fg: a ? '#FFFFFF' : '#3E4F4C', bg: a ? '#0F5D57' : 'transparent',
@@ -2225,6 +2225,7 @@ export default class App extends React.Component<any, any> {
     }));
     v.hasCases = (st.cases || []).length > 0;
     v.caseData = st.cases || [];
+    v.goTbCalc = (m) => this.setState({mode: m});
     v.openCaseList = () => this.setState({caseListOpen: true, caseListFlag: 'all'});
     v.todos = buildTodos(st.cases || [], st.intLog || [], localToday());
     v.openCasesFlag = (f) => this.setState({mode: 'adr', caseListOpen: true, caseListFlag: f});

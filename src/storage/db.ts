@@ -17,6 +17,8 @@ export interface RecRow {
 }
 /** ประวัติการแก้ไข (เก็บเฉพาะในเครื่อง · ไม่มีข้อมูลระบุตัวผู้ป่วย: ใช้รหัสรายการเท่านั้น) */
 export interface AuditRow { id?: number; at: number; user: string; action: string; collection: string; recordId: string }
+/** ไฟล์แนวทางที่แนบ (เก็บเฉพาะในเครื่องนี้ ไม่ซิงก์ ไม่ขึ้น Sheets) */
+export interface FileRow { id?: number; guidelineId: string; name: string; type: string; size: number; blob: Blob; addedAt: number }
 export interface MetaRow { key: string; value: unknown }
 
 export class AppDb extends Dexie {
@@ -24,9 +26,11 @@ export class AppDb extends Dexie {
   rec!: Table<RecRow, string>;
   meta!: Table<MetaRow, string>;
   audit!: Table<AuditRow, number>;
+  files!: Table<FileRow, number>;
   constructor(name = 'pharmakpn') {
     super(name);
     this.version(1).stores({ kv: 'key', rec: 'pk, collection', meta: 'key' });
     this.version(2).stores({ kv: 'key', rec: 'pk, collection', meta: 'key', audit: '++id, at' });
+    this.version(3).stores({ kv: 'key', rec: 'pk, collection', meta: 'key', audit: '++id, at', files: '++id, guidelineId' });
   }
 }

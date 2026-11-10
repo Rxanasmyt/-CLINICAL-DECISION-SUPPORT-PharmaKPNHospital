@@ -16,5 +16,6 @@ export const VALIDATION: ValidationItem[] = [
   { id: 'ped', name: 'ยาน้ำเด็ก 15 รายการ', reference: 'BNFC · AAP · WHO · รายการยาและความแรงของ รพ.', status: 'pending', reviewer: '', reviewedAt: '' },
   { id: 'ins', name: 'จำนวน insulin ที่ต้องจ่าย', reference: 'ขนาดบรรจุ vial/penfill ที่ รพ. จัดซื้อ', status: 'pending', reviewer: '', reviewedAt: '' },
   { id: 'adrauto', name: 'กฎเติมอัตโนมัติ: ชนิด ADR (A/B), Serious, สถานะ HPVC, คำแนะนำ Preventability', reference: 'Rawlins–Thompson · เกณฑ์ serious ADR · มาตรฐานข้อ 9-3.1 · Schumock & Thornton', status: 'pending', reviewer: '', reviewedAt: '' },
+  { id: 'gl-tb', name: 'การ์ดแนวทางการรักษาวัณโรค (คลังแนวทาง) — เนื้อหาคือข้อมูลอ้างอิง TB เดิมในแอป', reference: 'แนวทางการควบคุมวัณโรคประเทศไทย พ.ศ. 2564 · WHO Module 4 (2022) · แก้สถานะ/ผู้ทบทวนที่ src/guidelines/tb.ts ด้วย', status: 'pending', reviewer: '', reviewedAt: '' },
   { id: 'adr', name: 'Naranjo / WHO-UMC / Schumock & Thornton', reference: 'เอกสารต้นฉบับของแต่ละเกณฑ์', status: 'pending', reviewer: '', reviewedAt: '' },
 ];
