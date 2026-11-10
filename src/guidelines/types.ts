@@ -1,9 +1,11 @@
 // คลังแนวทางการรักษา: แนวทางรายโรค เน้นยา — เนื้อหาคลินิกมาจากไฟล์ข้อมูลที่มีที่มาและหน้าอ้างอิง ไม่เขียนใหม่ในโค้ดหน้าจอ
-export type Block =
+/** ที่มาของบล็อกที่ไม่ได้คัดจากไฟล์อ้างอิงมีหน้า — แสดงป้ายเตือนให้ตรวจกับต้นฉบับ */
+export type BlockOrigin = { origin?: string };
+export type Block = BlockOrigin & (
   | { kind: 'kv'; h: string; sub?: string; items: { k: string; v: string; note?: string }[] }
   | { kind: 'grid3' | 'grid5'; h: string; sub?: string; head: string[]; items: Record<string, string>[]; foot?: string; danger?: boolean }
   | { kind: 'drug'; h: string; items: { d: string; dose: string; max: string; ae: string; mon: string }[] }
-  | { kind: 'list'; h: string; danger?: boolean; items: { t: string }[] };
+  | { kind: 'list'; h: string; danger?: boolean; items: { t: string }[] });
 
 export interface Review { status: 'pending' | 'approved'; reviewer: string; reviewedAt: string; /** วันครบรอบทบทวนถัดไป YYYY-MM-DD */ nextDue: string }
 

@@ -1,7 +1,8 @@
 // แนวทางการรักษาวัณโรค — สร้างจาก REF_TB_BLOCKS / REF_TB_CITES (คัดจากต้นแบบพร้อมที่มา: แนวทางควบคุมวัณโรคประเทศไทย พ.ศ. 2564, WHO, ATS/CDC/IDSA)
-// ไม่มีข้อความทางคลินิกใหม่ในไฟล์นี้ — ที่นี่กำหนดเฉพาะโครงหมวดและป้ายนำทาง
+// บล็อก 0-8 คัดจากไฟล์อ้างอิงมีที่มา; บล็อก 9-13 จากสรุปที่ผู้ใช้ส่งมา (tb-extra.ts, มีป้าย origin)
 import { REF_TB_BLOCKS, REF_TB_CITES } from '../data/references';
 import type { Block, Guideline } from './types';
+import { TB_EXTRA_BLOCKS } from './tb-extra';
 
 export const TB_GUIDELINE: Guideline = {
   id: 'tb', title: 'วัณโรค (Tuberculosis)', category: 'โรคติดเชื้อ',
@@ -10,10 +11,11 @@ export const TB_GUIDELINE: Guideline = {
   cites: REF_TB_CITES as string[],
   // ตัวอย่างแรก: ยังไม่ได้ทบทวนโดยเภสัชกร — แก้ที่นี่ (ผ่าน PR) เมื่อทบทวนแล้ว
   review: { status: 'pending', reviewer: '', reviewedAt: '', nextDue: '' },
-  blocks: REF_TB_BLOCKS as unknown as Block[],
+  blocks: [...(REF_TB_BLOCKS as unknown as Block[]), ...TB_EXTRA_BLOCKS],
   sections: [
     { title: 'สูตรยา', blocks: [0] }, { title: 'ขนาดตามน้ำหนัก', blocks: [1] }, { title: 'รายตัวยา', blocks: [2] },
-    { title: 'อาการไม่พึงประสงค์', blocks: [3, 4, 5, 6] }, { title: 'กรณีพิเศษ', blocks: [7] }, { title: 'การติดตาม', blocks: [8] },
+    { title: 'อาการไม่พึงประสงค์', blocks: [3, 4, 5, 6] }, { title: 'กรณีพิเศษ', blocks: [7] }, { title: 'การติดตาม', blocks: [8, 13] },
+    { title: 'อันตรกิริยา', blocks: [11] }, { title: 'วัณโรคดื้อยา', blocks: [12] }, { title: 'วินิจฉัย/โรค', blocks: [9, 10] },
   ],
   calc: { label: 'คำนวณขนาดยา TB ตามน้ำหนัก', mode: 'tb' },
 };
