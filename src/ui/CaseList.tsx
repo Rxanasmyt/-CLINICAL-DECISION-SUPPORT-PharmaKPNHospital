@@ -2,13 +2,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FLAGS, filterRows, paginate, toRow, type Flag } from './caseView';
+import type { TodoItem } from './todos';
 import { hashHn } from '../storage/pdpa';
 import { loadSettings } from '../storage/settings';
 import { duplicateKeys, hnKey } from '../storage/caseIdentity';
 
-interface Props { cases: any[]; open: boolean; close: () => void; onOpen: (c: any) => void; onDelete: (c: any) => void; onRestore: (c: any) => void }
+interface Props { cases: any[]; initialFlag?: Flag; open: boolean; close: () => void; onOpen: (c: any) => void; onDelete: (c: any) => void; onRestore: (c: any) => void }
 
-export function CaseListModal({ cases, open, close, onOpen, onDelete, onRestore }: Props) {
+export function CaseListModal({ cases, initialFlag = 'all', open, close, onOpen, onDelete, onRestore }: Props) {
   const [q, setQ] = useState(''); const [quarter, setQuarter] = useState(''); const [flag, setFlag] = useState<Flag>('all');
   const [page, setPage] = useState(1); const [confirm, setConfirm] = useState<string | null>(null);
   const [undo, setUndo] = useState<any | null>(null); const [hnHash, setHnHash] = useState('');
@@ -33,6 +34,7 @@ export function CaseListModal({ cases, open, close, onOpen, onDelete, onRestore 
     return () => { live = false; };
   }, [q]);
   useEffect(() => { setPage(1); }, [q, quarter, flag, hnHash]);
+  useEffect(() => { if (open) { setFlag(initialFlag); setQ(''); setQuarter(''); } }, [open, initialFlag]);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
   if (!open) return null;
 
@@ -94,5 +96,28 @@ export function CaseShelf({ cases, open, onOpen }: { cases: any[]; open: () => v
         </button>
       ))}
     </div>
+  );
+}
+
+/** งานค้างวันนี้ (หน้าแรก) — กดที่รายการเพื่อไปยังเคส/ทะเบียนที่เกี่ยวข้อง */
+export function TodoBoard({ todos, openCases, openIntensive }: { todos: TodoItem[]; openCases: (f: Flag) => void; openIntensive: () => void }) {
+  const tone = { red: ['#FBEAE8', '#B3261E'], amber: ['#FBF1DE', '#A66A00'], blue: ['#E4EEF7', '#2F6DA8'] } as const;
+  return (
+    <section className="todoboard" data-print="hide" aria-label="งานค้างวันนี้">
+      <div className="tdhead"><h2>งานค้างวันนี้</h2><span>{todos.length ? `${todos.reduce((n, t) => n + t.count, 0)} รายการที่ต้องติดตาม` : 'ไม่มีงานค้าง'}</span></div>
+      {todos.length === 0
+        ? <p className="tdok">ไม่มีงานค้าง — เคสที่บันทึกไว้ไม่มีรายการรอส่ง HPVC, RCA ที่ยังไม่ครบ หรือผู้ป่วย intensive ที่ถึงกำหนดติดตาม</p>
+        : (
+          <div className="tdgrid">
+            {todos.map((t) => (
+              <button key={t.kind} type="button" className="tdcard" style={{ background: tone[t.tone][0], borderColor: tone[t.tone][1] + '55' }}
+                onClick={() => (t.flag ? openCases(t.flag) : openIntensive())}>
+                <b style={{ color: tone[t.tone][1] }}>{t.count}</b>
+                <span><strong>{t.title}</strong><em>{t.examples.join(' · ')}{t.count > t.examples.length ? ` และอีก ${t.count - t.examples.length}` : ''}</em></span>
+              </button>
+            ))}
+          </div>
+        )}
+    </section>
   );
 }

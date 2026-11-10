@@ -7,7 +7,7 @@ import { REQUIRED_SCRIPT_VERSION } from '../storage/scriptVersion';
 
 const TABS: [string, string, string][] = [
   ['home', 'หน้าแรก', '⌂'], ['tb', 'TB', '💊'], ['warf', 'Warfarin', '⚖'], ['ped', 'ยาน้ำเด็ก', '🧴'],
-  ['adr', 'แพ้ยา', '⚠'], ['calc', 'เครื่องมือ', '🧮'], ['std', 'มาตรฐาน', '✓'],
+  ['adr', 'แพ้ยา', '⚠'], ['gl', 'แนวทาง', '📋'], ['calc', 'เครื่องมือ', '🧮'], ['std', 'มาตรฐาน', '✓'],
 ];
 
 export function BottomNav({ mode, go }: { mode: string; go: (m: string) => void }) {
@@ -117,5 +117,20 @@ export function HeroMark() {
       <span className="hm-link" />
       <span className="hm-hosp"><img src="assets/kpn-logo-trim.png" alt="" /></span>
     </span>
+  );
+}
+
+/** แจ้งเมื่อพบร่างเคสที่ยังไม่ได้บันทึก (เช่น รีเฟรชหรือปิดแอปกลางคัน) */
+export function DraftBanner({ offer, onRestore, onDiscard }: { offer: { savedAt: number; data: any } | null; onRestore: () => void; onDiscard: () => void }) {
+  if (!offer) return null;
+  const pt = offer.data?.pt || {};
+  const who = [pt.hn && `HN ${pt.hn}`, pt.name].filter(Boolean).join(' · ') || 'ไม่ระบุผู้ป่วย';
+  const t = new Date(offer.savedAt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+  return (
+    <div className="backupbar draftbar" data-print="hide" role="alert">
+      <span><b>พบร่างเคสที่ยังไม่ได้บันทึก</b> — {who} · แก้ไขล่าสุด {t}</span>
+      <button type="button" onClick={onRestore}>กู้คืนร่าง</button>
+      <button type="button" className="ghost" onClick={onDiscard}>ทิ้งร่าง</button>
+    </div>
   );
 }
