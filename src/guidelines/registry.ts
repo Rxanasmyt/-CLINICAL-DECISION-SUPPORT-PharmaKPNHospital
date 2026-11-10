@@ -1,7 +1,8 @@
 import { TB_GUIDELINE } from './tb';
+import { COPD_GUIDELINE } from './copd';
 import type { Block, Guideline, Review } from './types';
 
-export const GUIDELINES: Guideline[] = [TB_GUIDELINE];
+export const GUIDELINES: Guideline[] = [TB_GUIDELINE, COPD_GUIDELINE];
 
 /** สถานะการทบทวน: ยังไม่ทบทวน / ทบทวนแล้ว / เลยรอบทบทวน */
 export function reviewState(r: Review, today: string): { kind: 'pending' | 'ok' | 'overdue'; label: string } {
