@@ -1,8 +1,8 @@
 // แนวทางการรักษาโรคหืด (GINA 2026) — คัดจากสรุปที่ผู้ใช้ส่งมาเป็นข้อความ คงถ้อยคำเดิม (แปลงสัญลักษณ์ ≥ ≤ เท่านั้น)
-// ไม่มีเลขหน้า และยังไม่ได้ตรวจกับต้นฉบับ → ทุกบล็อกมีป้าย origin ให้เภสัชกรตรวจก่อนใช้จริง
+// ไม่มีเลขหน้า · ผู้ใช้แจ้งว่าเภสัชกรทบทวนแล้ว → ป้าย origin ระบุสถานะนี้
 import type { Block, Guideline } from './types';
 
-const o = 'จากสรุปที่ผู้ใช้ส่งมา (GINA 2026) — ไม่มีเลขหน้า ยังไม่ได้ตรวจกับต้นฉบับ';
+const o = 'จากสรุปที่ผู้ใช้ส่งมา (GINA 2026) · ทบทวนโดยเภสัชกรแล้ว (ตามที่ผู้ใช้แจ้ง ยังไม่ระบุชื่อผู้ทบทวน) · ไม่มีเลขหน้า';
 
 const blocks: Block[] = [
   { kind: 'kv', h: 'ผู้ใหญ่และวัยรุ่น — Track 1 (แนะนำเป็นอันดับแรก)', origin: o, sub: 'ICS-formoterol ขนาดต่ำเป็นยาสูดพ่นเมื่อมีอาการ (Reliever) ลดความเสี่ยงกำเริบรุนแรงได้ดีกว่า SABA ใช้ยาชนิดเดียว อุปกรณ์เดียว ขนาดเดียวตลอด (Step 1-4) · ไม่แนะนำ SABA เพียงอย่างเดียว', items: [
@@ -61,9 +61,9 @@ const blocks: Block[] = [
 export const ASTHMA_GUIDELINE: Guideline = {
   id: 'asthma', title: 'โรคหืด (Asthma)', category: 'โรคระบบทางเดินหายใจ',
   keywords: ['asthma', 'หืด', 'GINA', 'ICS', 'formoterol', 'MART', 'SABA', 'LABA', 'LAMA', 'LTRA', 'AIR', 'reliever', 'controller', 'tiotropium', 'biologic'],
-  source: 'GINA 2026 (สรุปที่ผู้ใช้ส่งมา · ยังไม่ได้ตรวจกับต้นฉบับ)',
-  cites: ['Global Initiative for Asthma (GINA) 2026 — เนื้อหาคัดจากสรุปข้อความที่ผู้ใช้ส่งมา ไม่มีเลขหน้า ต้องตรวจกับเอกสารต้นฉบับก่อนใช้จริง'],
-  review: { status: 'pending', reviewer: '', reviewedAt: '', nextDue: '' },
+  source: 'GINA 2026 (สรุปที่ผู้ใช้ส่งมา · ทบทวนโดยเภสัชกรแล้วตามที่ผู้ใช้แจ้ง)',
+  cites: ['Global Initiative for Asthma (GINA). Global Strategy for Asthma Management and Prevention — 2026 update — เนื้อหาคัดจากสรุปข้อความที่ผู้ใช้ส่งมา ไม่มีเลขหน้า · ทบทวนโดยเภสัชกรแล้ว (ตามที่ผู้ใช้แจ้ง ยังไม่ระบุชื่อผู้ทบทวน)'],
+  review: { status: 'approved', reviewer: 'เภสัชกรของ รพ. (ผู้ใช้แจ้งว่าทบทวนแล้ว — รอระบุชื่อ)', reviewedAt: '2026-11-10', nextDue: '' },
   blocks,
   sections: [
     { title: 'ผู้ใหญ่/วัยรุ่น Track 1', blocks: [0] }, { title: 'Track 2', blocks: [1] }, { title: 'เด็ก 6-11 ปี', blocks: [2] },

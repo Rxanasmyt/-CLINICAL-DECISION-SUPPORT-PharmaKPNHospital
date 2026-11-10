@@ -1,8 +1,8 @@
 // แนวทางการรักษา COPD (GOLD 2026) — คัดจากสรุปที่ผู้ใช้ส่งมาเป็นข้อความ คงถ้อยคำเดิม (แปลงสัญลักษณ์ ≥ และ µL เท่านั้น)
-// ไม่มีเลขหน้า และยังไม่ได้ตรวจกับต้นฉบับ → ทุกบล็อกมีป้าย origin ให้เภสัชกรตรวจก่อนใช้จริง
+// ไม่มีเลขหน้า · ผู้ใช้แจ้งว่าเภสัชกรทบทวนแล้ว → ป้าย origin ระบุสถานะนี้
 import type { Block, Guideline } from './types';
 
-const o = 'จากสรุปที่ผู้ใช้ส่งมา (GOLD 2026) — ไม่มีเลขหน้า ยังไม่ได้ตรวจกับต้นฉบับ';
+const o = 'จากสรุปที่ผู้ใช้ส่งมา (GOLD 2026) · ทบทวนโดยเภสัชกรแล้ว (ตามที่ผู้ใช้แจ้ง ยังไม่ระบุชื่อผู้ทบทวน) · ไม่มีเลขหน้า';
 
 const blocks: Block[] = [
   { kind: 'kv', h: 'การเริ่มยาตามกลุ่ม GOLD ABE', origin: o, sub: 'พิจารณาจากอาการ (mMRC, CAT) และประวัติการกำเริบในปีก่อนหน้า', items: [
@@ -62,9 +62,9 @@ const blocks: Block[] = [
 export const COPD_GUIDELINE: Guideline = {
   id: 'copd', title: 'โรคปอดอุดกั้นเรื้อรัง (COPD)', category: 'โรคระบบทางเดินหายใจ',
   keywords: ['copd', 'ปอดอุดกั้น', 'GOLD', 'LABA', 'LAMA', 'ICS', 'eosinophil', 'dupilumab', 'mepolizumab', 'roflumilast', 'azithromycin', 'ensifentrine', 'inhaler'],
-  source: 'GOLD Report 2026 (สรุปที่ผู้ใช้ส่งมา · ยังไม่ได้ตรวจกับต้นฉบับ)',
-  cites: ['Global Initiative for Chronic Obstructive Lung Disease (GOLD) 2026 — เนื้อหาคัดจากสรุปข้อความที่ผู้ใช้ส่งมา ไม่มีเลขหน้า ต้องตรวจกับเอกสารต้นฉบับก่อนใช้จริง'],
-  review: { status: 'pending', reviewer: '', reviewedAt: '', nextDue: '' },
+  source: 'GOLD Report 2026 (สรุปที่ผู้ใช้ส่งมา · ทบทวนโดยเภสัชกรแล้วตามที่ผู้ใช้แจ้ง)',
+  cites: ['Global Initiative for Chronic Obstructive Lung Disease (GOLD). Global Strategy for the Diagnosis, Management, and Prevention of COPD — 2026 Report — เนื้อหาคัดจากสรุปข้อความที่ผู้ใช้ส่งมา ไม่มีเลขหน้า · ทบทวนโดยเภสัชกรแล้ว (ตามที่ผู้ใช้แจ้ง ยังไม่ระบุชื่อผู้ทบทวน)'],
+  review: { status: 'approved', reviewer: 'เภสัชกรของ รพ. (ผู้ใช้แจ้งว่าทบทวนแล้ว — รอระบุชื่อ)', reviewedAt: '2026-11-10', nextDue: '' },
   blocks,
   sections: [
     { title: 'เริ่มยา', blocks: [0] }, { title: 'ปรับยา', blocks: [1, 2] }, { title: 'ยาชีววัตถุ', blocks: [3] },

@@ -10,7 +10,7 @@ import { AppDb } from '../storage/db';
 describe('แนวทางวัณโรค (ตัวอย่างแรก)', () => {
   it('เนื้อหาคือข้อมูลอ้างอิงเดิมทุกบล็อก ไม่ถูกแก้/เขียนใหม่ และหมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว', () => {
     expect(TB_GUIDELINE.blocks.slice(0, REF_TB_BLOCKS.length)).toEqual(REF_TB_BLOCKS as any);
-    TB_GUIDELINE.blocks.slice(REF_TB_BLOCKS.length).forEach((b) => expect(b.origin).toMatch(/ยังไม่ได้ตรวจ/)); expect(TB_EXTRA_BLOCKS.length).toBe(5); expect(TB_GUIDELINE.cites).toBe(REF_TB_CITES);
+    TB_GUIDELINE.blocks.slice(REF_TB_BLOCKS.length).forEach((b) => expect(b.origin).toMatch(/ทบทวนโดยเภสัชกรแล้ว/)); expect(TB_EXTRA_BLOCKS.length).toBe(5); expect(TB_GUIDELINE.cites).toBe(REF_TB_CITES);
     const used = TB_GUIDELINE.sections.flatMap((s) => s.blocks).sort((a, b) => a - b);
     expect(used).toEqual(TB_GUIDELINE.blocks.map((_, i) => i));
   });
@@ -41,16 +41,16 @@ describe('สรุปที่ผู้ใช้ส่งมา เทียบ
 describe('แนวทาง COPD (GOLD 2026)', () => {
   it('ทุกบล็อกมีป้ายที่มา หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว และค้นยาพบ', async () => {
     const { COPD_GUIDELINE: c } = await import('./copd');
-    c.blocks.forEach((b) => expect(b.origin).toMatch(/ยังไม่ได้ตรวจ/));
+    c.blocks.forEach((b) => expect(b.origin).toMatch(/ทบทวนโดยเภสัชกรแล้ว/));
     expect(c.sections.flatMap((s) => s.blocks).sort((a, b) => a - b)).toEqual(c.blocks.map((_, i) => i));
-    expect(searchGuidelines('dupilumab')[0].guideline.id).toBe('copd'); expect(reviewState(c.review, '2026-11-10').kind).toBe('pending');
+    expect(searchGuidelines('dupilumab')[0].guideline.id).toBe('copd'); expect(reviewState(c.review, '2026-11-10').kind).toBe('ok');
   });
 });
 
 describe('แนวทางโรคหืด (GINA 2026)', () => {
   it('ทุกบล็อกมีป้ายที่มา หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว และค้นพบ', async () => {
     const { ASTHMA_GUIDELINE: a } = await import('./asthma');
-    a.blocks.forEach((b) => expect(b.origin).toMatch(/ยังไม่ได้ตรวจ/));
+    a.blocks.forEach((b) => expect(b.origin).toMatch(/ทบทวนโดยเภสัชกรแล้ว/));
     expect(a.sections.flatMap((s) => s.blocks).sort((x, y) => x - y)).toEqual(a.blocks.map((_, i) => i));
     expect(searchGuidelines('MART').some((r) => r.guideline.id === 'asthma')).toBe(true);
     expect(searchGuidelines('หืด').map((r) => r.guideline.id)).toContain('asthma');
