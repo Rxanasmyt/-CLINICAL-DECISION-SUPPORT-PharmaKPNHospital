@@ -38,6 +38,15 @@ describe('สรุปที่ผู้ใช้ส่งมา เทียบ
   });
 });
 
+describe('แนวทาง COPD (GOLD 2026)', () => {
+  it('ทุกบล็อกมีป้ายที่มา หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว และค้นยาพบ', async () => {
+    const { COPD_GUIDELINE: c } = await import('./copd');
+    c.blocks.forEach((b) => expect(b.origin).toMatch(/ยังไม่ได้ตรวจ/));
+    expect(c.sections.flatMap((s) => s.blocks).sort((a, b) => a - b)).toEqual(c.blocks.map((_, i) => i));
+    expect(searchGuidelines('dupilumab')[0].guideline.id).toBe('copd'); expect(reviewState(c.review, '2026-11-10').kind).toBe('pending');
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
