@@ -47,6 +47,16 @@ describe('แนวทาง COPD (GOLD 2026)', () => {
   });
 });
 
+describe('แนวทางโรคหืด (GINA 2026)', () => {
+  it('ทุกบล็อกมีป้ายที่มา หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว และค้นพบ', async () => {
+    const { ASTHMA_GUIDELINE: a } = await import('./asthma');
+    a.blocks.forEach((b) => expect(b.origin).toMatch(/ยังไม่ได้ตรวจ/));
+    expect(a.sections.flatMap((s) => s.blocks).sort((x, y) => x - y)).toEqual(a.blocks.map((_, i) => i));
+    expect(searchGuidelines('MART').some((r) => r.guideline.id === 'asthma')).toBe(true);
+    expect(searchGuidelines('หืด').map((r) => r.guideline.id)).toContain('asthma');
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
