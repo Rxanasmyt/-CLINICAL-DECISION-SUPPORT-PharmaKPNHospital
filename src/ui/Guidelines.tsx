@@ -83,7 +83,7 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
       {g.calc && <button type="button" className="glbtn pri" onClick={() => goCalc(g.calc!.mode)}>{g.calc.label} →</button>}
       <nav className="gltabs" role="tablist">{tabs.map((t) => <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</nav>
       {tab === 'ภาพรวม' && <Overview g={g} />}
-      {sec && sec.blocks.map((bi) => { const b = g.blocks[bi]; return <section key={bi} className="glsec"><h3>{b.h}</h3>{b.origin && <p className="glorigin">⚠ {b.origin}</p>}{'sub' in b && b.sub && <p className="muted">{b.sub}</p>}<BlockView b={b} /></section>; })}
+      {sec && sec.blocks.map((bi) => { const b = g.blocks[bi]; return <section key={bi} className="glsec"><h3>{b.h}</h3>{b.origin && <p className={"glorigin" + (/ทบทวนโดยเภสัชกรแล้ว/.test(b.origin) ? " ok" : "")}>{/ทบทวนโดยเภสัชกรแล้ว/.test(b.origin) ? "✓ " : "⚠ "}{b.origin}</p>}{'sub' in b && b.sub && <p className="muted">{b.sub}</p>}<BlockView b={b} /></section>; })}
       {tab === 'อ้างอิง' && <ol className="glcites">{g.cites.map((c, i) => <li key={i}>{c}</li>)}</ol>}
       {tab === 'ไฟล์แนบ' && <Attachments g={g} />}
     </div>);
