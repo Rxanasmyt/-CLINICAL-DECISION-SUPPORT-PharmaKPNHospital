@@ -2,13 +2,15 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect } from 'vitest';
 import { GUIDELINES, reviewState, searchGuidelines, blockLines } from './registry';
 import { TB_GUIDELINE } from './tb';
+import { TB_EXTRA_BLOCKS, TB_PASTE_DOSE } from './tb-extra';
 import { REF_TB_BLOCKS, REF_TB_CITES } from '../data/references';
 import { validateFile, addFile, listFiles, removeFile, MAX_FILE_BYTES, MAX_FILES_PER_GUIDELINE } from './attachments';
 import { AppDb } from '../storage/db';
 
 describe('แนวทางวัณโรค (ตัวอย่างแรก)', () => {
   it('เนื้อหาคือข้อมูลอ้างอิงเดิมทุกบล็อก ไม่ถูกแก้/เขียนใหม่ และหมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว', () => {
-    expect(TB_GUIDELINE.blocks).toBe(REF_TB_BLOCKS as any); expect(TB_GUIDELINE.cites).toBe(REF_TB_CITES);
+    expect(TB_GUIDELINE.blocks.slice(0, REF_TB_BLOCKS.length)).toEqual(REF_TB_BLOCKS as any);
+    TB_GUIDELINE.blocks.slice(REF_TB_BLOCKS.length).forEach((b) => expect(b.origin).toMatch(/ยังไม่ได้ตรวจ/)); expect(TB_EXTRA_BLOCKS.length).toBe(5); expect(TB_GUIDELINE.cites).toBe(REF_TB_CITES);
     const used = TB_GUIDELINE.sections.flatMap((s) => s.blocks).sort((a, b) => a - b);
     expect(used).toEqual(TB_GUIDELINE.blocks.map((_, i) => i));
   });
@@ -21,6 +23,18 @@ describe('แนวทางวัณโรค (ตัวอย่างแร�
     expect(reviewState(r, '2026-11-10')).toMatchObject({ kind: 'ok' });
     expect(reviewState(r, '2027-01-02')).toMatchObject({ kind: 'overdue' });
     expect(reviewState({ ...r, nextDue: '' }, '2030-01-01').kind).toBe('ok');
+  });
+});
+
+describe('สรุปที่ผู้ใช้ส่งมา เทียบกับข้อมูลอ้างอิงเดิม', () => {
+  it('ตารางขนาดยาตามน้ำหนักตรงกับตารางเดิมทุกช่อง', () => {
+    const g5: any = (REF_TB_BLOCKS as any).find((b: any) => b.kind === 'grid5');
+    const num = (x: string) => +x.replace(/,/g, '');
+    g5.items.forEach((r: any, i: number) => { const p = TB_PASTE_DOSE[i]; expect([num(r.c2), num(r.c3), num(r.c4), num(r.c5)]).toEqual([p.H, p.R, p.Z, p.E]); });
+  });
+  it('ค้นยาใหม่พบ และมีป้ายที่มา', () => {
+    expect(searchGuidelines('bedaquiline')[0].hits.length).toBeGreaterThan(0);
+    expect(searchGuidelines('serotonin')[0].hits[0].block).toBeGreaterThan(8);
   });
 });
 
