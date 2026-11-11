@@ -12,6 +12,16 @@ export const TB_GUIDELINE: Guideline = {
   // ตัวอย่างแรก: ยังไม่ได้ทบทวนโดยเภสัชกร — แก้ที่นี่ (ผ่าน PR) เมื่อทบทวนแล้ว
   review: { status: 'pending', reviewer: '', reviewedAt: '', nextDue: '' },
   blocks: [...(REF_TB_BLOCKS as unknown as Block[]), ...TB_EXTRA_BLOCKS],
+  drugs: [
+    { name: 'Isoniazid (H)', aliases: ['Isoniazid', 'INH'] }, { name: 'Rifampicin (R)', aliases: ['Rifampicin', 'rifampin'] },
+    { name: 'Pyrazinamide (Z)', aliases: ['Pyrazinamide'] }, { name: 'Ethambutol (E)', aliases: ['Ethambutol'] },
+    { name: 'Rifapentine', aliases: ['Rifapentine', '3HP'] }, { name: 'Pyridoxine (B6)', aliases: ['Pyridoxine', 'B6'] },
+    { name: 'Fluoroquinolones', aliases: ['Fluoroquinolone', 'Fluoroquinolones', 'FQ', 'Lfx', 'Mfx', 'levofloxacin', 'moxifloxacin'] },
+    { name: 'Bedaquiline', aliases: ['Bedaquiline', 'Bdq'] }, { name: 'Linezolid', aliases: ['Linezolid', 'Lzd'] },
+    { name: 'Clofazimine', aliases: ['Clofazimine', 'Cfz'] }, { name: 'Aminoglycosides', aliases: ['Aminoglycoside', 'Aminoglycosides'] },
+    { name: 'Prednisolone / steroid', aliases: ['Prednisolone', 'steroid'] }, { name: 'Warfarin', aliases: ['Warfarin'] },
+    { name: 'ยาต้านไวรัส (ART/ARV)', aliases: ['ART', 'ARV', 'ยาต้านไวรัส'] },
+  ],
   sections: [
     { title: 'สูตรยา', blocks: [0] }, { title: 'ขนาดตามน้ำหนัก', blocks: [1] }, { title: 'รายตัวยา', blocks: [2] },
     { title: 'อาการไม่พึงประสงค์', blocks: [3, 4, 5, 6] }, { title: 'กรณีพิเศษ', blocks: [7] }, { title: 'การติดตาม', blocks: [8, 13] },
