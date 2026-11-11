@@ -124,6 +124,16 @@ describe('เบาหวาน (แนวทางเวชปฏิบัต�
   });
 });
 
+describe('โรคไตเรื้อรัง (แนวทางเวชปฏิบัติ 2565)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว และตัวเลขสำคัญตรงตารางต้นฉบับ', () => {
+    const g = GUIDELINES.find((x) => x.id === 'ckd')!;
+    expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+    expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['น้อยกว่า 130/80 มม.ปรอท', 'เพิ่มเกิน 50%: หยุดยา', 'Benazepril', 'CrCl < 30 ลดเหลือวันละ 5 มก.', 'Perindopril', 'ไม่ควรใช้เมื่อ CrCl < 30', 'โพแทสเซียมในซีรัมไม่เกิน 4.8', 'Rosuvastatin', 'Fenofibrate', 'ไม่ควรใช้', 'Hb 10–12 g/dL', 'ไบคาร์บอเนต 24–26', 'dapagliflozin 10 มก.', 'eGFR < 30: ไม่เริ่มหรือหยุดยา']) expect(text).toContain(t);
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
