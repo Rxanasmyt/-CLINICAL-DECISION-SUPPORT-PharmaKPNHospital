@@ -5,7 +5,7 @@ export type Block = BlockOrigin & (
   | { kind: 'kv'; h: string; sub?: string; items: { k: string; v: string; note?: string }[] }
   | { kind: 'grid3' | 'grid5'; h: string; sub?: string; head: string[]; items: Record<string, string>[]; foot?: string; danger?: boolean }
   | { kind: 'drug'; h: string; items: { d: string; dose: string; max: string; ae: string; mon: string }[] }
-  | { kind: 'list'; h: string; danger?: boolean; items: { t: string }[] });
+  | { kind: 'list'; h: string; sub?: string; danger?: boolean; items: { t: string }[] });
 
 export interface Review { status: 'pending' | 'approved'; reviewer: string; reviewedAt: string; /** วันครบรอบทบทวนถัดไป YYYY-MM-DD */ nextDue: string }
 

@@ -134,6 +134,16 @@ describe('โรคไตเรื้อรัง (แนวทางเวช�
   });
 });
 
+describe('ไขมันผิดปกติในเลือด (แนวทางเวชปฏิบัติ 2567)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว และตัวเลขสำคัญตรงตารางต้นฉบับ', () => {
+    const g = GUIDELINES.find((x) => x.id === 'lipid')!;
+    expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+    expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['LDL-C < 55', 'ไม่ควรใช้ simvastatin 80 มก./วัน', 'conazole, erythromycin, clarithromycin', 'verbapamil'.replace('verbapamil', 'verapamil, diltiazem'), 'amiodarone, amlodipine, ranolazine', 'Atorvastatin 40–80 มก.', 'Rosuvastatin 20 มก.', 'Alirocumab 75 หรือ 150 มก.', 'Evolocumab 140 มก.', 'ตารางที่ 1.2 ระบุ 248 มก. แต่ตารางที่ 2.3 ระบุ 284 มก.', 'CK > 10 เท่า', 'ห่างจากยาอื่นอย่างน้อย 4 ชม.']) expect(text).toContain(t);
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);

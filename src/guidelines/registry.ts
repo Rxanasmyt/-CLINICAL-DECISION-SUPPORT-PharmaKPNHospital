@@ -5,9 +5,10 @@ import { HTN_GUIDELINE } from './htn';
 import { CAP_GUIDELINE } from './cap';
 import { DM_GUIDELINE } from './dm';
 import { CKD_GUIDELINE } from './ckd';
+import { LIPID_GUIDELINE } from './lipid';
 import type { Block, Guideline, Review } from './types';
 
-export const GUIDELINES: Guideline[] = [TB_GUIDELINE, COPD_GUIDELINE, ASTHMA_GUIDELINE, HTN_GUIDELINE, CAP_GUIDELINE, DM_GUIDELINE, CKD_GUIDELINE];
+export const GUIDELINES: Guideline[] = [TB_GUIDELINE, COPD_GUIDELINE, ASTHMA_GUIDELINE, HTN_GUIDELINE, CAP_GUIDELINE, DM_GUIDELINE, CKD_GUIDELINE, LIPID_GUIDELINE];
 
 /** สถานะการทบทวน: ยังไม่ทบทวน / ทบทวนแล้ว / เลยรอบทบทวน */
 export function reviewState(r: Review, today: string): { kind: 'pending' | 'ok' | 'overdue'; label: string } {
