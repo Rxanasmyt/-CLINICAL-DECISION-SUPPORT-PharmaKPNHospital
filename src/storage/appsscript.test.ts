@@ -124,8 +124,8 @@ describe('Code.gs กับชีตจำลอง', () => {
     expect(width('สาเหตุที่ราก (RCA)')).toBe(300); expect(width('คะแนน Naranjo')).toBe(95); expect(width('ยาที่สงสัย')).toBe(300); expect(width('แก้ไขล่าสุด')).toBe(150);
     expect(sh.rules[0].formula).toMatch(/="ใช่"$/); expect(sh.rules[0].strike).toBe(true);
     const rule = (h: string, t: string) => sh.rules.find((r: any) => r.text === t && r.ranges[0].c === col(h));
-    expect(rule('รายงาน HPVC', 'รอส่ง')?.bg).toBe('#FBF1DE'); expect(rule('รายงาน HPVC', 'ส่งแล้ว')?.bg).toBe('#EAF4EE');
-    expect(rule('เคสรุนแรง', 'ใช่')?.bg).toBe('#FBEAE8'); expect(rule('RCA (วิเคราะห์สาเหตุราก)', 'ยังไม่ครบ')).toBeTruthy();
+    expect(rule('รายงาน HPVC', 'รอส่ง')?.bg).toBe('#FFF1D6'); expect(rule('รายงาน HPVC', 'ส่งแล้ว')?.bg).toBe('#DDF3E7');
+    expect(rule('เคสรุนแรง', 'ใช่')?.bg).toBe('#FFE1DD'); expect(rule('RCA (วิเคราะห์สาเหตุราก)', 'ยังไม่ครบ')).toBeTruthy();
     const note = (h: string) => sh.log.find((l) => l[0] === 'setNote' && l[1] === col(h))?.[3];
     expect(note('ระดับ Naranjo')).toMatch(/Definite/); expect(note('ประเภท ADR')).toMatch(/HPVC/); expect(note('ลบแล้ว?')).toMatch(/ห้ามลบแถวเอง/);
     // หัวคอลัมน์ทุกตัวที่แอปส่งมีความกว้างที่กำหนด (ไม่มีคอลัมน์ลืมตั้ง) ยกเว้นคอลัมน์ซ่อน
@@ -144,6 +144,10 @@ describe('Code.gs กับชีตจำลอง', () => {
     const adr = env.sheets.find((s) => s.name === 'เคสแพ้ยา (ADR)')!;
     const L = (h: string) => { let n = adr.grid[0].indexOf(h) + 1, s = ''; while (n > 0) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
     expect(ov.grid.flat()).toContain(`=COUNTIFS('เคสแพ้ยา (ADR)'!$A$2:$A,"<>",'เคสแพ้ยา (ADR)'!$${L('ลบแล้ว?')}$2:$${L('ลบแล้ว?')},"<>ใช่",'เคสแพ้ยา (ADR)'!$${L('เคสรุนแรง')}$2:$${L('เคสรุนแรง')},"ใช่")`);
+    // Dashboard: การ์ดตัวชี้วัด 10 ใบ (ป้ายชื่ออยู่แถว 4 และ 8) ตารางไตรมาสเริ่มแถว 14
+    const cell = (r: number, c: number) => ov.grid[r - 1]?.[c - 1];
+    expect([cell(4, 1), cell(4, 3), cell(8, 9)]).toEqual(['เคส ADR ทั้งหมด', 'เคสรุนแรง', expect.stringMatching(/^PTC ปีงบประมาณ/)]);
+    expect(String(cell(5, 1))).toMatch(/^=COUNTIFS\(/); expect(cell(14, 1)).toBe('ไตรมาส');
     const guide = env.sheets.find((s) => s.name === 'อ่านก่อน')!;
     expect(guide.grid.flat().join(' ')).toMatch(/ไม่มีชื่อผู้ป่วย/);
   });

@@ -173,3 +173,50 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 
 .glorigin{font-size:12px;background:#FBF1DE;color:#7A5200;border-radius:8px;padding:6px 10px;margin:4px 0 8px}
 .glorigin.ok{background:#EAF4EE;color:#1E6B47}
+
+/* ===== คลังแนวทาง: สไตล์สีสันประจำโรค (ตัวแปร --gl) ===== */
+.glcard,.glitem{--gl:#0F5D57}
+.glcard{gap:16px}
+.glhead{background:linear-gradient(135deg,var(--gl),color-mix(in srgb,var(--gl) 55%,#0B1F3A));color:#fff;border-radius:20px;padding:20px 22px;display:flex;align-items:center;gap:16px;justify-content:flex-start;box-shadow:0 10px 28px -12px var(--gl)}
+.glhead h2{color:#fff;font-size:22px;margin:2px 0}.glhead .muted{color:rgba(255,255,255,.82);margin:0;font-size:12px}
+.glhead .glcat{color:rgba(255,255,255,.85);background:rgba(255,255,255,.16);border-radius:999px;padding:3px 10px;display:inline-block}
+.glicon{flex:none;width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:28px;backdrop-filter:blur(4px)}
+.glback{color:var(--gl);font-weight:600}
+.glbtn.pri{background:var(--gl);border-color:var(--gl);border-radius:12px;box-shadow:0 6px 16px -8px var(--gl)}
+.gltabs{gap:8px;padding:6px 2px}
+.gltabs button{border-radius:999px;border:1px solid color-mix(in srgb,var(--gl) 28%,transparent);background:color-mix(in srgb,var(--gl) 7%,#fff);color:color-mix(in srgb,var(--gl) 80%,#000);font-weight:600;transition:transform .15s,background .15s}
+.gltabs button:hover{transform:translateY(-1px)}
+.gltabs button.on{background:var(--gl);color:#fff;border-color:var(--gl);box-shadow:0 6px 14px -8px var(--gl)}
+.glsec,.glov section{border:none;border-radius:18px;padding:16px 18px;background:#fff;box-shadow:0 1px 0 rgba(22,33,31,.05),0 10px 24px -18px rgba(22,33,31,.35);position:relative;overflow:hidden}
+.glsec::before,.glov section::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--gl),color-mix(in srgb,var(--gl) 40%,#fff))}
+.glsec h3,.glov h3{color:color-mix(in srgb,var(--gl) 78%,#000);font-size:15px;margin-bottom:10px}
+.glkv{gap:10px}
+.glkvrow{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:12px;align-items:start;background:color-mix(in srgb,var(--gl) 5%,#fff);border:1px solid color-mix(in srgb,var(--gl) 14%,transparent);border-radius:14px;padding:10px 12px}
+.glkvrow>b{background:var(--gl);color:#fff;border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.35;text-align:center;align-self:stretch;display:flex;align-items:center;justify-content:center}
+@media(max-width:560px){.glkvrow{grid-template-columns:1fr}.glkvrow>b{justify-content:flex-start}}
+.gllist{list-style:none;padding:0;gap:8px}
+.gllist li{position:relative;padding:8px 12px 8px 34px;border-radius:12px;background:color-mix(in srgb,var(--gl) 6%,#fff);line-height:1.6}
+.gllist li::before{content:"";position:absolute;left:12px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--gl)}
+.gllist.danger li{background:#FFEDEA;color:#7A2A24}.gllist.danger li::before{background:#E5483A;box-shadow:0 0 0 4px #FFD2CC}
+.gldrugs{gap:14px}
+.gldrug{border:none;border-top:5px solid var(--gl);border-radius:16px;background:linear-gradient(#fff,color-mix(in srgb,var(--gl) 4%,#fff));box-shadow:0 10px 24px -18px rgba(22,33,31,.4)}
+.gldrug h4{color:color-mix(in srgb,var(--gl) 80%,#000)}
+.gldrug dt{color:color-mix(in srgb,var(--gl) 70%,#333);font-weight:700}
+.gltable table{border-collapse:separate;border-spacing:0;border-radius:14px;overflow:hidden;border:1px solid color-mix(in srgb,var(--gl) 20%,transparent)}
+.gltable th{background:var(--gl);color:#fff;border:none}
+.gltable td{border:none;border-top:1px solid color-mix(in srgb,var(--gl) 12%,transparent)}
+.gltable tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--gl) 5%,#fff)}
+.gltable table.danger th{background:#E5483A;color:#fff}
+.glchips{gap:10px}.glchip{border:none;border-radius:14px;background:color-mix(in srgb,var(--gl) 10%,#fff);color:color-mix(in srgb,var(--gl) 75%,#000)}
+.glchip b{color:var(--gl)}
+.glcites li::marker{color:var(--gl);font-weight:700}
+.glstatus{border-top:1px dashed rgba(22,33,31,.18);padding-top:10px}
+.glitem{border:none;border-radius:18px;padding:16px;position:relative;overflow:hidden;background:linear-gradient(160deg,color-mix(in srgb,var(--gl) 9%,#fff),#fff);box-shadow:0 10px 26px -18px var(--gl);transition:transform .18s,box-shadow .18s}
+.glitem:hover{transform:translateY(-3px);box-shadow:0 16px 30px -16px var(--gl)}
+.glitem::after{content:"";position:absolute;right:-24px;top:-24px;width:90px;height:90px;border-radius:50%;background:var(--gl);opacity:.12}
+.glitem .glicon{background:var(--gl);width:44px;height:44px;font-size:24px;border-radius:14px}
+.glitem b{font-size:16px;color:color-mix(in srgb,var(--gl) 80%,#000)}
+.glcat2{color:#0B4F4A!important}
+.glres{border:none;box-shadow:0 10px 24px -18px rgba(22,33,31,.4)}
+.glhit mark{background:#FFE58A;border-radius:4px;padding:0 2px}
+.glchip b{font-family:inherit;font-size:13px}.glchip{line-height:1.55}

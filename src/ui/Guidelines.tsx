@@ -73,10 +73,10 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
   const tabs = ['ภาพรวม', ...g.sections.map((s) => s.title), 'อ้างอิง', 'ไฟล์แนบ'];
   const sec = g.sections.find((s) => s.title === tab);
   return (
-    <div className="glcard">
+    <div className="glcard" style={{ ...({ '--gl': g.accent || '#0F5D57' } as React.CSSProperties) }}>
       <button type="button" className="glback" onClick={back}>← รายการแนวทาง</button>
       <header className="glhead">
-        <div><span className="glcat">{g.category}</span><h2>{g.title}</h2><p className="muted">{g.source}</p></div>
+        <span className="glicon" aria-hidden="true">{g.icon || '💊'}</span><div><span className="glcat">{g.category}</span><h2>{g.title}</h2><p className="muted">{g.source}</p></div>
       </header>
       {g.calc && <button type="button" className="glbtn pri" onClick={() => goCalc(g.calc!.mode)}>{g.calc.label} →</button>}
       <nav className="gltabs" role="tablist">{tabs.map((t) => <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</nav>
@@ -109,8 +109,8 @@ export function GuidelineLibrary({ goCalc }: { goCalc: (mode: string) => void })
       ) : cats.map((c) => (
         <section key={c}><h3 className="glcat2">{c}</h3>
           <div className="glgrid">{GUIDELINES.filter((x) => x.category === c).map((x) => { return (
-            <button key={x.id} type="button" className="glitem" onClick={() => setOpen(x.id)}>
-              <b>{x.title}</b><span>{x.source}</span></button>); })}</div></section>))}
-      {!q.trim() && <p className="muted">ตอนนี้มีแนวทางตัวอย่าง 1 เรื่อง (วัณโรค) — เพิ่มโรคอื่นตามลำดับความสำคัญของ รพ.</p>}
+            <button key={x.id} type="button" className="glitem" style={{ ...({ '--gl': x.accent || '#0F5D57' } as React.CSSProperties) }} onClick={() => setOpen(x.id)}>
+              <span className="glicon" aria-hidden="true">{x.icon || '💊'}</span><b>{x.title}</b><span>{x.source}</span></button>); })}</div></section>))}
+      {!q.trim() && <p className="muted">ตอนนี้มีแนวทาง {GUIDELINES.length} เรื่อง — เพิ่มโรคอื่นตามลำดับความสำคัญของ รพ.</p>}
     </div>);
 }

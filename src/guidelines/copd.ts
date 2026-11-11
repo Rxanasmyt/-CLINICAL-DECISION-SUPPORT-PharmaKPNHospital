@@ -60,7 +60,7 @@ const blocks: Block[] = [
 ];
 
 export const COPD_GUIDELINE: Guideline = {
-  id: 'copd', title: 'โรคปอดอุดกั้นเรื้อรัง (COPD)', category: 'โรคระบบทางเดินหายใจ',
+  id: 'copd', title: 'โรคปอดอุดกั้นเรื้อรัง (COPD)', category: 'โรคระบบทางเดินหายใจ', accent: '#2F6FED', icon: '🫁',
   keywords: ['copd', 'ปอดอุดกั้น', 'GOLD', 'LABA', 'LAMA', 'ICS', 'eosinophil', 'dupilumab', 'mepolizumab', 'roflumilast', 'azithromycin', 'ensifentrine', 'inhaler'],
   source: 'GOLD Report 2026',
   cites: ['Global Initiative for Chronic Obstructive Lung Disease (GOLD). Global Strategy for the Diagnosis, Management, and Prevention of COPD — 2026 Report'],

@@ -59,7 +59,7 @@ const blocks: Block[] = [
 ];
 
 export const ASTHMA_GUIDELINE: Guideline = {
-  id: 'asthma', title: 'โรคหืด (Asthma)', category: 'โรคระบบทางเดินหายใจ',
+  id: 'asthma', title: 'โรคหืด (Asthma)', category: 'โรคระบบทางเดินหายใจ', accent: '#7A4FD6', icon: '🌬️',
   keywords: ['asthma', 'หืด', 'GINA', 'ICS', 'formoterol', 'MART', 'SABA', 'LABA', 'LAMA', 'LTRA', 'AIR', 'reliever', 'controller', 'tiotropium', 'biologic'],
   source: 'GINA 2026',
   cites: ['Global Initiative for Asthma (GINA). Global Strategy for Asthma Management and Prevention — 2026 update'],
