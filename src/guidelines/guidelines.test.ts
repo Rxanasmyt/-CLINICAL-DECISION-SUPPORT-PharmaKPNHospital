@@ -4,7 +4,7 @@ import { GUIDELINES, reviewState, searchGuidelines, blockLines } from './registr
 import { TB_GUIDELINE } from './tb';
 import { drugHits, aliasRe } from './drugs';
 import { TB_EXTRA_BLOCKS, TB_PASTE_DOSE } from './tb-extra';
-import { REF_TB_BLOCKS, REF_TB_CITES } from '../data/references';
+import { REF_TB_BLOCKS, REF_TB_CITES, REF_WF_BLOCKS } from '../data/references';
 import { validateFile, addFile, listFiles, removeFile, MAX_FILE_BYTES, MAX_FILES_PER_GUIDELINE } from './attachments';
 import { AppDb } from '../storage/db';
 
@@ -141,6 +141,19 @@ describe('ไขมันผิดปกติในเลือด (แนว�
     expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
     const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
     for (const t of ['LDL-C < 55', 'ไม่ควรใช้ simvastatin 80 มก./วัน', 'conazole, erythromycin, clarithromycin', 'verbapamil'.replace('verbapamil', 'verapamil, diltiazem'), 'amiodarone, amlodipine, ranolazine', 'Atorvastatin 40–80 มก.', 'Rosuvastatin 20 มก.', 'Alirocumab 75 หรือ 150 มก.', 'Evolocumab 140 มก.', 'ตารางที่ 1.2 ระบุ 248 มก. แต่ตารางที่ 2.3 ระบุ 284 มก.', 'CK > 10 เท่า', 'ห่างจากยาอื่นอย่างน้อย 4 ชม.']) expect(text).toContain(t);
+  });
+});
+
+describe('วอร์ฟาริน (แนวทางสมาคมแพทย์โรคหัวใจ)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว ตัวเลขสำคัญตรงต้นฉบับ และตรงกับข้อมูลวอร์ฟารินเดิมในแอป', () => {
+    const g = GUIDELINES.find((x) => x.id === 'warfarin')!;
+    expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+    expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['INR 2.5–3.5', 'หยุด warfarin 4–5 วันก่อน', 'enoxaparin 1.5 มก./กก. วันละครั้ง', 'ร้อยละ 6.4', 'Rosendaal', 'ไม่ต่ำกว่า 65%', 'vitamin K1 10 มก.', 'ผลิตภัณฑ์ที่มี vitamin K (Glakay)', 'หยุด IV UFH 4–6 ชม. ก่อน'.replace('หยุด IV UFH', 'IV UFH')]) expect(text).toContain(t);
+    // ข้อมูลเดิมในแอป (REF_WF_BLOCKS) พูดตรงกันในประเด็นสำคัญ
+    const old = JSON.stringify(REF_WF_BLOCKS);
+    for (const t of ['4–5 วัน', 'ร้อยละ 6.4', '1.5 มก./กก. วันละครั้ง', '5–20%']) expect(old).toContain(t);
   });
 });
 
