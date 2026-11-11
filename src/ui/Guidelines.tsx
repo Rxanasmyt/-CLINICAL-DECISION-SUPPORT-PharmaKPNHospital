@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { GUIDELINES, reviewState, searchGuidelines } from '../guidelines/registry';
 import type { Block, Guideline } from '../guidelines/types';
 import { drugHits, DRUG_KIND_ORDER } from '../guidelines/drugs';
+import { blockGroup, groupedBlocks, drugGroups } from '../guidelines/groups';
 import type { DrugKind } from '../guidelines/drugs';
 import { addFile, fmtSize, listFiles, removeFile } from '../guidelines/attachments';
 import { store } from '../storage';
@@ -40,7 +41,8 @@ function Overview({ g, openDrug }: { g: Guideline; openDrug: (n: string) => void
   const dl = (g.drugs || []).filter((d) => drugHits(g, d.aliases).length);
   return (
     <div className="glov">
-      {dl.length > 0 && <section><h3>ยาในแนวทางนี้ — แตะเพื่อดูขนาด ข้อห้าม อันตรกิริยา การติดตาม</h3><div className="gldchips">{dl.map((d) => <button key={d.name} type="button" onClick={() => openDrug(d.name)}>{d.name}</button>)}</div></section>}
+      {dl.length > 0 && <section><h3>ยาในแนวทางนี้ — แตะชื่อยาเพื่อดูขนาด ข้อห้าม อันตรกิริยา การติดตาม</h3>
+        {drugGroups({ ...g, drugs: dl }).map((gr) => <div key={gr.group} className="gldgrp"><h4>{gr.group}</h4><div className="gldchips">{gr.drugs.map((d) => <button key={d.name} type="button" onClick={() => openDrug(d.name)}>{d.name}</button>)}</div></div>)}</section>}
       {kv && <section><h3>{kv.h}</h3>{kv.sub && <p className="muted">{kv.sub}</p>}<div className="glchips">{kv.items.map((x) => <span key={x.k} className="glchip"><b>{x.k}</b>{x.v.split(' — ')[0]}</span>)}</div></section>}
       {drugs && <section><h3>ยาหลัก — ขนาดโดยย่อ</h3><div className="gltable"><table><thead><tr><th>ยา</th><th>ขนาด</th><th>สูงสุด</th></tr></thead>
         <tbody>{drugs.items.map((d) => <tr key={d.d}><td><b>{d.d}</b></td><td>{d.dose}</td><td>{d.max}</td></tr>)}</tbody></table></div></section>}
@@ -51,16 +53,15 @@ function Overview({ g, openDrug }: { g: Guideline; openDrug: (n: string) => void
 
 const KIND_CLS: Record<DrugKind, string> = { 'การ์ดยา': 'k-card', 'ขนาดยา': 'k-dose', 'การใช้/ข้อบ่งชี้': 'k-use', 'ข้อห้าม/ข้อควรระวัง': 'k-warn', 'อันตรกิริยา': 'k-ddi', 'ผลข้างเคียง': 'k-ae', 'การติดตาม': 'k-mon' };
 
-/** มุมมองตามตัวยา: เลือกยา → เห็นทุกข้อความของแนวทางที่เกี่ยวกับยานั้น แยกตามหัวข้อ (ขนาด/ข้อห้าม/อันตรกิริยา/ผลข้างเคียง/ติดตาม) */
+/** มุมมองตามตัวยา: ยาแบ่งเป็นกลุ่ม → เลือกยาในกลุ่ม → เห็นทุกข้อความของแนวทางที่เกี่ยวกับยานั้น แยกตามหัวข้อ */
 function DrugTab({ g, pick, setPick, goBlock }: { g: Guideline; pick: string; setPick: (n: string) => void; goBlock: (bi: number) => void }) {
   const list = useMemo(() => (g.drugs || []).map((d) => ({ d, hits: drugHits(g, d.aliases) })).filter((x) => x.hits.length), [g]);
+  const groups = useMemo(() => drugGroups({ ...g, drugs: list.map((x) => x.d) }), [g, list]);
   const cur = list.find((x) => x.d.name === pick) || list[0];
   if (!cur) return <p className="muted">แนวทางนี้ยังไม่มีรายการยา</p>;
   const kinds = DRUG_KIND_ORDER.filter((k) => cur.hits.some((h) => h.kind === k));
-  return (
-    <div className="gldrugtab">
-      <div className="gldchips" role="tablist" aria-label="เลือกยา">{list.map((x) => (
-        <button key={x.d.name} type="button" role="tab" aria-selected={x.d.name === cur.d.name} className={x.d.name === cur.d.name ? 'on' : ''} onClick={() => setPick(x.d.name)}>{x.d.name}<small>{x.hits.length}</small></button>))}</div>
+  const detail = (
+    <div className="gldetail">
       <h3 className="gldtitle">{cur.d.name}</h3>
       {kinds.map((k) => (
         <section key={k} className={'gldgroup ' + KIND_CLS[k]}>
@@ -72,6 +73,31 @@ function DrugTab({ g, pick, setPick, goBlock }: { g: Guideline; pick: string; se
             <button key={i} type="button" className="gldline" onClick={() => goBlock(h.block)}>
               <small>{h.heading}</small>{h.label && <b>{h.label}</b>}<span>{h.text}</span></button>))}
         </section>))}
+    </div>);
+  return (
+    <div className="gldrugtab">
+      {groups.map((gr) => (
+        <section key={gr.group} className="gldgrp">
+          <h4>{gr.group}<small>{gr.drugs.length} รายการ</small></h4>
+          <div className="gldchips" role="tablist" aria-label={'เลือกยาในกลุ่ม ' + gr.group}>{gr.drugs.map((d) => { const x = list.find((y) => y.d.name === d.name)!; return (
+            <button key={d.name} type="button" role="tab" aria-selected={d.name === cur.d.name} className={d.name === cur.d.name ? 'on' : ''} onClick={() => setPick(d.name)}>{d.name}<small>{x.hits.length}</small></button>); })}</div>
+          {gr.drugs.some((d) => d.name === cur.d.name) && detail}
+        </section>))}
+    </div>);
+}
+
+/** เนื้อหาแนวทางแบบพับได้: ส่วน "การรักษา" และ "ความปลอดภัย" แต่ละหัวข้อเป็นแถบพับ */
+function Accordion({ g, ids, openMap, setOpen }: { g: Guideline; ids: number[]; openMap: Record<number, boolean>; setOpen: (m: Record<number, boolean>) => void }) {
+  const isOpen = (bi: number) => (bi in openMap ? openMap[bi] : bi === ids[0]);
+  const all = ids.every((bi) => isOpen(bi));
+  return (
+    <div className="glacclist">
+      <button type="button" className="glbtn glexp" onClick={() => setOpen({ ...openMap, ...Object.fromEntries(ids.map((bi) => [bi, !all])) })}>{all ? 'ย่อทั้งหมด' : 'ขยายทั้งหมด'}</button>
+      {ids.map((bi) => { const b = g.blocks[bi]; return (
+        <details key={bi} id={'glb-' + bi} className="glsec glacc" open={isOpen(bi)} onToggle={(e) => { const o = (e.currentTarget as HTMLDetailsElement).open; if (o !== isOpen(bi)) setOpen({ ...openMap, [bi]: o }); }}>
+          <summary><h3>{b.h}</h3></summary>
+          {'sub' in b && b.sub && <p className="muted">{b.sub}</p>}<BlockView b={b} />
+        </details>); })}
     </div>);
 }
 
@@ -102,10 +128,14 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
   const [tab, setTab] = useState('ภาพรวม');
   const rs = reviewState(g.review, today());
   const [drugPick, setDrugPick] = useState('');
-  const tabs = ['ภาพรวม', ...(g.drugs?.length ? ['ยา'] : []), ...g.sections.map((s) => s.title), 'อ้างอิง', 'ไฟล์แนบ'];
-  const goBlock = (bi: number) => { const t = g.sections.find((x) => x.blocks.includes(bi)); if (t) { setTab(t.title); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
+  const [openMap, setOpenMap] = useState<Record<number, boolean>>({});
+  const gb = useMemo(() => groupedBlocks(g), [g]);
+  const tabs = ['ภาพรวม', ...(g.drugs?.length ? ['ยา'] : []), ...(gb.treat.length ? ['การรักษา'] : []), ...(gb.safety.length ? ['ความปลอดภัย'] : []), 'อ้างอิง', 'ไฟล์แนบ'];
+  const goBlock = (bi: number) => {
+    setTab(blockGroup(g.blocks[bi]) === 'treat' ? 'การรักษา' : 'ความปลอดภัย'); setOpenMap((m) => ({ ...m, [bi]: true }));
+    setTimeout(() => document.getElementById('glb-' + bi)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  };
   const openDrug = (n: string) => { setDrugPick(n); setTab('ยา'); };
-  const sec = g.sections.find((s) => s.title === tab);
   return (
     <div className="glcard" style={{ ...({ '--gl': g.accent || '#0F5D57' } as React.CSSProperties) }}>
       <button type="button" className="glback" onClick={back}>← รายการแนวทาง</button>
@@ -116,7 +146,8 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
       <nav className="gltabs" role="tablist">{tabs.map((t) => <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</nav>
       {tab === 'ภาพรวม' && <Overview g={g} openDrug={openDrug} />}
       {tab === 'ยา' && <DrugTab g={g} pick={drugPick} setPick={setDrugPick} goBlock={goBlock} />}
-      {sec && sec.blocks.map((bi) => { const b = g.blocks[bi]; return <section key={bi} className="glsec"><h3>{b.h}</h3>{'sub' in b && b.sub && <p className="muted">{b.sub}</p>}<BlockView b={b} /></section>; })}
+      {tab === 'การรักษา' && <Accordion g={g} ids={gb.treat} openMap={openMap} setOpen={setOpenMap} />}
+      {tab === 'ความปลอดภัย' && <Accordion g={g} ids={gb.safety} openMap={openMap} setOpen={setOpenMap} />}
       {tab === 'อ้างอิง' && <><ol className="glcites">{g.cites.map((c, i) => <li key={i}>{c}</li>)}</ol><p className="muted glstatus">{rs.kind === 'ok' ? 'ทบทวนโดย ' + g.review.reviewer + (g.review.reviewedAt ? ' · ' + g.review.reviewedAt : '') : 'อยู่ระหว่างการทบทวนโดยเภสัชกร'}</p></>}
       {tab === 'ไฟล์แนบ' && <Attachments g={g} />}
     </div>);

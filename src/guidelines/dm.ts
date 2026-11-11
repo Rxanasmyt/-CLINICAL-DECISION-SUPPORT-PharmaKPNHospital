@@ -74,16 +74,16 @@ const blocks: Block[] = [
 ];
 
 export const DM_GUIDELINE: Guideline = {
-  id: 'dm', title: 'เบาหวาน (Diabetes mellitus)', category: 'โรคต่อมไร้ท่อและเมตาบอลิก', accent: '#2F6FED', icon: '🩸',
+  id: 'dm', title: 'เบาหวาน (Diabetes mellitus)', category: 'โรคหัวใจ ไต และเมตาบอลิก', accent: '#2F6FED', icon: '🩸',
   keywords: ['เบาหวาน', 'diabetes', 'DM', 'metformin', 'sulfonylurea', 'glipizide', 'glibenclamide', 'gliclazide', 'pioglitazone', 'TZD', 'DPP-4', 'SGLT2', 'SGLT-2', 'GLP-1', 'insulin', 'อินซูลิน', 'NPH', 'glargine', 'degludec', 'liraglutide', 'semaglutide', 'dulaglutide', 'repaglinide', 'acarbose'],
   drugs: [
-    { name: 'Metformin', aliases: ['Metformin'] }, { name: 'Sulfonylureas', aliases: ['Sulfonylureas', 'sulfonylurea', 'glibenclamide', 'glipizide'] },
-    { name: 'Glinides / Repaglinide', aliases: ['Glinides', 'Repaglinide'] }, { name: 'Thiazolidinediones', aliases: ['Thiazolidinediones', 'thiazolidinedione', 'glitazone'] },
-    { name: 'Alpha-glucosidase inhibitors', aliases: ['Alpha-glucosidase', 'α-glucosidase'] }, { name: 'DPP-4 inhibitors', aliases: ['DPP-4'] },
-    { name: 'SGLT-2 inhibitors', aliases: ['SGLT-2', 'SGLT2'] }, { name: 'GLP-1 analogs', aliases: ['GLP-1', 'Liraglutide', 'Dulaglutide', 'Semaglutide', 'Lixisenatide'] },
-    { name: 'Insulin ฮิวแมน (RI / NPH / ผสม)', aliases: ['regular insulin', 'NPH', 'Mixtard', 'ฮิวแมนอินซูลิน', 'RI'] },
-    { name: 'Insulin analog (RAA / LAA / ULAA)', aliases: ['RAA', 'LAA', 'ULAA', 'lispro', 'aspart', 'glulisine', 'glargine', 'detemir', 'degludec'] },
-    { name: 'Insulin + GLP-1 (ผสมสำเร็จ)', aliases: ['Soliqua', 'Xultophy'] },
+    { name: 'Metformin', group: 'ยากินลดน้ำตาล', aliases: ['Metformin'] }, { name: 'Sulfonylureas', group: 'ยากินลดน้ำตาล', aliases: ['Sulfonylureas', 'sulfonylurea', 'glibenclamide', 'glipizide'] },
+    { name: 'Glinides / Repaglinide', group: 'ยากินลดน้ำตาล', aliases: ['Glinides', 'Repaglinide'] }, { name: 'Thiazolidinediones', group: 'ยากินลดน้ำตาล', aliases: ['Thiazolidinediones', 'thiazolidinedione', 'glitazone'] },
+    { name: 'Alpha-glucosidase inhibitors', group: 'ยากินลดน้ำตาล', aliases: ['Alpha-glucosidase', 'α-glucosidase'] }, { name: 'DPP-4 inhibitors', group: 'ยากินลดน้ำตาล', aliases: ['DPP-4'] },
+    { name: 'SGLT-2 inhibitors', group: 'ยากินลดน้ำตาล', aliases: ['SGLT-2', 'SGLT2'] }, { name: 'GLP-1 analogs', group: 'ยาฉีด GLP-1', aliases: ['GLP-1', 'Liraglutide', 'Dulaglutide', 'Semaglutide', 'Lixisenatide'] },
+    { name: 'Insulin ฮิวแมน (RI / NPH / ผสม)', group: 'อินซูลิน', aliases: ['regular insulin', 'NPH', 'Mixtard', 'ฮิวแมนอินซูลิน', 'RI'] },
+    { name: 'Insulin analog (RAA / LAA / ULAA)', group: 'อินซูลิน', aliases: ['RAA', 'LAA', 'ULAA', 'lispro', 'aspart', 'glulisine', 'glargine', 'detemir', 'degludec'] },
+    { name: 'Insulin + GLP-1 (ผสมสำเร็จ)', group: 'อินซูลิน', aliases: ['Soliqua', 'Xultophy'] },
   ],
   source: 'แนวทางเวชปฏิบัติสำหรับโรคเบาหวาน 2566 · บทที่ 7 การให้ยาเพื่อควบคุมระดับน้ำตาลในเลือดในผู้ใหญ่',
   cites: [

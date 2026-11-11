@@ -235,3 +235,20 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .gldline{display:flex;flex-direction:column;gap:2px;text-align:left;border:none;background:color-mix(in srgb,var(--k) 7%,#fff);border-radius:12px;padding:9px 12px;cursor:pointer;line-height:1.6}
 .gldline small{color:#6B7B77;font-size:11px}.gldline b{color:color-mix(in srgb,var(--k) 85%,#000);font-size:13px}.gldline span{font-size:14px}
 .gldline:hover{background:color-mix(in srgb,var(--k) 13%,#fff)}
+
+/* ===== จัดกลุ่มให้อ่านง่าย: แท็บน้อยลง, แถบพับ, กลุ่มยา ===== */
+.glacclist{display:flex;flex-direction:column;gap:10px}
+.glexp{align-self:flex-end;padding:6px 12px;font-size:12px}
+.glacc{padding:0}.glacc>summary{list-style:none;cursor:pointer;padding:14px 18px;display:flex;align-items:center;gap:10px}
+.glacc>summary::-webkit-details-marker{display:none}
+.glacc>summary h3{margin:0;flex:1}
+.glacc>summary::after{content:"＋";font-weight:700;color:var(--gl);font-size:18px}
+.glacc[open]>summary::after{content:"－"}
+.glacc[open]>summary{border-bottom:1px dashed color-mix(in srgb,var(--gl) 25%,transparent)}
+.glacc>:not(summary){margin-left:18px;margin-right:18px}.glacc>:last-child{margin-bottom:16px}.glacc>summary+*{margin-top:12px}
+.gldgrp{background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 10px 24px -18px rgba(22,33,31,.4);border-left:6px solid var(--gl);display:flex;flex-direction:column;gap:10px}
+.gldgrp>h4{margin:0;font-size:14px;color:color-mix(in srgb,var(--gl) 80%,#000);display:flex;gap:8px;align-items:baseline}
+.gldgrp>h4 small{font-weight:500;color:#6B7B77;font-size:11px}
+.gldrugtab{gap:12px}
+.gldetail{display:flex;flex-direction:column;gap:12px;border-top:1px dashed color-mix(in srgb,var(--gl) 30%,transparent);padding-top:12px}
+.glov .gldgrp{box-shadow:none;border-left-width:4px;background:color-mix(in srgb,var(--gl) 4%,#fff);margin-top:8px}

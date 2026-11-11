@@ -83,18 +83,18 @@ const blocks: Block[] = [
 ];
 
 export const HF_GUIDELINE: Guideline = {
-  id: 'hf', title: 'หัวใจล้มเหลว (Heart failure)', category: 'โรคหัวใจและหลอดเลือด', accent: '#D6336C', icon: '🫀',
+  id: 'hf', title: 'หัวใจล้มเหลว (Heart failure)', category: 'โรคหัวใจ ไต และเมตาบอลิก', accent: '#D6336C', icon: '🫀',
   keywords: ['หัวใจล้มเหลว', 'heart failure', 'HF', 'HFrEF', 'HFpEF', 'ACEI', 'ARB', 'ARNI', 'sacubitril', 'valsartan', 'beta-blocker', 'bisoprolol', 'carvedilol', 'metoprolol', 'spironolactone', 'MRA', 'ivabradine', 'digoxin', 'furosemide', 'tolvaptan', 'dobutamine', 'milrinone'],
   drugs: [
-    { name: 'ACEI', aliases: ['ACEI', 'Captopril', 'Enalapril', 'Lisinopril', 'Ramipril'] }, { name: 'ARB', aliases: ['ARB', 'Candesartan', 'Losartan', 'Valsartan'] },
-    { name: 'Beta-blocker', aliases: ['Beta-blocker', 'beta-blocker', 'Bisoprolol', 'Carvedilol', 'metoprolol', 'Nebivolol'] },
-    { name: 'MRA / Spironolactone', aliases: ['MRA', 'spironolactone'] }, { name: 'ARNI (sacubitril/valsartan)', aliases: ['ARNI', 'sacubitril'] },
-    { name: 'Ivabradine', aliases: ['Ivabradine', 'ivabradine'] }, { name: 'Hydralazine + ISDN', aliases: ['Hydralazine', 'hydralazine', 'isosorbide dinitrate'] },
-    { name: 'Digoxin', aliases: ['Digoxin', 'digoxin'] }, { name: 'SGLT2 inhibitors', aliases: ['SGLT2'] },
-    { name: 'ยาขับปัสสาวะ (Furosemide ฯลฯ)', aliases: ['furosemide', 'ยาขับปัสสาวะ', 'thiazide', 'Tolvaptan', 'tolvaptan'] },
-    { name: 'Vasodilator IV', aliases: ['nitroprusside', 'nitroglycerine', 'Vasodilator'] },
-    { name: 'Inotrope / Vasopressor', aliases: ['Dobutamine', 'Dopamine', 'Levosimendan', 'Milrinone', 'milrinone', 'Norepinephrine', 'norepinephrine', 'Epinephrine', 'inotrope'] },
-    { name: 'วัคซีน / Coenzyme Q10', aliases: ['วัคซีน', 'Q10', 'โคเอนไซม์'] },
+    { name: 'ACEI', group: 'ยาที่ลดอัตราการเสียชีวิต', aliases: ['ACEI', 'Captopril', 'Enalapril', 'Lisinopril', 'Ramipril'] }, { name: 'ARB', group: 'ยาที่ลดอัตราการเสียชีวิต', aliases: ['ARB', 'Candesartan', 'Losartan', 'Valsartan'] },
+    { name: 'Beta-blocker', group: 'ยาที่ลดอัตราการเสียชีวิต', aliases: ['Beta-blocker', 'beta-blocker', 'Bisoprolol', 'Carvedilol', 'metoprolol', 'Nebivolol'] },
+    { name: 'MRA / Spironolactone', group: 'ยาที่ลดอัตราการเสียชีวิต', aliases: ['MRA', 'spironolactone'] }, { name: 'ARNI (sacubitril/valsartan)', group: 'ยาที่ลดอัตราการเสียชีวิต', aliases: ['ARNI', 'sacubitril'] },
+    { name: 'Ivabradine', group: 'ยาเสริมใน HFrEF', aliases: ['Ivabradine', 'ivabradine'] }, { name: 'Hydralazine + ISDN', group: 'ยาเสริมใน HFrEF', aliases: ['Hydralazine', 'hydralazine', 'isosorbide dinitrate'] },
+    { name: 'Digoxin', group: 'ยาเสริมใน HFrEF', aliases: ['Digoxin', 'digoxin'] }, { name: 'SGLT2 inhibitors', group: 'ยาเสริมใน HFrEF', aliases: ['SGLT2'] },
+    { name: 'ยาขับปัสสาวะ (Furosemide ฯลฯ)', group: 'ยาในภาวะเฉียบพลัน', aliases: ['furosemide', 'ยาขับปัสสาวะ', 'thiazide', 'Tolvaptan', 'tolvaptan'] },
+    { name: 'Vasodilator IV', group: 'ยาในภาวะเฉียบพลัน', aliases: ['nitroprusside', 'nitroglycerine', 'Vasodilator'] },
+    { name: 'Inotrope / Vasopressor', group: 'ยาในภาวะเฉียบพลัน', aliases: ['Dobutamine', 'Dopamine', 'Levosimendan', 'Milrinone', 'milrinone', 'Norepinephrine', 'norepinephrine', 'Epinephrine', 'inotrope'] },
+    { name: 'วัคซีน / Coenzyme Q10', group: 'วัคซีนและอื่นๆ', aliases: ['วัคซีน', 'Q10', 'โคเอนไซม์'] },
   ],
   source: 'แนวทางเวชปฏิบัติเพื่อการวินิจฉัยและการดูแลรักษาผู้ป่วยภาวะหัวใจล้มเหลว พ.ศ. 2562 (HFCT) · สมาคมแพทย์โรคหัวใจแห่งประเทศไทย',
   cites: [

@@ -72,16 +72,16 @@ const blocks: Block[] = [
 ];
 
 export const WARFARIN_GUIDELINE: Guideline = {
-  id: 'warfarin', title: 'ยาต้านการแข็งตัวของเลือด (วอร์ฟาริน)', category: 'โรคหัวใจและหลอดเลือด', accent: '#C0392B', icon: '🩸',
+  id: 'warfarin', title: 'ยาต้านการแข็งตัวของเลือด (วอร์ฟาริน)', category: 'โรคหัวใจ ไต และเมตาบอลิก', accent: '#C0392B', icon: '🩸',
   keywords: ['warfarin', 'วอร์ฟาริน', 'INR', 'anticoagulant', 'ยาต้านการแข็งตัวของเลือด', 'bridging', 'LMWH', 'enoxaparin', 'vitamin K', 'heparin', 'mechanical valve', 'CHADS2', 'TTR'],
   drugs: [
-    { name: 'Warfarin', aliases: ['warfarin', 'Warfarin', 'วอร์ฟาริน'] }, { name: 'Vitamin K1', aliases: ['vitamin K', 'Vit K1', 'vitamin K1'] },
-    { name: 'Heparin / UFH', aliases: ['UFH', 'heparin', 'Heparin'] }, { name: 'LMWH (Enoxaparin)', aliases: ['LMWH', 'enoxaparin'] },
-    { name: 'FFP / PCC / rFVIIa', aliases: ['FFP', 'PCC', 'factor VIIa'] }, { name: 'Aspirin', aliases: ['aspirin', 'ASA'] },
-    { name: 'NSAIDs / COX-2', aliases: ['NSAIDs', 'COX-2', 'Coxibs'] }, { name: 'ยาปฏิชีวนะ/ยาต้านเชื้อรา (อันตรกิริยา)', aliases: ['erythromycin', 'clarithromycin', 'cotrimoxazole', 'ciprofloxacin', 'metronidazole', 'ketoconazole', 'itraconazole', 'fluconazole'] },
-    { name: 'Amiodarone / ยาหัวใจ (อันตรกิริยา)', aliases: ['amiodarone', 'propafenone', 'propranolol', 'fluvastatin', 'rosuvastatin'] },
-    { name: 'Enzyme inducers', aliases: ['rifampicin', 'phenytoin', 'carbamazepine', 'phenobarbital', 'griseofulvin'] },
-    { name: 'สมุนไพร/อาหารเสริม', aliases: ['Ginkgo', 'แปะก๊วย', 'โสม', 'fish oil'] },
+    { name: 'Warfarin', group: 'ยาต้านการแข็งตัวและยาแก้ฤทธิ์', aliases: ['warfarin', 'Warfarin', 'วอร์ฟาริน'] }, { name: 'Vitamin K1', group: 'ยาต้านการแข็งตัวและยาแก้ฤทธิ์', aliases: ['vitamin K', 'Vit K1', 'vitamin K1'] },
+    { name: 'Heparin / UFH', group: 'ยาต้านการแข็งตัวและยาแก้ฤทธิ์', aliases: ['UFH', 'heparin', 'Heparin'] }, { name: 'LMWH (Enoxaparin)', group: 'ยาต้านการแข็งตัวและยาแก้ฤทธิ์', aliases: ['LMWH', 'enoxaparin'] },
+    { name: 'FFP / PCC / rFVIIa', group: 'ยาต้านการแข็งตัวและยาแก้ฤทธิ์', aliases: ['FFP', 'PCC', 'factor VIIa'] }, { name: 'Aspirin', group: 'ยา/สารที่มีอันตรกิริยา', aliases: ['aspirin', 'ASA'] },
+    { name: 'NSAIDs / COX-2', group: 'ยา/สารที่มีอันตรกิริยา', aliases: ['NSAIDs', 'COX-2', 'Coxibs'] }, { name: 'ยาปฏิชีวนะ/ยาต้านเชื้อรา (อันตรกิริยา)', group: 'ยา/สารที่มีอันตรกิริยา', aliases: ['erythromycin', 'clarithromycin', 'cotrimoxazole', 'ciprofloxacin', 'metronidazole', 'ketoconazole', 'itraconazole', 'fluconazole'] },
+    { name: 'Amiodarone / ยาหัวใจ (อันตรกิริยา)', group: 'ยา/สารที่มีอันตรกิริยา', aliases: ['amiodarone', 'propafenone', 'propranolol', 'fluvastatin', 'rosuvastatin'] },
+    { name: 'Enzyme inducers', group: 'ยา/สารที่มีอันตรกิริยา', aliases: ['rifampicin', 'phenytoin', 'carbamazepine', 'phenobarbital', 'griseofulvin'] },
+    { name: 'สมุนไพร/อาหารเสริม', group: 'ยา/สารที่มีอันตรกิริยา', aliases: ['Ginkgo', 'แปะก๊วย', 'โสม', 'fish oil'] },
   ],
   source: 'แนวทางการรักษาผู้ป่วยด้วยยาต้านการแข็งตัวของเลือดชนิดรับประทาน (วอร์ฟาริน) · สมาคมแพทย์โรคหัวใจแห่งประเทศไทย',
   cites: [
