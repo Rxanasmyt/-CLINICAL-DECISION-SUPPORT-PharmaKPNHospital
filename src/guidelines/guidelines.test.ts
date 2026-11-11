@@ -157,6 +157,16 @@ describe('วอร์ฟาริน (แนวทางสมาคมแพ�
   });
 });
 
+describe('หัวใจล้มเหลว (HFCT 2562)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว และตัวเลขสำคัญตรงตารางต้นฉบับ', () => {
+    const g = GUIDELINES.find((x) => x.id === 'hf')!;
+    expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+    expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['6.25 mg t.i.d.', '122.7 mg/d', '3.125 mg b.i.d.', '12.5–25 mg o.d.', '49/51 มก. วันละ 2 ครั้ง', '97/103', 'อย่างน้อย 36 ชั่วโมง', 'K > 5.2'.replace('K', 'โพแทสเซียม'), 'spironolactone ตั้งแต่ 50 มก./วัน', 'furosemide 20–40 มก.', 'Dobutamine 2–20', 'Milrinone bolus 25–75', 'ตารางที่ 26']) expect(text).toContain(t);
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
