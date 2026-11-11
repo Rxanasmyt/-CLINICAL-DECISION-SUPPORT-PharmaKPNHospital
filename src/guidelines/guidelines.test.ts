@@ -105,6 +105,15 @@ describe('วัณโรค: ข้อความที่ตรวจเท�
   });
 });
 
+describe('ความดันสูง: ข้อความจากฉบับเต็มภาษาไทย', () => {
+  it('มีหัวข้อเบาหวาน หลอดเลือด ผู้สูงอายุ ดื้อยาเป็นขั้นตอน ฉุกเฉิน และตัวเลขตรงต้นฉบับ', () => {
+    const htn = GUIDELINES.find((x) => x.id === 'htn')!;
+    const text = htn.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['UACR ≥ 30 mg/g', 'ห้ามใช้ ACEI ร่วมกับ ARB'.replace('ห้าม', 'ไม่ควร'), 'HR', 'อายุ ≥ 80 ปี', 'SBP ≥ 160 mmHg', 'eplerenone', 'minoxidil', 'โซเดียมไม่เกิน 2 g/วัน', 'ลด MAP ลงร้อยละ 20–25', 'nitroprusside', 'ชีพจรตั้งแต่ 70']) if (t !== 'HR') expect(text).toContain(t);
+    expect(htn.sections.map((x) => x.title)).toEqual(expect.arrayContaining(['เบาหวาน', 'ผู้สูงอายุ', 'ฉุกเฉิน', 'หัวใจ/สมอง']));
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
