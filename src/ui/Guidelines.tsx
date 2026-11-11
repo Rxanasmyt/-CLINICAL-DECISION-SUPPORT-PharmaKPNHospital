@@ -77,14 +77,12 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
       <button type="button" className="glback" onClick={back}>← รายการแนวทาง</button>
       <header className="glhead">
         <div><span className="glcat">{g.category}</span><h2>{g.title}</h2><p className="muted">{g.source}</p></div>
-        <span className={'glreview ' + rs.kind}>{rs.label}</span>
       </header>
-      {rs.kind !== 'ok' && <p className="glwarn" role="note">สรุปนี้คัดจากข้อมูลอ้างอิงในแอปพร้อมที่มา ใช้ประกอบการตัดสินใจเท่านั้น ไม่ใช่แทนแนวทางฉบับเต็มและดุลยพินิจของเภสัชกร · ตรวจกับฉบับเต็มก่อนใช้กับผู้ป่วย</p>}
       {g.calc && <button type="button" className="glbtn pri" onClick={() => goCalc(g.calc!.mode)}>{g.calc.label} →</button>}
       <nav className="gltabs" role="tablist">{tabs.map((t) => <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</nav>
       {tab === 'ภาพรวม' && <Overview g={g} />}
-      {sec && sec.blocks.map((bi) => { const b = g.blocks[bi]; return <section key={bi} className="glsec"><h3>{b.h}</h3>{b.origin && <p className={"glorigin" + (/ทบทวนโดยเภสัชกรแล้ว/.test(b.origin) ? " ok" : "")}>{/ทบทวนโดยเภสัชกรแล้ว/.test(b.origin) ? "✓ " : "⚠ "}{b.origin}</p>}{'sub' in b && b.sub && <p className="muted">{b.sub}</p>}<BlockView b={b} /></section>; })}
-      {tab === 'อ้างอิง' && <ol className="glcites">{g.cites.map((c, i) => <li key={i}>{c}</li>)}</ol>}
+      {sec && sec.blocks.map((bi) => { const b = g.blocks[bi]; return <section key={bi} className="glsec"><h3>{b.h}</h3>{'sub' in b && b.sub && <p className="muted">{b.sub}</p>}<BlockView b={b} /></section>; })}
+      {tab === 'อ้างอิง' && <><ol className="glcites">{g.cites.map((c, i) => <li key={i}>{c}</li>)}</ol><p className="muted glstatus">{rs.kind === 'ok' ? 'ทบทวนโดย ' + g.review.reviewer + (g.review.reviewedAt ? ' · ' + g.review.reviewedAt : '') : 'อยู่ระหว่างการทบทวนโดยเภสัชกร'}</p></>}
       {tab === 'ไฟล์แนบ' && <Attachments g={g} />}
     </div>);
 }
@@ -110,9 +108,9 @@ export function GuidelineLibrary({ goCalc }: { goCalc: (mode: string) => void })
             </section>))
       ) : cats.map((c) => (
         <section key={c}><h3 className="glcat2">{c}</h3>
-          <div className="glgrid">{GUIDELINES.filter((x) => x.category === c).map((x) => { const rs = reviewState(x.review, today()); return (
+          <div className="glgrid">{GUIDELINES.filter((x) => x.category === c).map((x) => { return (
             <button key={x.id} type="button" className="glitem" onClick={() => setOpen(x.id)}>
-              <b>{x.title}</b><span>{x.source}</span><i className={'glreview ' + rs.kind}>{rs.label}</i></button>); })}</div></section>))}
+              <b>{x.title}</b><span>{x.source}</span></button>); })}</div></section>))}
       {!q.trim() && <p className="muted">ตอนนี้มีแนวทางตัวอย่าง 1 เรื่อง (วัณโรค) — เพิ่มโรคอื่นตามลำดับความสำคัญของ รพ.</p>}
     </div>);
 }

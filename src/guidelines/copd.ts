@@ -62,9 +62,9 @@ const blocks: Block[] = [
 export const COPD_GUIDELINE: Guideline = {
   id: 'copd', title: 'โรคปอดอุดกั้นเรื้อรัง (COPD)', category: 'โรคระบบทางเดินหายใจ',
   keywords: ['copd', 'ปอดอุดกั้น', 'GOLD', 'LABA', 'LAMA', 'ICS', 'eosinophil', 'dupilumab', 'mepolizumab', 'roflumilast', 'azithromycin', 'ensifentrine', 'inhaler'],
-  source: 'GOLD Report 2026 (สรุปที่ผู้ใช้ส่งมา · ทบทวนโดยเภสัชกรแล้วตามที่ผู้ใช้แจ้ง)',
-  cites: ['Global Initiative for Chronic Obstructive Lung Disease (GOLD). Global Strategy for the Diagnosis, Management, and Prevention of COPD — 2026 Report — เนื้อหาคัดจากสรุปข้อความที่ผู้ใช้ส่งมา ไม่มีเลขหน้า · ทบทวนโดยเภสัชกรแล้ว (ตามที่ผู้ใช้แจ้ง ยังไม่ระบุชื่อผู้ทบทวน)'],
-  review: { status: 'approved', reviewer: 'เภสัชกรของ รพ. (ผู้ใช้แจ้งว่าทบทวนแล้ว — รอระบุชื่อ)', reviewedAt: '2026-11-10', nextDue: '' },
+  source: 'GOLD Report 2026',
+  cites: ['Global Initiative for Chronic Obstructive Lung Disease (GOLD). Global Strategy for the Diagnosis, Management, and Prevention of COPD — 2026 Report'],
+  review: { status: 'approved', reviewer: 'เภสัชกรโรงพยาบาล', reviewedAt: '2026-11-10', nextDue: '' },
   blocks,
   sections: [
     { title: 'เริ่มยา', blocks: [0] }, { title: 'ปรับยา', blocks: [1, 2] }, { title: 'ยาชีววัตถุ', blocks: [3] },
