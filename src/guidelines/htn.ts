@@ -1,0 +1,85 @@
+// ความดันโลหิตสูง — คัดจาก 2024 Thai guidelines on the treatment of hypertension (Thai Hypertension Society; Asian Biomed 2025, CC BY 4.0)
+// ข้อความมาจากตารางคำแนะนำ/เนื้อหาของบทความต้นฉบับ (ภาษาอังกฤษ) สรุปเป็นไทย คงตัวเลข/ชื่อยาตามต้นฉบับ · ระดับคำแนะนำ (Class/Level) ตามต้นฉบับ
+// ยังไม่ได้ทบทวนโดยเภสัชกร
+import type { Block, Guideline } from './types';
+
+const o = 'จากแนวทางไทย 2567 (ฉบับเต็ม open access) — รอเภสัชกรทบทวน';
+
+const blocks: Block[] = [
+  { kind: 'kv', h: 'เป้าหมายและเกณฑ์ความดัน', origin: o, items: [
+    { k: 'เกณฑ์วินิจฉัย', v: 'ความดันที่คลินิก ≥ 140/90 mmHg (คงเกณฑ์เดิม) · หมวดใหม่ "BP at risk" = 130–139/80–89 mmHg · ควรยืนยันด้วย HBPM หรือ ABPM' },
+    { k: 'เป้าหมาย อายุ 18–65 ปี', v: '120–130/70–79 mmHg' },
+    { k: 'เป้าหมาย อายุ > 65 ปี', v: '130–139/70–79 mmHg' },
+    { k: 'ความดันที่บ้านเฉลี่ย', v: '65–79 ปี และผู้ที่เคยเป็นโรคหลอดเลือดสมอง ควร < 135/85 mmHg (Class I, C) · อายุ ≥ 80 ปี < 140/80 mmHg ยอมรับได้ (IIb, C)' },
+  ] },
+  { kind: 'kv', h: 'ยาลดความดันกลุ่มหลัก 5 กลุ่มและการเริ่มยา', origin: o, items: [
+    { k: 'ยากลุ่มหลัก 5 กลุ่ม', v: 'ACEI, ARB, Beta-blocker, CCB, Diuretic (thiazide/thiazide-like เช่น chlorthalidone, indapamide) · เลือกโดยพิจารณาโรคร่วมและข้อห้ามของแต่ละกลุ่ม (I, A)' },
+    { k: 'เริ่มด้วยยา 2 ชนิด', v: 'ผู้ป่วยส่วนใหญ่ควรเริ่มยา 2 ชนิด · สูตรที่แนะนำ: RAS blocker (ACEI หรือ ARB) + CCB หรือ thiazide/thiazide-like (I, A)' },
+    { k: 'ยาเม็ดรวม (SPC)', v: 'แนะนำยาเม็ดรวม 2 ชนิดในเม็ดเดียวทุกที่ที่มี (I, A) และใช้ยาเม็ดรวม 2–3 กลุ่มได้ทุกขั้น (I, A)' },
+    { k: 'เริ่มด้วยยา 1 ชนิด', v: 'พิจารณาในผู้สูงอายุมาก อ่อนแรง/เปราะบาง ความดันเริ่มต้นต่ำ (140–149/90–95 mmHg) ร่วมกับความเสี่ยงหัวใจและหลอดเลือดต่ำ หรือ BP at risk ที่เสี่ยงหัวใจและหลอดเลือดสูงมาก (I, C)' },
+    { k: 'ถ้ายังคุมไม่ได้', v: 'เพิ่มเป็นยา 3 ชนิด โดยทั่วไป RAS blocker + CCB + thiazide/thiazide-like โดยหนึ่งในสามต้องเป็นขับปัสสาวะ ควรเป็น thiazide-like (I, A)' },
+    { k: 'เวลากินยา', v: 'ผู้ป่วยเลือกกินเช้าหรือก่อนนอนได้ (I, C) · โดยทั่วไป THS แนะนำกินตอนเช้าเพราะความร่วมมือดีกว่า (I, C) · พิจารณาก่อนนอนในผู้ที่มีความดันกลางคืนสูง (IIb, C)' },
+  ] },
+  { kind: 'list', h: 'ข้อห้ามและข้อควรระวังในการเลือกยา', origin: o, danger: true, items: [
+    { t: 'ไม่แนะนำให้ใช้ RAS blocker 2 ตัวร่วมกัน (ACEI + ARB) เพราะเสี่ยง AKI และ hyperkalemia (Class III, A)' },
+    { t: 'ARNI ยังไม่แนะนำเป็นยาแนวแรกของความดันสูงเพราะขาดหลักฐานลดเหตุการณ์หัวใจและหลอดเลือดโดยรวม · อาจเหมาะใน resistant hypertension แทน RAS blocker (IIb, B) · ใน HFrEF ควรใช้แทน RAS blocker (I, A)' },
+    { t: 'SGLT2i และ GLP1-RA ใช้เป็นยาเสริมในผู้ที่มีโรคร่วมที่ต้องใช้ยาเหล่านี้ (IIa, A) แต่ไม่แนะนำให้ใช้เพื่อลดความดันอย่างเดียว (III, C) · ยังไม่ได้รับอนุมัติข้อบ่งชี้ลดความดันในประเทศไทย' },
+    { t: 'ไม่แนะนำ non-DHP-CCB ใน HFrEF (Class III, C)' },
+  ] },
+  { kind: 'kv', h: 'ความดันสูงดื้อยา (Resistant / Refractory)', origin: o, items: [
+    { k: 'Resistant hypertension', v: 'ความดันยังสูงกว่าเป้าหมายแม้ใช้ยาอย่างน้อย 3 กลุ่ม ซึ่งมักรวม CCB ออกฤทธิ์ยาว, ACEI หรือ ARB และยาขับปัสสาวะ ในขนาดสูงสุดหรือสูงสุดที่ทนได้ · ถ้ายังคุมไม่ได้ด้วยยา 3 ชนิด (ขนาดสูงสุด/ที่ทนได้) ให้ถือเป็น resistant hypertension (I, A)' },
+    { k: 'Refractory hypertension', v: 'ความดันยังคุมไม่ได้ทั้งที่ใช้ยาสูงสุดหรือใกล้สูงสุดอย่างน้อย 5 กลุ่ม รวม thiazide-like ออกฤทธิ์ยาวและ spironolactone' },
+    { k: 'ยาที่ใช้', v: 'Spironolactone (MRA) มีประสิทธิภาพใน refractory hypertension แต่อาจทำให้ hyperkalemia หรือการทำงานของไตลดลงแบบย้อนกลับได้ · ARNI พิจารณาแทน RAS blocker (IIb, B)' },
+    { k: 'หัตถการ', v: 'Renal denervation พิจารณาเฉพาะ refractory hypertension (I, C) หรือ resistant ที่มี ASCVD/HMOD ลุกลาม (IIa, B)' },
+  ] },
+  { kind: 'kv', h: 'โรคไตเรื้อรัง (CKD)', origin: o, items: [
+    { k: 'เริ่มรักษา', v: 'ปรับวิถีชีวิตและให้ยาในผู้ป่วย CKD ส่วนใหญ่ทุกระยะเมื่อความดัน ≥ 140/90 mmHg (I, A) · เป้าหมายที่คลินิก 120–130/70–79 mmHg ในผู้ที่มี albuminuria และเสี่ยงสูง (IIa, A)' },
+    { k: 'ACR ≥ 30 mg/g', v: 'ใช้ ACEI หรือ ARB เป็นยาแรก (I, A) ปรับถึงขนาดสูงสุดที่ทนได้' },
+    { k: 'ACR < 30 mg/g', v: 'ใช้ยากลุ่มหลักได้ทุกกลุ่ม (I, B)' },
+    { k: 'การติดตามหลังเริ่ม/ปรับขนาด ACEI/ARB', v: 'ใช้ต่อได้ เว้นแต่ creatinine เพิ่มขึ้น > 30% ภายใน 4 สัปดาห์หลังเริ่มหรือปรับขนาด · พิจารณาลดขนาดหรือหยุดเมื่อมีความดันต่ำที่มีอาการ หรือ hyperkalemia ที่คุมไม่ได้ · ถ้ามี hyperkalemia อาจใช้ potassium binder เพื่อรักษาระดับโพแทสเซียม < 5.5 mmol/L เพื่อใช้ยาต่อได้' },
+    { k: 'ยาร่วมตาม eGFR', v: 'eGFR > 45: ACEI/ARB + CCB หรือ thiazide/thiazide-like · eGFR 30–45: thiazide/thiazide-like มักเปลี่ยนเป็น loop diuretic · ห้ามใช้ ACEI + ARB เพื่อคุมความดัน (III, B)' },
+    { k: 'ปลูกถ่ายไต', v: 'ACEI/ARB หรือ DHP-CCB เป็นยาแรก (I, A) · ลดความดัน < 130/80 mmHg ได้ (IIb, B)' },
+  ] },
+  { kind: 'kv', h: 'หัวใจล้มเหลว (HFrEF / HFpEF)', origin: o, items: [
+    { k: 'HFrEF', v: 'ให้ยาที่มีหลักฐานลดเหตุการณ์ในหัวใจล้มเหลวร่วมกัน: ACEI หรือ ARB หรือ ARNI + beta-blocker + MRA + SGLT2i หากไม่มีข้อห้ามและทนได้ (I, A) · ถ้ายังคุมไม่ได้ด้วย 4 กลุ่มและยาขับปัสสาวะ ให้เพิ่ม DHP-CCB (I, B) · ไม่แนะนำ non-DHP-CCB (III, C)' },
+    { k: 'ยาขับปัสสาวะ', v: 'Thiazide/thiazide-like เมื่อไม่มีปัญหาน้ำเกินมาก · Loop diuretic เมื่อมีน้ำเกิน โดยเฉพาะปอดบวมน้ำหรือ CKD ขั้นสูง (eGFR < 30)' },
+    { k: 'HFpEF', v: 'รักษาความดันสูง (I, A) · พิจารณาแทน RAS blocker ด้วย ARNI โดยเฉพาะที่ดูเหมือนความดันสูงดื้อยา (IIb, B) · พิจารณา spironolactone โดยเฉพาะ LVEF ค่อนข้างต่ำ (IIb, B) · SGLT2i มีหลักฐานปรับปรุงผลลัพธ์ใน HFpEF' },
+    { k: 'เป้าหมายความดัน', v: 'ผู้เสี่ยงหัวใจล้มเหลว < 130/80 mmHg (I, A) · HFrEF และ HFpEF SBP < 130 mmHg (I, C) · Stage D ให้เพิ่ม GDMT สูงสุดเท่าที่ทนได้ (I, C)' },
+  ] },
+  { kind: 'drug', h: 'ยาลดความดันฉุกเฉินในหญิงตั้งครรภ์ (preeclampsia)', origin: o, items: [
+    { d: 'Hydralazine', dose: '5 mg IV/IM bolus แล้ว IV bolus 5–10 mg ทุก 20–40 นาที', max: 'รวมสูงสุด 20 mg หรือ IV infusion 0.5–10 mg/h', ae: '-', mon: 'ตามตารางที่ 29 ของแนวทาง (Class I, B)' },
+    { d: 'Nifedipine', dose: '10–20 mg รับประทาน ทำซ้ำหลัง 20 นาทีได้ แล้ว 10–20 mg ทุก 2–6 ชั่วโมง', max: 'สูงสุด 180 mg/วัน', ae: '-', mon: 'ตามตารางที่ 29 ของแนวทาง (Class I, B)' },
+    { d: 'Labetalol', dose: '10–20 mg IV bolus แล้ว IV bolus 20–80 mg ทุก 10–30 นาที', max: 'รวมสูงสุด 300 mg หรือ IV infusion 1–2 mg/min', ae: '-', mon: 'ตามตารางที่ 29 ของแนวทาง (Class I, B)' },
+  ] },
+  { kind: 'list', h: 'Aspirin ป้องกัน preeclampsia', origin: o, items: [
+    { t: 'Aspirin ขนาดต่ำ 81 mg/วัน เริ่มระหว่างอายุครรภ์ 12–28 สัปดาห์ (เหมาะที่สุดก่อน 16 สัปดาห์) ต่อจนคลอด ในผู้ที่มีปัจจัยเสี่ยง preeclampsia' },
+    { t: 'แนะนำเมื่อมีปัจจัยเสี่ยงสูง ≥ 1 ข้อ เช่น เคยเป็น preeclampsia, ครรภ์แฝด, ความดันสูงเรื้อรัง, เบาหวานชนิด 1 หรือ 2, โรคไต, โรคภูมิต้านตนเอง (I, A) หรือมีปัจจัยเสี่ยงปานกลาง ≥ 2 ข้อ (I, A)' },
+    { t: 'ไม่แนะนำในผู้ที่เคยคลอดครบกำหนดโดยไม่มีภาวะแทรกซ้อน (III, A)' },
+  ] },
+];
+
+export const HTN_GUIDELINE: Guideline = {
+  id: 'htn', title: 'ความดันโลหิตสูง (Hypertension)', category: 'โรคหัวใจและหลอดเลือด', accent: '#E5483A', icon: '❤️',
+  keywords: ['ความดัน', 'hypertension', 'HT', 'ACEI', 'ARB', 'CCB', 'thiazide', 'chlorthalidone', 'indapamide', 'beta-blocker', 'spironolactone', 'ARNI', 'amlodipine', 'resistant', 'SPC', 'preeclampsia', 'labetalol', 'nifedipine', 'hydralazine'],
+  drugs: [
+    { name: 'ACEI', aliases: ['ACEI', 'ACEIs', 'ACEi'] }, { name: 'ARB', aliases: ['ARB'] }, { name: 'CCB (DHP / non-DHP)', aliases: ['CCB', 'DHP-CCB', 'non-DHP-CCB'] },
+    { name: 'Thiazide / thiazide-like', aliases: ['thiazide', 'chlorthalidone', 'indapamide'] }, { name: 'Loop diuretic', aliases: ['Loop diuretic'] },
+    { name: 'Beta-blocker', aliases: ['Beta-blocker', 'beta-blocker'] }, { name: 'Spironolactone / MRA', aliases: ['spironolactone', 'MRA', 'mineralocorticoid'] },
+    { name: 'ARNI', aliases: ['ARNI'] }, { name: 'SGLT2i / GLP1-RA', aliases: ['SGLT2i', 'GLP1-RA'] },
+    { name: 'Hydralazine', aliases: ['Hydralazine'] }, { name: 'Nifedipine', aliases: ['Nifedipine'] }, { name: 'Labetalol', aliases: ['Labetalol'] },
+    { name: 'Aspirin (ป้องกัน preeclampsia)', aliases: ['Aspirin'] },
+  ],
+  source: '2024 Thai guidelines on the treatment of hypertension · Thai Hypertension Society',
+  cites: [
+    'Kunanon S, Kotruchin P, Chattranukulchai P, et al. 2024 Thai guidelines on the treatment of hypertension. Asian Biomed (Res Rev News). 2025. doi:10.2478/abm-2025-0034 · PMC12919385 · CC BY 4.0 · https://pmc.ncbi.nlm.nih.gov/articles/PMC12919385/',
+    'สรุปเป็นภาษาไทยจากตารางคำแนะนำและเนื้อหาของบทความ (ไม่มีเลขหน้า) ระดับคำแนะนำ (Class/Level) ตามต้นฉบับ',
+    'หมายเหตุความไม่ตรงกันในต้นฉบับ: บทคัดย่อระบุความดันเริ่มต้นต่ำ 140–149/90–99 mmHg แต่ตารางที่ 12 ระบุ 140–149/90–95 mmHg — การ์ดนี้ใช้ตามตารางที่ 12 ควรตรวจกับฉบับเต็ม',
+    'ยังไม่ครอบคลุม: ความดันสูงในเบาหวาน/โรคหลอดเลือดหัวใจ/โรคหลอดเลือดสมอง/ผู้สูงอายุ (ในแนวทางฉบับเต็ม) และยาฉุกเฉินที่ไม่ใช่ในหญิงตั้งครรภ์',
+  ],
+  review: { status: 'pending', reviewer: '', reviewedAt: '', nextDue: '' },
+  blocks,
+  sections: [
+    { title: 'เป้าหมาย', blocks: [0] }, { title: 'การเลือกยา', blocks: [1] }, { title: 'ข้อห้าม/ระวัง', blocks: [2] }, { title: 'ดื้อยา', blocks: [3] },
+    { title: 'CKD', blocks: [4] }, { title: 'หัวใจล้มเหลว', blocks: [5] }, { title: 'ตั้งครรภ์', blocks: [6, 7] },
+  ],
+};
