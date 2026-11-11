@@ -79,6 +79,23 @@ describe('มุมมองตามตัวยา', () => {
   });
 });
 
+describe('แนวทางที่ค้นเพิ่ม (ความดันโลหิตสูง, ปอดอักเสบชุมชน)', () => {
+  for (const id of ['htn', 'cap']) {
+    it(id + ': หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว มีแหล่งอ้างอิงลิงก์ และสถานะยังไม่ทบทวน', () => {
+      const g = GUIDELINES.find((x) => x.id === id)!;
+      expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+      expect(g.cites.join(' ')).toMatch(/https:\/\//); expect(g.review.status).toBe('pending');
+      g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    });
+  }
+  it('ตัวเลขสำคัญตรงกับต้นฉบับที่อ่านมา (ขนาดยา CAP, ตารางความดัน)', () => {
+    const cap = GUIDELINES.find((x) => x.id === 'cap')!; const htn = GUIDELINES.find((x) => x.id === 'htn')!;
+    const capText = cap.blocks.flatMap((b) => blockLines(b)).join('\n'); const htnText = htn.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['Amoxicillin 1,000 mg ทุก 8 ชม.', 'Doxycycline 100 mg ทุก 12 ชม.', 'Levofloxacin 750 mg', 'Moxifloxacin 400 mg', 'Vancomycin 15 mg/kg', 'Piperacillin/tazobactam 4.5 g IV ทุก 6 ชม.', 'Meropenem 1 g IV ทุก 8 ชม.', 'เกณฑ์รอง ≥ 3 ข้อ']) expect(capText).toContain(t);
+    for (const t of ['120–130/70–79', '130–139/70–79', 'Nifedipine', '180 mg/วัน', '81 mg/วัน', 'ACEI + ARB', 'creatinine เพิ่มขึ้น > 30%', 'eGFR > 45']) expect(htnText).toContain(t);
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
