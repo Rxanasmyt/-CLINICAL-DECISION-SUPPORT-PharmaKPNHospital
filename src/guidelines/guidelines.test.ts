@@ -114,6 +114,16 @@ describe('ความดันสูง: ข้อความจากฉบ�
   });
 });
 
+describe('เบาหวาน (แนวทางเวชปฏิบัติ 2566 บทที่ 7)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว มีสถานะรอทบทวน และตัวเลขสำคัญตรงตารางต้นฉบับ', () => {
+    const dm = GUIDELINES.find((x) => x.id === 'dm')!;
+    expect(dm.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(dm.blocks.map((_, i) => i));
+    expect(dm.review.status).toBe('pending'); dm.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = dm.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['ลดขนาดเมื่อ eGFR 30–45', 'ไม่ควรให้เมื่อ eGFR < 30', 'eGFR < 20–30', 'eGFR < 15', 'NPH 0.1–0.2 ยูนิต/กก./วัน', 'ปรับขนาดขึ้น 2–4 ยูนิต ทุก 3–7 วัน', '0.4–0.6 ยูนิต/กก./วัน', 'Liraglutide (Victoza): half-life 13 ชม.', 'Dulaglutide (Trulicity)', 'Insulin degludec (Tresiba): เริ่ม 6 ชม.']) expect(text).toContain(t);
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
