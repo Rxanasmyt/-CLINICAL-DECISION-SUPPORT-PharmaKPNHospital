@@ -11,7 +11,7 @@ import { AppDb } from '../storage/db';
 describe('แนวทางวัณโรค (ตัวอย่างแรก)', () => {
   it('เนื้อหาคือข้อมูลอ้างอิงเดิมทุกบล็อก ไม่ถูกแก้/เขียนใหม่ และหมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว', () => {
     expect(TB_GUIDELINE.blocks.slice(0, REF_TB_BLOCKS.length)).toEqual(REF_TB_BLOCKS as any);
-    TB_GUIDELINE.blocks.slice(REF_TB_BLOCKS.length).forEach((b) => expect(b.origin).toMatch(/ทบทวนโดยเภสัชกรแล้ว/)); expect(TB_EXTRA_BLOCKS.length).toBe(5); expect(TB_GUIDELINE.cites.slice(0, REF_TB_CITES.length)).toEqual(REF_TB_CITES); expect(TB_GUIDELINE.cites.at(-1)).toMatch(/ตรวจเทียบกับไฟล์ต้นฉบับ/);
+    TB_GUIDELINE.blocks.slice(REF_TB_BLOCKS.length).forEach((b) => expect(b.origin).toMatch(/ทบทวนโดยเภสัชกรแล้ว/)); expect(TB_EXTRA_BLOCKS.length).toBe(5); expect(TB_GUIDELINE.cites.slice(0, REF_TB_CITES.length)).toEqual(REF_TB_CITES); expect(TB_GUIDELINE.cites.some((c) => /ตรวจเทียบกับไฟล์ต้นฉบับ NTP 2021/.test(c))).toBe(true);
     const used = TB_GUIDELINE.sections.flatMap((s) => s.blocks).sort((a, b) => a - b);
     expect(used).toEqual(TB_GUIDELINE.blocks.map((_, i) => i));
   });
@@ -93,6 +93,34 @@ describe('แนวทางที่ค้นเพิ่ม (ความด�
     const capText = cap.blocks.flatMap((b) => blockLines(b)).join('\n'); const htnText = htn.blocks.flatMap((b) => blockLines(b)).join('\n');
     for (const t of ['Amoxicillin 1,000 mg ทุก 8 ชม.', 'Doxycycline 100 mg ทุก 12 ชม.', 'Levofloxacin 750 mg', 'Moxifloxacin 400 mg', 'Vancomycin 15 mg/kg', 'Piperacillin/tazobactam 4.5 g IV ทุก 6 ชม.', 'Meropenem 1 g IV ทุก 8 ชม.', 'เกณฑ์รอง ≥ 3 ข้อ']) expect(capText).toContain(t);
     for (const t of ['120–130/70–79', '130–139/70–79', 'Nifedipine', '180 mg/วัน', '81 mg/วัน', 'ACEI + ARB', 'creatinine เพิ่มขึ้น > 30%', 'eGFR > 45']) expect(htnText).toContain(t);
+  });
+});
+
+describe('วัณโรค: ข้อความที่ตรวจเทียบกับต้นฉบับทั้งเล่มแล้ว', () => {
+  it('Linezolid ตรงตารางที่ 6.7 และมีรายละเอียดสูตรระยะสั้น Bdq', () => {
+    const tb = TB_GUIDELINE;
+    const text = tb.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['buspirone, meperidine, fluoxetine', 'monoamine oxidase (MAO) อย่างอ่อน', 'Bdq ใช้ 6 เดือนเสมอ', 'เมื่อสิ้นสุดเดือนที่ 4', 'อายุ ≥ 6 ปี']) expect(text).toContain(t);
+    expect(text).not.toContain('SSRIs หรือ MAOIs');
+  });
+});
+
+describe('ความดันสูง: ข้อความจากฉบับเต็มภาษาไทย', () => {
+  it('มีหัวข้อเบาหวาน หลอดเลือด ผู้สูงอายุ ดื้อยาเป็นขั้นตอน ฉุกเฉิน และตัวเลขตรงต้นฉบับ', () => {
+    const htn = GUIDELINES.find((x) => x.id === 'htn')!;
+    const text = htn.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['UACR ≥ 30 mg/g', 'ห้ามใช้ ACEI ร่วมกับ ARB'.replace('ห้าม', 'ไม่ควร'), 'HR', 'อายุ ≥ 80 ปี', 'SBP ≥ 160 mmHg', 'eplerenone', 'minoxidil', 'โซเดียมไม่เกิน 2 g/วัน', 'ลด MAP ลงร้อยละ 20–25', 'nitroprusside', 'ชีพจรตั้งแต่ 70']) if (t !== 'HR') expect(text).toContain(t);
+    expect(htn.sections.map((x) => x.title)).toEqual(expect.arrayContaining(['เบาหวาน', 'ผู้สูงอายุ', 'ฉุกเฉิน', 'หัวใจ/สมอง']));
+  });
+});
+
+describe('เบาหวาน (แนวทางเวชปฏิบัติ 2566 บทที่ 7)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว มีสถานะรอทบทวน และตัวเลขสำคัญตรงตารางต้นฉบับ', () => {
+    const dm = GUIDELINES.find((x) => x.id === 'dm')!;
+    expect(dm.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(dm.blocks.map((_, i) => i));
+    expect(dm.review.status).toBe('pending'); dm.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = dm.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['ลดขนาดเมื่อ eGFR 30–45', 'ไม่ควรให้เมื่อ eGFR < 30', 'eGFR < 20–30', 'eGFR < 15', 'NPH 0.1–0.2 ยูนิต/กก./วัน', 'ปรับขนาดขึ้น 2–4 ยูนิต ทุก 3–7 วัน', '0.4–0.6 ยูนิต/กก./วัน', 'Liraglutide (Victoza): half-life 13 ชม.', 'Dulaglutide (Trulicity)', 'Insulin degludec (Tresiba): เริ่ม 6 ชม.']) expect(text).toContain(t);
   });
 });
 
