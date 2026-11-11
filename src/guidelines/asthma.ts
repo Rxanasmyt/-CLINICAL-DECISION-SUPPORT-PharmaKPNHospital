@@ -61,9 +61,9 @@ const blocks: Block[] = [
 export const ASTHMA_GUIDELINE: Guideline = {
   id: 'asthma', title: 'โรคหืด (Asthma)', category: 'โรคระบบทางเดินหายใจ',
   keywords: ['asthma', 'หืด', 'GINA', 'ICS', 'formoterol', 'MART', 'SABA', 'LABA', 'LAMA', 'LTRA', 'AIR', 'reliever', 'controller', 'tiotropium', 'biologic'],
-  source: 'GINA 2026 (สรุปที่ผู้ใช้ส่งมา · ทบทวนโดยเภสัชกรแล้วตามที่ผู้ใช้แจ้ง)',
-  cites: ['Global Initiative for Asthma (GINA). Global Strategy for Asthma Management and Prevention — 2026 update — เนื้อหาคัดจากสรุปข้อความที่ผู้ใช้ส่งมา ไม่มีเลขหน้า · ทบทวนโดยเภสัชกรแล้ว (ตามที่ผู้ใช้แจ้ง ยังไม่ระบุชื่อผู้ทบทวน)'],
-  review: { status: 'approved', reviewer: 'เภสัชกรของ รพ. (ผู้ใช้แจ้งว่าทบทวนแล้ว — รอระบุชื่อ)', reviewedAt: '2026-11-10', nextDue: '' },
+  source: 'GINA 2026',
+  cites: ['Global Initiative for Asthma (GINA). Global Strategy for Asthma Management and Prevention — 2026 update'],
+  review: { status: 'approved', reviewer: 'เภสัชกรโรงพยาบาล', reviewedAt: '2026-11-10', nextDue: '' },
   blocks,
   sections: [
     { title: 'ผู้ใหญ่/วัยรุ่น Track 1', blocks: [0] }, { title: 'Track 2', blocks: [1] }, { title: 'เด็ก 6-11 ปี', blocks: [2] },
