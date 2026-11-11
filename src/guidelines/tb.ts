@@ -5,7 +5,7 @@ import type { Block, Guideline } from './types';
 import { TB_EXTRA_BLOCKS } from './tb-extra';
 
 export const TB_GUIDELINE: Guideline = {
-  id: 'tb', title: 'วัณโรค (Tuberculosis)', category: 'โรคติดเชื้อ',
+  id: 'tb', title: 'วัณโรค (Tuberculosis)', category: 'โรคติดเชื้อ', accent: '#0F9D8A', icon: '🦠',
   keywords: ['วัณโรค', 'tuberculosis', 'TB', '2HRZE', '4HR', '3HP', 'LTBI', 'isoniazid', 'rifampicin', 'pyrazinamide', 'ethambutol', 'rifapentine'],
   source: 'แนวทางการควบคุมวัณโรคประเทศไทย พ.ศ. 2564 · WHO consolidated guidelines on tuberculosis Module 4 (2022)',
   cites: REF_TB_CITES as string[],

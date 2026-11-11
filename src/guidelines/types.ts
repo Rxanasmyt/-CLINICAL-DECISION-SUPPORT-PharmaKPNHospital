@@ -11,6 +11,8 @@ export interface Review { status: 'pending' | 'approved'; reviewer: string; revi
 
 export interface Guideline {
   id: string; title: string; category: string; keywords: string[];
+  /** สีประจำการ์ดและไอคอน (หน้าตาเท่านั้น ไม่ใช่เนื้อหาคลินิก) */
+  accent?: string; icon?: string;
   /** แหล่งอ้างอิงหลัก (บรรทัดเดียว) */
   source: string; cites: string[];
   review: Review;

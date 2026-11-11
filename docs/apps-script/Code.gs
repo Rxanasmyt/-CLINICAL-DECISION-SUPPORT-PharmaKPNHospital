@@ -16,7 +16,7 @@
  * แต่ละแท็บ = หนึ่งชุดข้อมูล แถวละหนึ่งรายการ คอลัมน์ที่อ่านได้อยู่ซ้าย · คอลัมน์เทคนิค (ซ่อน) อยู่ขวาสุด
  */
 // เลขเวอร์ชันของโค้ดนี้ — แอปเทียบกับเลขที่ต้องการ (src/storage/scriptVersion.ts) แล้วเตือนเมื่อโค้ดในชีตเก่ากว่า เพิ่มเลขทุกครั้งที่แก้ไฟล์นี้
-var SCRIPT_VERSION = 3;
+var SCRIPT_VERSION = 4;
 var H = { id: 'รหัสรายการ', at: 'แก้ไขล่าสุด', del: 'ลบแล้ว?', ms: '_เวลา(ms) ห้ามแก้', pay: '_ข้อมูลเต็ม(JSON) ห้ามแก้' };
 var TZ = 'Asia/Bangkok';
 var MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
@@ -176,8 +176,10 @@ var WIDE = ['อาการที่พบ', 'สาเหตุที่รา
   'Trigger ที่พบ', 'เกณฑ์ Serious ที่เข้า', 'สาเหตุอื่นที่เป็นไปได้', 'ผลแลปที่บันทึก', 'ขนาดยา/วิธีให้ (ยาที่สงสัย)', 'ประวัติแพ้ยาเดิม', 'ชื่อโครงการ', 'หมวดสาเหตุ RCA', 'ยาที่สงสัย', 'กลุ่มยา', 'ชนิดปฏิกิริยา'];
 var NARROW = ['ไตรมาส', 'คะแนน Naranjo', 'เคสรุนแรง', 'แพ้ยาซ้ำ', 'Serious ADR (ร้ายแรง)', 'ประเภท ADR', 'อายุ (ปี)', 'เพศ', 'มาตรฐานข้อ', 'ระดับ', 'ข้อย่อย',
   'ปีงบประมาณ (พ.ศ.)', 'จำนวน Trigger ที่พบ', 'ความเข้าใจ (เต็ม 5)', 'ความพึงพอใจ (เต็ม 5)', 'ลบแล้ว?'];
-var AMBER = ['#FBF1DE', '#7A5200'], GREEN = ['#EAF4EE', '#1E6B47'], RED = ['#FBEAE8', '#7A2A24'];
+var AMBER = ['#FFF1D6', '#8A5A00'], GREEN = ['#DDF3E7', '#17613F'], RED = ['#FFE1DD', '#9B2C22'], BLUE = ['#DDEBFF', '#1D4E9E'], VIOLET = ['#EBE3FF', '#5B34B5'], GRAY = ['#EEF1F0', '#55635F'];
 var STATUS = [
+  ['ระดับ Naranjo', 'Definite (ใช่แน่นอน)', RED], ['ระดับ Naranjo', 'Probable (น่าจะใช่)', AMBER], ['ระดับ Naranjo', 'Possible (อาจจะใช่)', BLUE], ['ระดับ Naranjo', 'Doubtful (น่าสงสัย)', GRAY],
+  ['ประเภท ADR', 'Type B', VIOLET], ['ประเภท ADR', 'Type A', BLUE], ['ป้องกันได้หรือไม่ (Schumock)', 'ป้องกันไม่ได้', GRAY],
   ['รายงาน HPVC', 'รอส่ง', AMBER], ['รายงาน HPVC', 'ส่งแล้ว', GREEN],
   ['เคสรุนแรง', 'ใช่', RED], ['แพ้ยาซ้ำ', 'ใช่', RED], ['Serious ADR (ร้ายแรง)', 'ใช่', RED],
   ['ป้องกันได้หรือไม่ (Schumock)', 'ป้องกันได้', AMBER],
@@ -212,7 +214,7 @@ function style_(sh) {
     var iId = head.indexOf(H.id), iDel = head.indexOf(H.del), iMs = head.indexOf(H.ms), iPay = head.indexOf(H.pay);
     var rows = Math.max(2, sh.getMaxRows());
     var hr = sh.getRange(1, 1, 1, n);
-    hr.setBackground('#0F5D57').setFontColor('#FFFFFF').setFontWeight('bold').setWrap(true).setVerticalAlignment('middle').setHorizontalAlignment('center');
+    hr.setBackground('#0B4F4A').setFontColor('#FFFFFF').setFontWeight('bold').setWrap(true).setVerticalAlignment('middle').setHorizontalAlignment('center');
     sh.setRowHeight(1, 52);
     sh.setFrozenRows(1); sh.setFrozenColumns(2);
     sh.getRange(1, iId + 1, rows, 1).setNumberFormat('@');                       // รหัสเป็นข้อความ (กันถูกแปลงเป็นตัวเลข/วันที่)
@@ -233,7 +235,9 @@ function style_(sh) {
       var i = head.indexOf(st[0]); if (i < 0) return;
       rules.push(SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(st[1]).setBackground(st[2][0]).setFontColor(st[2][1]).setBold(true).setRanges([sh.getRange(2, i + 1, rows - 1, 1)]).build());
     });
+    rules.push(SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=ISEVEN(ROW())').setBackground('#F6FAF9').setRanges([body]).build());   // แถวสลับสี (ลำดับท้ายสุด สีสถานะเด่นกว่า)
     sh.setConditionalFormatRules(rules);
+    try { sh.setTabColor('#0F9D8A'); } catch (e2) {}
     if (!sh.getFilter()) sh.getRange(1, 1, rows, iDel + 1).createFilter();
     if (sh.getProtections(SpreadsheetApp.ProtectionType.SHEET).length === 0) sh.protect().setWarningOnly(true).setDescription('ข้อมูลมาจากแอป — แก้ในแอปเท่านั้น');
   } catch (e) { /* การจัดรูปแบบล้มเหลวไม่กระทบข้อมูล */ }
@@ -268,12 +272,12 @@ function guide_() {
     ['แท็บ', 'มาจากหน้าไหนของแอป', 'เก็บอะไร', 'ใช้เป็นหลักฐานมาตรฐานข้อ']
   ];
   Object.keys(TABS).forEach(function (k) { var t = TABS[k]; rows.push([t.tab, t.from, t.what, t.row]); });
-  rows.push(['']); rows.push(['แท็บ "ภาพรวม" สรุปตัวเลขสำคัญและแนวโน้มรายไตรมาสอัตโนมัติจากข้อมูลในแท็บต่าง ๆ']);
+  rows.push(['']); rows.push(['แท็บ "ภาพรวม" = Dashboard: การ์ดตัวชี้วัด (แดง = เฝ้าระวัง, เหลือง = งานค้าง, เขียว = ไม่มีค้าง) พร้อมกราฟแนวโน้มรายไตรมาสและสัดส่วน คำนวณอัตโนมัติจากแท็บต่าง ๆ']);
   sh.getRange(1, 1, rows.length, 4).setValues(rows.map(function (r) { while (r.length < 4) r.push(''); return r; }));
   try {
     sh.getRange(1, 1).setFontSize(16).setFontWeight('bold').setFontColor('#0E3F3B');
     sh.getRange(4, 1).setFontWeight('bold');
-    sh.getRange(9, 1, 1, 4).setBackground('#0F5D57').setFontColor('#FFFFFF').setFontWeight('bold');
+    sh.getRange(9, 1, 1, 4).setBackground('#0B4F4A').setFontColor('#FFFFFF').setFontWeight('bold');
     sh.setColumnWidth(1, 230); sh.setColumnWidth(2, 300); sh.setColumnWidth(3, 480); sh.setColumnWidth(4, 260);
     sh.getRange(1, 1, rows.length, 4).setWrap(true).setVerticalAlignment('top');
     sh.setHiddenGridlines(true);
@@ -304,47 +308,101 @@ function refreshOverview_() {
     return '=COUNTIFS(' + parts.join(',') + ')';
   };
   var fyBE = (function () { var n = new Date(); return n.getFullYear() + 543 + (n.getMonth() >= 9 ? 1 : 0); })();
+  // [ชื่อ, สูตร, คำอธิบาย, โทนสี, เงื่อนไขเตือน: 'zero' = ควรเป็น 0 · 'pending' = ค้างอยู่ควรลดเป็น 0 · '' = ข้อมูลทั่วไป]
   var metrics = [
-    ['เคส ADR ทั้งหมดในทะเบียน', cnt(adr, []), 'จำนวนเคสที่กด "บันทึกเคส" (ไม่รวมที่ลบ)'],
-    ['เคสรุนแรง', cnt(adr, [['เคสรุนแรง', 'ใช่']]), 'มีอาการระดับ severe หรือเข้าเกณฑ์ SJS/TEN, DRESS, anaphylaxis'],
-    ['แพ้ยาซ้ำ (เป้าหมาย = 0)', cnt(adr, [['แพ้ยาซ้ำ', 'ใช่']]), 'ผู้ป่วยแพ้ยาเดิมซ้ำ — ควรเป็น 0'],
-    ['ป้องกันได้ (Schumock & Thornton)', cnt(adr, [['ป้องกันได้หรือไม่ (Schumock)', 'ป้องกันได้']]), 'เหตุการณ์ที่ป้องกันได้ — ต้องทำ RCA'],
-    ['รอส่งรายงาน HPVC', cnt(adr, [['รายงาน HPVC', 'รอส่ง']]), 'งานค้างที่ต้องติดตาม'],
-    ['RCA ยังไม่ครบ', cnt(adr, [['RCA (วิเคราะห์สาเหตุราก)', 'ยังไม่ครบ']]), 'เคสที่ป้องกันได้แต่ยังไม่ได้ระบุสาเหตุ/แผนป้องกัน'],
-    ['โครงการ CQI / R2R', cnt(cqi, []), 'จำนวนโครงการพัฒนาคุณภาพและวิจัย'],
-    ['Intensive monitoring ที่ยังติดตามอยู่', cnt(itn, [['สถานะ', 'ติดตามอยู่']]), 'ผู้ป่วยที่ยังอยู่ในการเฝ้าติดตาม'],
-    ['ครั้งที่ให้ข้อมูลด้านยา', cnt(inf, []), 'จำนวนครั้งที่บันทึกการให้ข้อมูล'],
-    ['การนำเสนอ PTC ปีงบประมาณ ' + fyBE, cnt(ptc, [['ปีงบประมาณ (พ.ศ.)', String(fyBE)]]), 'เป้าหมาย 3–4 ครั้ง/ปี (มาตรฐานข้อ 9: 9-3.6)']
+    ['เคส ADR ทั้งหมด', cnt(adr, []), 'เคสที่กด "บันทึกเคส" (ไม่รวมที่ลบ)', 'teal', ''],
+    ['เคสรุนแรง', cnt(adr, [['เคสรุนแรง', 'ใช่']]), 'severe หรือเข้าเกณฑ์ SJS/TEN, DRESS, anaphylaxis', 'red', ''],
+    ['แพ้ยาซ้ำ', cnt(adr, [['แพ้ยาซ้ำ', 'ใช่']]), 'เป้าหมาย = 0', 'red', 'zero'],
+    ['ป้องกันได้', cnt(adr, [['ป้องกันได้หรือไม่ (Schumock)', 'ป้องกันได้']]), 'Schumock & Thornton · ต้องทำ RCA', 'amber', ''],
+    ['รอส่งรายงาน HPVC', cnt(adr, [['รายงาน HPVC', 'รอส่ง']]), 'งานค้างที่ต้องติดตาม', 'amber', 'pending'],
+    ['RCA ยังไม่ครบ', cnt(adr, [['RCA (วิเคราะห์สาเหตุราก)', 'ยังไม่ครบ']]), 'เคสป้องกันได้ที่ยังไม่ระบุสาเหตุ/แผน', 'amber', 'pending'],
+    ['โครงการ CQI / R2R', cnt(cqi, []), 'พัฒนาคุณภาพและวิจัย', 'blue', ''],
+    ['Intensive ที่ยังติดตามอยู่', cnt(itn, [['สถานะ', 'ติดตามอยู่']]), 'ผู้ป่วยที่ยังอยู่ในการเฝ้าติดตาม', 'blue', ''],
+    ['ครั้งที่ให้ข้อมูลด้านยา', cnt(inf, []), 'จำนวนครั้งที่บันทึก', 'violet', ''],
+    ['PTC ปีงบประมาณ ' + fyBE, cnt(ptc, [['ปีงบประมาณ (พ.ศ.)', String(fyBE)]]), 'เป้าหมาย 3–4 ครั้ง/ปี (ข้อ 9-3.6)', 'violet', '']
   ];
+  var TONE = { teal: ['#DFF5F1', '#0B4F4A'], red: ['#FFE9E6', '#9B2C22'], amber: ['#FFF4DC', '#8A5A00'], blue: ['#E3EEFF', '#1D4E9E'], violet: ['#EEE8FF', '#5B34B5'] };
   sh.clear();
+  try { sh.getCharts().forEach(function (ch) { sh.removeChart(ch); }); } catch (e) {}
   var qs = qLabels_(8);
   var qrows = qs.map(function (q) {
     return [q, cnt(adr, [['ไตรมาส', q]]), cnt(adr, [['ไตรมาส', q], ['ป้องกันได้หรือไม่ (Schumock)', 'ป้องกันได้']]),
       cnt(adr, [['ไตรมาส', q], ['เคสรุนแรง', 'ใช่']]), cnt(adr, [['ไตรมาส', q], ['แพ้ยาซ้ำ', 'ใช่']]), cnt(adr, [['ไตรมาส', q], ['รายงาน HPVC', 'ส่งแล้ว']])];
   });
   sh.getRange(1, 1).setValue('ภาพรวมการเฝ้าระวังอาการไม่พึงประสงค์จากยา');
-  sh.getRange(2, 1).setValue('คำนวณอัตโนมัติจากแท็บข้อมูล · ปรับปรุงล่าสุด ' + thaiStamp_(Date.now()));
-  sh.getRange(4, 1, 1, 3).setValues([['ตัวชี้วัด', 'ค่า', 'ความหมาย']]);
-  sh.getRange(5, 1, metrics.length, 3).setValues(metrics.map(function (m) { return [m[0], '', m[2]]; }));
-  metrics.forEach(function (m, i) { sh.getRange(5 + i, 2).setFormula(m[1]); });
-  var qr = 5 + metrics.length + 2;
+  sh.getRange(2, 1).setValue('Dashboard · คำนวณอัตโนมัติจากแท็บข้อมูล · ปรับปรุงล่าสุด ' + thaiStamp_(Date.now()));
+  // การ์ดตัวชี้วัด: 5 ใบต่อแถว ใบละ 2 คอลัมน์ (A-J) · แต่ละใบ 3 แถว: ชื่อ / ตัวเลข / คำอธิบาย
+  var CARD_ROW = [4, 8];
+  metrics.forEach(function (m, i) {
+    var r0 = CARD_ROW[Math.floor(i / 5)], c0 = 1 + (i % 5) * 2;
+    sh.getRange(r0, c0).setValue(m[0]);
+    sh.getRange(r0 + 1, c0).setFormula(m[1]);
+    sh.getRange(r0 + 2, c0).setValue(m[2]);
+  });
+  // ตารางแนวโน้มรายไตรมาส
+  var qr = 14;
   sh.getRange(qr - 1, 1).setValue('แนวโน้มรายไตรมาส (ไตรมาสปฏิทิน)');
   sh.getRange(qr, 1, 1, 6).setValues([['ไตรมาส', 'เคสทั้งหมด', 'ป้องกันได้', 'เคสรุนแรง', 'แพ้ยาซ้ำ', 'ส่ง HPVC แล้ว']]);
   qrows.forEach(function (r, i) { sh.getRange(qr + 1 + i, 1).setValue(r[0]); for (var c = 1; c < 6; c++) sh.getRange(qr + 1 + i, c + 1).setFormula(r[c]); });
+  var last = qr + qrows.length;
+  // สัดส่วนสำหรับแผนภูมิวงกลม (ตารางเล็กด้านขวา คอลัมน์ H-I)
+  var pr = qr;
+  var dist = [
+    ['สัดส่วนสถานะ HPVC', 'จำนวน'],
+    ['ส่งแล้ว', cnt(adr, [['รายงาน HPVC', 'ส่งแล้ว']])], ['รอส่ง', cnt(adr, [['รายงาน HPVC', 'รอส่ง']])],
+    ['ระดับ Naranjo', 'จำนวน'],
+    ['Definite', cnt(adr, [['ระดับ Naranjo', 'Definite*']])], ['Probable', cnt(adr, [['ระดับ Naranjo', 'Probable*']])],
+    ['Possible', cnt(adr, [['ระดับ Naranjo', 'Possible*']])], ['Doubtful', cnt(adr, [['ระดับ Naranjo', 'Doubtful*']])]
+  ];
+  dist.forEach(function (d, i) {
+    sh.getRange(pr + i, 8).setValue(d[0]);
+    if (i === 0 || i === 3) sh.getRange(pr + i, 9).setValue(d[1]); else sh.getRange(pr + i, 9).setFormula(d[1]);
+  });
   try {
-    sh.getRange(1, 1).setFontSize(16).setFontWeight('bold').setFontColor('#0E3F3B');
-    sh.getRange(2, 1).setFontColor('#6B7B77');
-    [sh.getRange(4, 1, 1, 3), sh.getRange(qr, 1, 1, 6)].forEach(function (r) { r.setBackground('#0F5D57').setFontColor('#FFFFFF').setFontWeight('bold'); });
-    sh.getRange(qr - 1, 1).setFontWeight('bold');
-    sh.getRange(5, 2, metrics.length, 1).setFontWeight('bold').setHorizontalAlignment('center').setFontSize(13);
-    sh.getRange(qr + 1, 2, qrows.length, 5).setHorizontalAlignment('center');
-    sh.setColumnWidth(1, 280); sh.setColumnWidth(2, 110); sh.setColumnWidth(3, 380);
-    for (var c = 4; c <= 6; c++) sh.setColumnWidth(c, 110);
-    sh.setHiddenGridlines(true);
-    sh.getCharts().forEach(function (ch) { sh.removeChart(ch); });
-    var chart = sh.newChart().setChartType(Charts.ChartType.COLUMN).addRange(sh.getRange(qr, 1, qrows.length + 1, 2))
-      .setPosition(qr + qrows.length + 3, 1, 0, 0).setOption('title', 'จำนวนเคส ADR รายไตรมาส').setOption('legend', { position: 'none' }).setOption('colors', ['#0F5D57']).build();
-    sh.insertChart(chart);
+    sh.setHiddenGridlines(true); sh.setTabColor('#0F9D8A');
+    sh.getRange(1, 1, 1, 10).merge().setBackground('#0B4F4A').setFontColor('#FFFFFF').setFontSize(18).setFontWeight('bold').setVerticalAlignment('middle');
+    sh.setRowHeight(1, 46);
+    sh.getRange(2, 1, 1, 10).merge().setFontColor('#6B7B77').setFontSize(10);
+    for (var c = 1; c <= 10; c++) sh.setColumnWidth(c, 118);
+    sh.setColumnWidth(8, 150);
+    metrics.forEach(function (m, i) {
+      var r0 = CARD_ROW[Math.floor(i / 5)], c0 = 1 + (i % 5) * 2, tn = TONE[m[3]];
+      var card = sh.getRange(r0, c0, 3, 2);
+      card.setBackground(tn[0]).setBorder(true, true, true, true, false, false, tn[1], SpreadsheetApp.BorderStyle.SOLID);
+      for (var k = 0; k < 3; k++) sh.getRange(r0 + k, c0, 1, 2).merge();
+      sh.getRange(r0, c0).setFontWeight('bold').setFontSize(10).setFontColor(tn[1]).setHorizontalAlignment('center').setWrap(true);
+      sh.getRange(r0 + 1, c0).setFontWeight('bold').setFontSize(30).setFontColor(tn[1]).setHorizontalAlignment('center').setVerticalAlignment('middle');
+      sh.getRange(r0 + 2, c0).setFontSize(8).setFontColor('#55635F').setHorizontalAlignment('center').setWrap(true);
+      sh.setRowHeight(r0, 30); sh.setRowHeight(r0 + 1, 54); sh.setRowHeight(r0 + 2, 36);
+    });
+    sh.setRowHeight(7, 12); sh.setRowHeight(11, 14);
+    // สีเตือนบนตัวเลข: ควรเป็น 0 → แดงเมื่อมี เขียวเมื่อ 0 · ค้างอยู่ → เหลืองเข้ม/เขียว
+    var rules = [];
+    metrics.forEach(function (m, i) {
+      if (!m[4]) return;
+      var r0 = CARD_ROW[Math.floor(i / 5)], c0 = 1 + (i % 5) * 2, cell = sh.getRange(r0 + 1, c0, 1, 2), a1 = '$' + letter_(c0 - 1) + '$' + (r0 + 1);
+      rules.push(SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=' + a1 + '=0').setBackground('#DDF3E7').setFontColor('#17613F').setRanges([cell]).build());
+      if (m[4] === 'zero') rules.push(SpreadsheetApp.newConditionalFormatRule().whenFormulaSatisfied('=' + a1 + '>0').setBackground('#FF6B5E').setFontColor('#FFFFFF').setRanges([cell]).build());
+    });
+    sh.setConditionalFormatRules(rules);
+    // ตาราง
+    sh.getRange(qr - 1, 1, 1, 6).merge().setFontWeight('bold').setFontSize(12).setFontColor('#0B4F4A');
+    [sh.getRange(qr, 1, 1, 6), sh.getRange(pr, 8, 1, 2), sh.getRange(pr + 3, 8, 1, 2)].forEach(function (r) { r.setBackground('#0B4F4A').setFontColor('#FFFFFF').setFontWeight('bold').setHorizontalAlignment('center'); });
+    sh.getRange(qr + 1, 1, qrows.length, 6).setHorizontalAlignment('center').setBorder(false, false, true, false, false, true, '#E3EAE8', SpreadsheetApp.BorderStyle.SOLID);
+    sh.getRange(pr + 1, 8, 2, 2).setHorizontalAlignment('center'); sh.getRange(pr + 4, 8, 4, 2).setHorizontalAlignment('center');
+    // แผนภูมิ
+    var col = sh.newChart().setChartType(Charts.ChartType.COLUMN).addRange(sh.getRange(qr, 1, qrows.length + 1, 2))
+      .setPosition(last + 3, 1, 0, 0).setOption('title', 'จำนวนเคส ADR รายไตรมาส').setOption('legend', { position: 'none' }).setOption('colors', ['#0F9D8A']).setOption('width', 560).setOption('height', 300).build();
+    sh.insertChart(col);
+    var line = sh.newChart().setChartType(Charts.ChartType.LINE).addRange(sh.getRange(qr, 1, qrows.length + 1, 1)).addRange(sh.getRange(qr, 3, qrows.length + 1, 3))
+      .setPosition(last + 3, 6, 0, 0).setOption('title', 'ป้องกันได้ · รุนแรง · แพ้ยาซ้ำ รายไตรมาส').setOption('colors', ['#F4A100', '#E5483A', '#7A4FD6']).setOption('legend', { position: 'bottom' }).setOption('width', 560).setOption('height', 300).build();
+    sh.insertChart(line);
+    var pie1 = sh.newChart().setChartType(Charts.ChartType.PIE).addRange(sh.getRange(pr, 8, 3, 2))
+      .setPosition(last + 20, 1, 0, 0).setOption('title', 'สถานะรายงาน HPVC').setOption('colors', ['#1FA971', '#F4A100']).setOption('pieHole', 0.5).setOption('width', 560).setOption('height', 280).build();
+    sh.insertChart(pie1);
+    var pie2 = sh.newChart().setChartType(Charts.ChartType.PIE).addRange(sh.getRange(pr + 3, 8, 5, 2))
+      .setPosition(last + 20, 6, 0, 0).setOption('title', 'ความน่าจะเป็นตาม Naranjo').setOption('colors', ['#E5483A', '#F4A100', '#3B82F6', '#9AA5A2']).setOption('pieHole', 0.5).setOption('width', 560).setOption('height', 280).build();
+    sh.insertChart(pie2);
   } catch (e) {}
 }
 
