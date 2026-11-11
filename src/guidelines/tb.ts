@@ -8,10 +8,24 @@ export const TB_GUIDELINE: Guideline = {
   id: 'tb', title: 'วัณโรค (Tuberculosis)', category: 'โรคติดเชื้อ', accent: '#0F9D8A', icon: '🦠',
   keywords: ['วัณโรค', 'tuberculosis', 'TB', '2HRZE', '4HR', '3HP', 'LTBI', 'isoniazid', 'rifampicin', 'pyrazinamide', 'ethambutol', 'rifapentine'],
   source: 'แนวทางการควบคุมวัณโรคประเทศไทย พ.ศ. 2564 · WHO consolidated guidelines on tuberculosis Module 4 (2022)',
-  cites: REF_TB_CITES as string[],
+  cites: [
+    ...(REF_TB_CITES as string[]),
+    // ตรวจเทียบกับไฟล์ PDF ต้นฉบับ (เฉพาะช่วงที่ดึงข้อความได้ หน้า 59-65) — ส่วนอื่นของเล่มยังไม่ได้เทียบ
+    'ตรวจเทียบกับไฟล์ต้นฉบับ NTP 2021 (กองวัณโรค, ISBN 978-616-11-4749-5) แล้วในหัวข้อ 5.2.2 สูตรยา 2HRZE/4HR, ตารางที่ 5.1 ขนาดยาผู้ใหญ่, ตารางที่ 5.2 อาการไม่พึงประสงค์และการจัดการ, แนวทางตรวจตับ, การ re-challenge, การให้ ethambutol (หน้า 59-64) และ 5.2.4 การรักษาหลังขาดยา (หน้า 64-65) — ขนาดยาและเกณฑ์ AST/ALT/bilirubin ตรงกับข้อมูลในแอป',
+  ],
   // ตัวอย่างแรก: ยังไม่ได้ทบทวนโดยเภสัชกร — แก้ที่นี่ (ผ่าน PR) เมื่อทบทวนแล้ว
   review: { status: 'pending', reviewer: '', reviewedAt: '', nextDue: '' },
   blocks: [...(REF_TB_BLOCKS as unknown as Block[]), ...TB_EXTRA_BLOCKS],
+  drugs: [
+    { name: 'Isoniazid (H)', aliases: ['Isoniazid', 'INH'] }, { name: 'Rifampicin (R)', aliases: ['Rifampicin', 'rifampin'] },
+    { name: 'Pyrazinamide (Z)', aliases: ['Pyrazinamide'] }, { name: 'Ethambutol (E)', aliases: ['Ethambutol'] },
+    { name: 'Rifapentine', aliases: ['Rifapentine', '3HP'] }, { name: 'Pyridoxine (B6)', aliases: ['Pyridoxine', 'B6'] },
+    { name: 'Fluoroquinolones', aliases: ['Fluoroquinolone', 'Fluoroquinolones', 'FQ', 'Lfx', 'Mfx', 'levofloxacin', 'moxifloxacin'] },
+    { name: 'Bedaquiline', aliases: ['Bedaquiline', 'Bdq'] }, { name: 'Linezolid', aliases: ['Linezolid', 'Lzd'] },
+    { name: 'Clofazimine', aliases: ['Clofazimine', 'Cfz'] }, { name: 'Aminoglycosides', aliases: ['Aminoglycoside', 'Aminoglycosides'] },
+    { name: 'Prednisolone / steroid', aliases: ['Prednisolone', 'steroid'] }, { name: 'Warfarin', aliases: ['Warfarin'] },
+    { name: 'ยาต้านไวรัส (ART/ARV)', aliases: ['ART', 'ARV', 'ยาต้านไวรัส'] },
+  ],
   sections: [
     { title: 'สูตรยา', blocks: [0] }, { title: 'ขนาดตามน้ำหนัก', blocks: [1] }, { title: 'รายตัวยา', blocks: [2] },
     { title: 'อาการไม่พึงประสงค์', blocks: [3, 4, 5, 6] }, { title: 'กรณีพิเศษ', blocks: [7] }, { title: 'การติดตาม', blocks: [8, 13] },

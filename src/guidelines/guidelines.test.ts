@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { describe, it, expect } from 'vitest';
 import { GUIDELINES, reviewState, searchGuidelines, blockLines } from './registry';
 import { TB_GUIDELINE } from './tb';
+import { drugHits, aliasRe } from './drugs';
 import { TB_EXTRA_BLOCKS, TB_PASTE_DOSE } from './tb-extra';
 import { REF_TB_BLOCKS, REF_TB_CITES } from '../data/references';
 import { validateFile, addFile, listFiles, removeFile, MAX_FILE_BYTES, MAX_FILES_PER_GUIDELINE } from './attachments';
@@ -10,7 +11,7 @@ import { AppDb } from '../storage/db';
 describe('แนวทางวัณโรค (ตัวอย่างแรก)', () => {
   it('เนื้อหาคือข้อมูลอ้างอิงเดิมทุกบล็อก ไม่ถูกแก้/เขียนใหม่ และหมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว', () => {
     expect(TB_GUIDELINE.blocks.slice(0, REF_TB_BLOCKS.length)).toEqual(REF_TB_BLOCKS as any);
-    TB_GUIDELINE.blocks.slice(REF_TB_BLOCKS.length).forEach((b) => expect(b.origin).toMatch(/ทบทวนโดยเภสัชกรแล้ว/)); expect(TB_EXTRA_BLOCKS.length).toBe(5); expect(TB_GUIDELINE.cites).toBe(REF_TB_CITES);
+    TB_GUIDELINE.blocks.slice(REF_TB_BLOCKS.length).forEach((b) => expect(b.origin).toMatch(/ทบทวนโดยเภสัชกรแล้ว/)); expect(TB_EXTRA_BLOCKS.length).toBe(5); expect(TB_GUIDELINE.cites.slice(0, REF_TB_CITES.length)).toEqual(REF_TB_CITES); expect(TB_GUIDELINE.cites.at(-1)).toMatch(/ตรวจเทียบกับไฟล์ต้นฉบับ/);
     const used = TB_GUIDELINE.sections.flatMap((s) => s.blocks).sort((a, b) => a - b);
     expect(used).toEqual(TB_GUIDELINE.blocks.map((_, i) => i));
   });
@@ -54,6 +55,27 @@ describe('แนวทางโรคหืด (GINA 2026)', () => {
     expect(a.sections.flatMap((s) => s.blocks).sort((x, y) => x - y)).toEqual(a.blocks.map((_, i) => i));
     expect(searchGuidelines('MART').some((r) => r.guideline.id === 'asthma')).toBe(true);
     expect(searchGuidelines('หืด').map((r) => r.guideline.id)).toContain('asthma');
+  });
+});
+
+describe('มุมมองตามตัวยา', () => {
+  it('ทุกยาที่ระบุในแนวทางต้องมีข้อความจริงอย่างน้อยหนึ่งรายการ (ไม่มีรายการว่าง)', () => {
+    for (const g of GUIDELINES) {
+      expect(g.drugs?.length).toBeGreaterThan(5);
+      for (const d of g.drugs!) expect(drugHits(g, d.aliases).length, g.id + ': ' + d.name).toBeGreaterThan(0);
+    }
+  });
+  it('จัดกลุ่มตามหัวข้อ: อันตรกิริยา/ข้อห้าม/ขนาด และข้อความตรงกับของเดิม', () => {
+    const tb = GUIDELINES.find((g) => g.id === 'tb')!; const bdq = drugHits(tb, ['Bedaquiline']);
+    expect(bdq.some((h) => h.kind === 'อันตรกิริยา' && /CYP3A4/.test(h.text))).toBe(true);
+    const copd = GUIDELINES.find((g) => g.id === 'copd')!;
+    expect(drugHits(copd, ['Methylxanthines']).some((h) => h.kind === 'ข้อห้าม/ข้อควรระวัง')).toBe(true);
+    const wf = drugHits(tb, ['Warfarin']); expect(wf.length).toBeGreaterThan(0);
+    // ชื่อย่อละตินไม่ไปติดกลางคำ: ART ต้องไม่เจอใน "start"
+    expect(aliasRe(['ART']).test('start')).toBe(false); expect(aliasRe(['ART']).test('เริ่ม ART ภายใน')).toBe(true);
+    // ทุกข้อความที่แสดงต้องมาจากบล็อกของแนวทางจริง
+    const all = tb.blocks.flatMap((b) => blockLines(b)).join('\n');
+    drugHits(tb, ['Isoniazid']).filter((h) => !h.card).forEach((h) => expect(all).toContain(h.text.split(' — ')[0]));
   });
 });
 

@@ -220,3 +220,18 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .glres{border:none;box-shadow:0 10px 24px -18px rgba(22,33,31,.4)}
 .glhit mark{background:#FFE58A;border-radius:4px;padding:0 2px}
 .glchip b{font-family:inherit;font-size:13px}.glchip{line-height:1.55}
+
+/* ===== มุมมองตามตัวยา ===== */
+.gldchips{display:flex;flex-wrap:wrap;gap:8px}
+.gldchips button{border:1px solid color-mix(in srgb,var(--gl) 30%,transparent);background:color-mix(in srgb,var(--gl) 8%,#fff);color:color-mix(in srgb,var(--gl) 80%,#000);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.gldchips button small{background:var(--gl);color:#fff;border-radius:999px;padding:1px 7px;font-size:11px}
+.gldchips button.on{background:var(--gl);color:#fff;border-color:var(--gl);box-shadow:0 6px 14px -8px var(--gl)}
+.gldchips button.on small{background:#fff;color:var(--gl)}
+.gldrugtab{display:flex;flex-direction:column;gap:14px}
+.gldtitle{margin:2px 0 0;font-size:20px;color:color-mix(in srgb,var(--gl) 80%,#000)}
+.gldgroup{background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 10px 24px -18px rgba(22,33,31,.4);border-left:6px solid var(--k,var(--gl));display:flex;flex-direction:column;gap:8px}
+.gldgroup>h4{margin:0}.gldgroup>h4 span{display:inline-block;background:var(--k,var(--gl));color:#fff;border-radius:999px;padding:3px 12px;font-size:12px}
+.gldgroup.k-card{--k:#0F9D8A}.gldgroup.k-dose{--k:#2F6FED}.gldgroup.k-use{--k:#4B5F5A}.gldgroup.k-warn{--k:#E5483A}.gldgroup.k-ddi{--k:#7A4FD6}.gldgroup.k-ae{--k:#E08A00}.gldgroup.k-mon{--k:#1FA971}
+.gldline{display:flex;flex-direction:column;gap:2px;text-align:left;border:none;background:color-mix(in srgb,var(--k) 7%,#fff);border-radius:12px;padding:9px 12px;cursor:pointer;line-height:1.6}
+.gldline small{color:#6B7B77;font-size:11px}.gldline b{color:color-mix(in srgb,var(--k) 85%,#000);font-size:13px}.gldline span{font-size:14px}
+.gldline:hover{background:color-mix(in srgb,var(--k) 13%,#fff)}

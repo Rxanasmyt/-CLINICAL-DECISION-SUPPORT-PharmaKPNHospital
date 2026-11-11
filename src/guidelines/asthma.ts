@@ -65,6 +65,14 @@ export const ASTHMA_GUIDELINE: Guideline = {
   cites: ['Global Initiative for Asthma (GINA). Global Strategy for Asthma Management and Prevention — 2026 update'],
   review: { status: 'approved', reviewer: 'เภสัชกรโรงพยาบาล', reviewedAt: '2026-11-10', nextDue: '' },
   blocks,
+  drugs: [
+    { name: 'ICS-formoterol', aliases: ['ICS-formoterol', 'formoterol'] }, { name: 'ICS-SABA', aliases: ['ICS-SABA', 'ICS+SABA'] },
+    { name: 'ICS-LABA', aliases: ['ICS-LABA'] }, { name: 'ICS', aliases: ['ICS'] }, { name: 'SABA', aliases: ['SABA'] },
+    { name: 'LAMA / Tiotropium', aliases: ['LAMA', 'Tiotropium'] }, { name: 'Biologic therapy', aliases: ['Biologic', 'Anti-IgE', 'Anti-IL5', 'Anti-IL4Ra', 'Anti-TSLP'] },
+    { name: 'Oral corticosteroids (OCS)', aliases: ['OCS', 'Oral corticosteroids', 'สเตียรอยด์ชนิดรับประทาน'] }, { name: 'LTRA', aliases: ['LTRA'] },
+    { name: 'Azithromycin', aliases: ['Azithromycin'] }, { name: 'Epinephrine', aliases: ['Epinephrine'] }, { name: 'Fenoterol', aliases: ['Fenoterol'] },
+    { name: 'ยาขยายหลอดลมชนิดรับประทาน', aliases: ['ยาขยายหลอดลมชนิดรับประทาน'] },
+  ],
   sections: [
     { title: 'ผู้ใหญ่/วัยรุ่น Track 1', blocks: [0] }, { title: 'Track 2', blocks: [1] }, { title: 'เด็ก 6-11 ปี', blocks: [2] },
     { title: 'กลุ่มยา', blocks: [3] }, { title: 'ข้อควรระวัง', blocks: [4] }, { title: 'วินิจฉัย/ประเมิน', blocks: [5, 6] },

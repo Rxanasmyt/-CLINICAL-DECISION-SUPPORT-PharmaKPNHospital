@@ -66,6 +66,15 @@ export const COPD_GUIDELINE: Guideline = {
   cites: ['Global Initiative for Chronic Obstructive Lung Disease (GOLD). Global Strategy for the Diagnosis, Management, and Prevention of COPD — 2026 Report'],
   review: { status: 'approved', reviewer: 'เภสัชกรโรงพยาบาล', reviewedAt: '2026-11-10', nextDue: '' },
   blocks,
+  drugs: [
+    { name: 'LABA', aliases: ['LABA'] }, { name: 'LAMA', aliases: ['LAMA'] }, { name: 'ICS', aliases: ['ICS'] },
+    { name: 'SABA / ยาขยายหลอดลมออกฤทธิ์สั้น', aliases: ['SABA', 'SABAs', 'Short-acting'] },
+    { name: 'Ensifentrine', aliases: ['Ensifentrine'] }, { name: 'Roflumilast', aliases: ['Roflumilast'] },
+    { name: 'Azithromycin', aliases: ['Azithromycin'] }, { name: 'Dupilumab', aliases: ['Dupilumab'] }, { name: 'Mepolizumab', aliases: ['Mepolizumab'] },
+    { name: 'Systemic corticosteroids', aliases: ['Systemic corticosteroids', 'คอร์ติโคสเตียรอยด์'] }, { name: 'ยาปฏิชีวนะ', aliases: ['ยาปฏิชีวนะ', 'Antibiotics'] },
+    { name: 'Methylxanthines', aliases: ['Methylxanthines'] },
+    { name: 'วัคซีน', aliases: ['วัคซีน', 'Influenza', 'Pneumococcal', 'PCV20', 'RSV', 'Tdap', 'Zoster', 'COVID-19'] },
+  ],
   sections: [
     { title: 'เริ่มยา', blocks: [0] }, { title: 'ปรับยา', blocks: [1, 2] }, { title: 'ยาชีววัตถุ', blocks: [3] },
     { title: 'ICS', blocks: [4] }, { title: 'ภาวะกำเริบ', blocks: [5, 8] }, { title: 'วัคซีน', blocks: [6] },
