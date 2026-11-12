@@ -252,3 +252,13 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .gldrugtab{gap:12px}
 .gldetail{display:flex;flex-direction:column;gap:12px;border-top:1px dashed color-mix(in srgb,var(--gl) 30%,transparent);padding-top:12px}
 .glov .gldgrp{box-shadow:none;border-left-width:4px;background:color-mix(in srgb,var(--gl) 4%,#fff);margin-top:8px}
+
+/* ยาแต่ละตัวในกลุ่มยา */
+.gldmem{margin:6px 0 10px;padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--gl) 8%,transparent)}
+.gldmem>small{display:block;margin-bottom:6px;font-weight:600;color:var(--gl)}
+
+/* สรุปย่อของแนวทาง */
+.glsum{padding:12px 14px;border-radius:12px;border-left:4px solid var(--gl);background:color-mix(in srgb,var(--gl) 7%,transparent)}
+.glsum h3{margin:0 0 6px}
+.glsum ul{margin:0;padding-left:1.1em;display:grid;gap:5px}
+.glsum li{line-height:1.5}

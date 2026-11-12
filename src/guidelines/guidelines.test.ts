@@ -63,7 +63,17 @@ describe('มุมมองตามตัวยา', () => {
   it('ทุกยาที่ระบุในแนวทางต้องมีข้อความจริงอย่างน้อยหนึ่งรายการ (ไม่มีรายการว่าง)', () => {
     for (const g of GUIDELINES) {
       expect(g.drugs?.length).toBeGreaterThan(5);
-      for (const d of g.drugs!) expect(drugHits(g, d.aliases).length, g.id + ': ' + d.name).toBeGreaterThan(0);
+      for (const d of g.drugs!) expect(drugHits(g, [...d.aliases, ...(d.members || []).flatMap((m) => m.aliases)]).length, g.id + ': ' + d.name).toBeGreaterThan(0);
+    }
+  });
+  it('ยารายตัวทุกตัวมีข้อความจริง ชื่อไม่ซ้ำในการ์ดเดียวกัน และไม่มีชื่อที่รวมหลายตัวด้วย " / "', () => {
+    for (const g of GUIDELINES) {
+      const names: string[] = [];
+      for (const d of g.drugs!) {
+        names.push(d.name); expect(d.name, g.id).not.toMatch(/\s\/\s/);
+        for (const m of d.members || []) { names.push(m.name); expect(drugHits(g, m.aliases).length, g.id + ': ' + d.name + ' › ' + m.name).toBeGreaterThan(0); }
+      }
+      expect(new Set(names).size, g.id + ' ชื่อยาซ้ำ: ' + names.filter((n, i) => names.indexOf(n) !== i).join(',')).toBe(names.length);
     }
   });
   it('จัดกลุ่มตามหัวข้อ: อันตรกิริยา/ข้อห้าม/ขนาด และข้อความตรงกับของเดิม', () => {
@@ -202,6 +212,16 @@ describe('Sepsis (Surviving Sepsis Campaign 2021)', () => {
     expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
     const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
     for (const t of ['ภายใน 1 ชม.', 'อย่างน้อย 30 มล./กก. ภายใน 3 ชม.', 'MAP 65 mm Hg', '0.25–0.5 ไมโครกรัม/กก./นาที', 'hydrocortisone 200 มก./วัน แบ่ง 50 มก. IV ทุก 6 ชม.', '≥ 180 มก./ดล.', '144–180 มก./ดล.', 'AUC0–24/MIC ประมาณ 400', 'Voriconazole Cmin 2–6 มก./ลิตร']) expect(text).toContain(t);
+  });
+});
+
+describe('สรุปย่อ', () => {
+  it('ทุกการ์ดมีสรุปย่อ 5–8 บรรทัด และตัวเลขทุกตัวในสรุปต้องมีอยู่ในเนื้อหาการ์ด', () => {
+    for (const g of GUIDELINES) {
+      expect(g.summary?.length, g.id).toBeGreaterThanOrEqual(5); expect(g.summary!.length, g.id).toBeLessThanOrEqual(8);
+      const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+      for (const line of g.summary!) for (const n of line.match(/\d[\d,]*(?:\.\d+)?/g) || []) expect(text, g.id + ': ' + n + ' ใน "' + line + '"').toContain(n.replace(/,$/, ''));
+    }
   });
 });
 

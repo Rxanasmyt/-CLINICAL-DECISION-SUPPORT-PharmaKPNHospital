@@ -15,16 +15,25 @@ export const TB_GUIDELINE: Guideline = {
     'หมายเหตุจากการเทียบ: เวลาเริ่ม ART ตามตารางที่ 5.7 = ภายใน 2 สัปดาห์ อย่างช้าไม่เกิน 4 สัปดาห์ (วัณโรคเยื่อหุ้มสมอง ≥ 4 และไม่เกิน 8 สัปดาห์) ตรงกับข้อมูลเดิมในการ์ด · ข้อความ Linezolid ปรับให้ตรงตารางที่ 6.7 และหมายเหตุหน้า 88',
   ],
   // ตัวอย่างแรก: ยังไม่ได้ทบทวนโดยเภสัชกร — แก้ที่นี่ (ผ่าน PR) เมื่อทบทวนแล้ว
+  summary: [
+    'ผู้ป่วยใหม่ที่เชื้อไวต่อยา: 2HRZE/4HR รวม 6 เดือน · วัณโรคเยื่อหุ้มสมองและกระดูกและข้อ: 2HRZE/10HR รวม 12 เดือน · โรคตับ: 2HRE/7HR (ตัด pyrazinamide) รวม 9 เดือน',
+    'ขนาดผู้ใหญ่ต่อวัน: Isoniazid 4–6 มก./กก. (สูงสุด 300 มก.) · Rifampicin 8–12 มก./กก. (สูงสุด 600 มก.) · Pyrazinamide 20–30 มก./กก. (สูงสุด 2,000 มก.)',
+    'ผื่น ดีซ่าน หรืออาการสับสน: หยุดยารักษาวัณโรคและส่งปรึกษาผู้เชี่ยวชาญ',
+    'ชาปลายมือปลายเท้าจาก isoniazid: ให้ pyridoxine 50–75 มก./วัน · ปวดข้อจาก pyrazinamide: ให้ NSAIDs หรือ paracetamol',
+    'ตั้งครรภ์: ใช้สูตรมาตรฐานได้ ให้ pyridoxine 50–100 มก./วัน ร่วมกับ isoniazid และหลีกเลี่ยง aminoglycoside',
+    'ตรวจ AFB smear ก่อนเริ่มรักษา สิ้นเดือนที่ 2 สิ้นเดือนที่ 5 และเดือนสุดท้าย',
+    'MDR/RR-TB สูตรระยะสั้น 9–11 เดือน มี bedaquiline และ fluoroquinolone เป็นแกน — ดูรายละเอียดและข้อห้ามในแท็บการรักษา',
+  ],
   review: { status: 'pending', reviewer: '', reviewedAt: '', nextDue: '' },
   blocks: [...(REF_TB_BLOCKS as unknown as Block[]), ...TB_EXTRA_BLOCKS],
   drugs: [
     { name: 'Isoniazid (H)', group: 'ยาหลัก (แนวที่ 1)', aliases: ['Isoniazid', 'INH'] }, { name: 'Rifampicin (R)', group: 'ยาหลัก (แนวที่ 1)', aliases: ['Rifampicin', 'rifampin'] },
     { name: 'Pyrazinamide (Z)', group: 'ยาหลัก (แนวที่ 1)', aliases: ['Pyrazinamide'] }, { name: 'Ethambutol (E)', group: 'ยาหลัก (แนวที่ 1)', aliases: ['Ethambutol'] },
     { name: 'Rifapentine', group: 'ยาหลัก (แนวที่ 1)', aliases: ['Rifapentine', '3HP'] }, { name: 'Pyridoxine (B6)', group: 'ยาที่ใช้ร่วม/อันตรกิริยา', aliases: ['Pyridoxine', 'B6'] },
-    { name: 'Fluoroquinolones', group: 'ยาวัณโรคดื้อยา', aliases: ['Fluoroquinolone', 'Fluoroquinolones', 'FQ', 'Lfx', 'Mfx', 'levofloxacin', 'moxifloxacin'] },
+    { name: 'Fluoroquinolones', group: 'ยาวัณโรคดื้อยา', aliases: ['Fluoroquinolone', 'Fluoroquinolones', 'FQ'], members: [{ name: 'Levofloxacin', aliases: ['Levofloxacin', 'Lfx'] }, { name: 'Moxifloxacin', aliases: ['Moxifloxacin', 'Mfx'] }] },
     { name: 'Bedaquiline', group: 'ยาวัณโรคดื้อยา', aliases: ['Bedaquiline', 'Bdq'] }, { name: 'Linezolid', group: 'ยาวัณโรคดื้อยา', aliases: ['Linezolid', 'Lzd'] },
     { name: 'Clofazimine', group: 'ยาวัณโรคดื้อยา', aliases: ['Clofazimine', 'Cfz'] }, { name: 'Aminoglycosides', group: 'ยาวัณโรคดื้อยา', aliases: ['Aminoglycoside', 'Aminoglycosides'] },
-    { name: 'Prednisolone / steroid', group: 'ยาที่ใช้ร่วม/อันตรกิริยา', aliases: ['Prednisolone', 'steroid'] }, { name: 'Warfarin', group: 'ยาที่ใช้ร่วม/อันตรกิริยา', aliases: ['Warfarin'] },
+    { name: 'Prednisolone', group: 'ยาที่ใช้ร่วม/อันตรกิริยา', aliases: ['Prednisolone', 'steroid'] }, { name: 'Warfarin', group: 'ยาที่ใช้ร่วม/อันตรกิริยา', aliases: ['Warfarin'] },
     { name: 'ยาต้านไวรัส (ART/ARV)', group: 'ยาที่ใช้ร่วม/อันตรกิริยา', aliases: ['ART', 'ARV', 'ยาต้านไวรัส'] },
   ],
   sections: [
