@@ -41,6 +41,7 @@ function Overview({ g, openDrug }: { g: Guideline; openDrug: (n: string) => void
   const dl = (g.drugs || []).filter((d) => drugHits(g, d.aliases).length);
   return (
     <div className="glov">
+      {g.summary && g.summary.length > 0 && <section className="glsum"><h3>สรุปย่อ</h3><ul>{g.summary.map((t, i) => <li key={i}>{t}</li>)}</ul></section>}
       {dl.length > 0 && <section><h3>ยาในแนวทางนี้ — แตะชื่อยาเพื่อดูขนาด ข้อห้าม อันตรกิริยา การติดตาม</h3>
         {drugGroups({ ...g, drugs: dl }).map((gr) => <div key={gr.group} className="gldgrp"><h4>{gr.group}</h4><div className="gldchips">{gr.drugs.map((d) => <button key={d.name} type="button" onClick={() => openDrug(d.name)}>{d.name}</button>)}</div></div>)}</section>}
       {kv && <section><h3>{kv.h}</h3>{kv.sub && <p className="muted">{kv.sub}</p>}<div className="glchips">{kv.items.map((x) => <span key={x.k} className="glchip"><b>{x.k}</b>{x.v.split(' — ')[0]}</span>)}</div></section>}
@@ -55,14 +56,22 @@ const KIND_CLS: Record<DrugKind, string> = { 'การ์ดยา': 'k-card', 
 
 /** มุมมองตามตัวยา: ยาแบ่งเป็นกลุ่ม → เลือกยาในกลุ่ม → เห็นทุกข้อความของแนวทางที่เกี่ยวกับยานั้น แยกตามหัวข้อ */
 function DrugTab({ g, pick, setPick, goBlock }: { g: Guideline; pick: string; setPick: (n: string) => void; goBlock: (bi: number) => void }) {
-  const list = useMemo(() => (g.drugs || []).map((d) => ({ d, hits: drugHits(g, d.aliases) })).filter((x) => x.hits.length), [g]);
+  const list = useMemo(() => (g.drugs || []).map((d) => {
+    const members = (d.members || []).map((m) => ({ d: m, hits: drugHits(g, m.aliases) })).filter((x) => x.hits.length);
+    return { d, members, hits: drugHits(g, [...d.aliases, ...(d.members || []).flatMap((m) => m.aliases)]) };
+  }).filter((x) => x.hits.length), [g]);
   const groups = useMemo(() => drugGroups({ ...g, drugs: list.map((x) => x.d) }), [g, list]);
-  const cur = list.find((x) => x.d.name === pick) || list[0];
-  if (!cur) return <p className="muted">แนวทางนี้ยังไม่มีรายการยา</p>;
+  const top = list.find((x) => x.d.name === pick || x.members.some((m) => m.d.name === pick)) || list[0];
+  if (!top) return <p className="muted">แนวทางนี้ยังไม่มีรายการยา</p>;
+  const mem = top.members.find((m) => m.d.name === pick);
+  const cur = mem ? { d: mem.d, hits: mem.hits } : { d: top.d, hits: top.hits };
   const kinds = DRUG_KIND_ORDER.filter((k) => cur.hits.some((h) => h.kind === k));
   const detail = (
     <div className="gldetail">
-      <h3 className="gldtitle">{cur.d.name}</h3>
+      {top.members.length > 0 && <div className="gldmem"><small>ยาแต่ละตัวในกลุ่ม {top.d.name}</small><div className="gldchips" role="tablist">
+        <button type="button" role="tab" aria-selected={!mem} className={!mem ? 'on' : ''} onClick={() => setPick(top.d.name)}>ทั้งกลุ่ม<small>{top.hits.length}</small></button>
+        {top.members.map((m) => <button key={m.d.name} type="button" role="tab" aria-selected={mem?.d.name === m.d.name} className={mem?.d.name === m.d.name ? 'on' : ''} onClick={() => setPick(m.d.name)}>{m.d.name}<small>{m.hits.length}</small></button>)}</div></div>}
+      <h3 className="gldtitle">{mem ? top.d.name + ' › ' + cur.d.name : cur.d.name}</h3>
       {kinds.map((k) => (
         <section key={k} className={'gldgroup ' + KIND_CLS[k]}>
           <h4><span>{k}</span></h4>
@@ -80,8 +89,8 @@ function DrugTab({ g, pick, setPick, goBlock }: { g: Guideline; pick: string; se
         <section key={gr.group} className="gldgrp">
           <h4>{gr.group}<small>{gr.drugs.length} รายการ</small></h4>
           <div className="gldchips" role="tablist" aria-label={'เลือกยาในกลุ่ม ' + gr.group}>{gr.drugs.map((d) => { const x = list.find((y) => y.d.name === d.name)!; return (
-            <button key={d.name} type="button" role="tab" aria-selected={d.name === cur.d.name} className={d.name === cur.d.name ? 'on' : ''} onClick={() => setPick(d.name)}>{d.name}<small>{x.hits.length}</small></button>); })}</div>
-          {gr.drugs.some((d) => d.name === cur.d.name) && detail}
+            <button key={d.name} type="button" role="tab" aria-selected={d.name === top.d.name} className={d.name === top.d.name ? 'on' : ''} onClick={() => setPick(d.name)}>{d.name}<small>{x.hits.length}</small></button>); })}</div>
+          {gr.drugs.some((d) => d.name === top.d.name) && detail}
         </section>))}
     </div>);
 }

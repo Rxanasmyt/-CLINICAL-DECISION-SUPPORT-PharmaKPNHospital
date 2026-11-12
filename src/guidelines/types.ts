@@ -10,13 +10,15 @@ export type Block = BlockOrigin & (
 export interface Review { status: 'pending' | 'approved'; reviewer: string; reviewedAt: string; /** วันครบรอบทบทวนถัดไป YYYY-MM-DD */ nextDue: string }
 
 /** ยาที่แนวทางพูดถึง: ชื่อที่แสดง + ชื่อ/ชื่อย่อที่ใช้ค้นข้อความ (ไม่ใช่เนื้อหาคลินิก) */
-export interface DrugRef { name: string; /** กลุ่มยา (ใช้จัดหมวดในแท็บยา) */ group?: string; aliases: string[] }
+export interface DrugRef { name: string; /** กลุ่มยา (ใช้จัดหมวดในแท็บยา) */ group?: string; aliases: string[]; /** ยารายตัวในกลุ่มยานี้ (ชื่อต้องมาจากข้อความของแนวทาง) */ members?: DrugRef[] }
 
 export interface Guideline {
   id: string; title: string; category: string; keywords: string[];
   /** สีประจำการ์ดและไอคอน (หน้าตาเท่านั้น ไม่ใช่เนื้อหาคลินิก) */
   accent?: string; icon?: string;
   drugs?: DrugRef[];
+  /** สรุปย่อ: ใจความหลักของแนวทาง (ตัวเลขทุกตัวต้องมีอยู่ในบล็อกของการ์ด — มีเทสต์ตรวจ) */
+  summary?: string[];
   /** แหล่งอ้างอิงหลัก (บรรทัดเดียว) */
   source: string; cites: string[];
   review: Review;
