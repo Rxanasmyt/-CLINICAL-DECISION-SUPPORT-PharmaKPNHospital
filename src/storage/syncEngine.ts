@@ -2,7 +2,7 @@
 // เปิดแอป/กลับมาออนไลน์ → ส่งคิวค้าง → ดึงข้อมูลล่าสุดมารวม (id + updatedAt ล่าสุดชนะ)
 import { COLLECTIONS } from './collections';
 import type { Store } from './store';
-import type { StorageAdapter, SyncState } from './types';
+import { PushSkipped, type StorageAdapter, type SyncState } from './types';
 import { REQUIRED_SCRIPT_VERSION } from './scriptVersion';
 
 export class SyncEngine {
@@ -89,9 +89,18 @@ export class SyncEngine {
         this.outdated = typeof v === 'number' ? v < REQUIRED_SCRIPT_VERSION : null;
         // 1) ส่งคิวค้าง
         const rows = this.store.pendingRows();
+        let skippedMsg = '';
         if (rows.length) {
-          await remote.put(rows.map((r) => this.store.recordOf(r)));
-          this.store.markPushed(rows);
+          try {
+            await remote.put(rows.map((r) => this.store.recordOf(r)));
+            this.store.markPushed(rows);
+          } catch (e) {
+            // ส่งได้บางรายการ: ทำเครื่องหมายส่วนที่ส่งแล้ว และดึงข้อมูลจากเครื่องอื่นต่อ แล้วค่อยแจ้งรายการที่ส่งไม่ได้
+            if (!(e instanceof PushSkipped)) throw e;
+            const skip = new Set(e.skipped.map((x) => x.collection + '|' + x.id));
+            this.store.markPushed(rows.filter((r) => !skip.has(r.pk)));
+            skippedMsg = e.message;
+          }
         }
         // 2) ดึงข้อมูลล่าสุดมารวม
         for (const def of COLLECTIONS) {
@@ -102,6 +111,7 @@ export class SyncEngine {
         await this.store.flush();
         this.lastOk = Date.now();
         this.running = null;
+        if (skippedMsg) { this.set({ kind: 'error', message: skippedMsg, pending: this.store.pendingCount() }); return; }
         this.refreshIdle();
       } catch (e: any) {
         this.running = null;

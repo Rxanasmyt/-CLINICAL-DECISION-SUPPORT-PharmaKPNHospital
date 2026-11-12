@@ -39,7 +39,7 @@ export function toEntries(def: CollectionDef, value: any): Map<string, any> {
   if (def.kind === 'object') {
     for (const [k, v] of Object.entries(value || {})) m.set(k, v);
   } else {
-    for (const it of Array.isArray(value) ? value : []) m.set(def.idOf!(it), it);
+    for (const it of Array.isArray(value) ? value : []) if (it != null) m.set(def.idOf!(it), it);
   }
   return m;
 }
@@ -51,7 +51,7 @@ export function applyEntry(def: CollectionDef, value: any, id: string, data: any
     if (data === undefined) delete o[id]; else o[id] = data;
     return o;
   }
-  const list: any[] = Array.isArray(value) ? value.slice() : [];
+  const list: any[] = Array.isArray(value) ? value.filter((x) => x != null) : [];
   const i = list.findIndex((x) => def.idOf!(x) === id);
   if (data === undefined) { if (i >= 0) list.splice(i, 1); }
   else if (i >= 0) list[i] = data; else list.push(data);
