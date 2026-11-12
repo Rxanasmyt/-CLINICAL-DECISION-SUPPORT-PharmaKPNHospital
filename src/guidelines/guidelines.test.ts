@@ -195,6 +195,16 @@ describe('AF และ DOACs (แนวทางไทย 2568)', () => {
   });
 });
 
+describe('Sepsis (Surviving Sepsis Campaign 2021)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว ตัวเลขสำคัญตรงต้นฉบับ', () => {
+    const g = GUIDELINES.find((x) => x.id === 'sepsis')!;
+    expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+    expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['ภายใน 1 ชม.', 'อย่างน้อย 30 มล./กก. ภายใน 3 ชม.', 'MAP 65 mm Hg', '0.25–0.5 ไมโครกรัม/กก./นาที', 'hydrocortisone 200 มก./วัน แบ่ง 50 มก. IV ทุก 6 ชม.', '≥ 180 มก./ดล.', '144–180 มก./ดล.', 'AUC0–24/MIC ประมาณ 400', 'Voriconazole Cmin 2–6 มก./ลิตร']) expect(text).toContain(t);
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
