@@ -107,6 +107,19 @@ describe('ข้อมูลทุกชุดไปถึงชีตและ�
   });
 });
 
+describe('รายการที่ใหญ่เกิน ไม่ขวางการรับข้อมูลจากเครื่องอื่น', () => {
+  it('เครื่อง A มีรายการใหญ่เกิน แต่ยังรับเคสที่เครื่อง B เพิ่มเข้ามาได้ และรายการอื่นของ A ไม่ถูกส่งซ้ำ', async () => {
+    const w = world(); const A = await w.device(); const B = await w.device();
+    B.store.setJson('adrCases.v1', [adrCase('2001')]); await B.engine.syncNow();
+    A.store.setJson('adrCases.v1', [adrCase('1', { data: { ...adrCase('1').data, pharmNote: 'ก'.repeat(60000) } }), adrCase('2')]);
+    await A.engine.syncNow();
+    expect(A.engine.state).toMatchObject({ kind: 'error' });
+    const ids = (A.store.getJson<any[]>('adrCases.v1', [])).map((c) => c.cid).sort();
+    expect(ids).toEqual(['1', '2', '2001']);                              // รับเคสของ B แม้ A มีรายการที่ส่งไม่ได้
+    expect(A.store.pendingCount()).toBe(1);                               // ค้างเฉพาะรายการที่ใหญ่เกิน
+  });
+});
+
 describe('การลบ (PDPA)', () => {
   it('ลบเคสในแอป → แถวในชีตถูกล้างข้อมูลทางคลินิกทั้งหมด เหลือเพียงรหัสและเครื่องหมาย "ลบแล้ว"', async () => {
     const w = world(); const A = await w.device();

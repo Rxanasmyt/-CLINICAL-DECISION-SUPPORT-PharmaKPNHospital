@@ -2,7 +2,7 @@
 // ส่งแบบ POST Content-Type: text/plain เพื่อเลี่ยง CORS preflight · ตรวจ token ทุกคำขอ
 import { BY_NAME } from './collections';
 import { sanitizeForRemote } from './pdpa';
-import type { CollectionName, StorageAdapter, StoredRecord } from './types';
+import { PushSkipped, type CollectionName, type StorageAdapter, type StoredRecord } from './types';
 
 export interface SheetsConfig { url: string; token: string; salt: string }
 
@@ -55,7 +55,7 @@ export class SheetsAdapter implements StorageAdapter {
   async put(records: StoredRecord[]) {
     if (!records.length) return;
     const out: any[] = [];
-    const tooBig: string[] = [];
+    const tooBig: { collection: CollectionName; id: string }[] = [];
     const ok: StoredRecord[] = [];
     for (const r of records) {
       let data: any, summary: Record<string, unknown> = {};
@@ -65,7 +65,7 @@ export class SheetsAdapter implements StorageAdapter {
         }
         data = await sanitizeForRemote(r.collection, r.id, r.data, this.cfg.salt);
         summary = BY_NAME[r.collection].summary(data, r.id);
-        if (JSON.stringify(data).length > MAX_PAYLOAD_CHARS) { tooBig.push(`${r.collection}/${r.id}`); continue; }
+        if (JSON.stringify(data).length > MAX_PAYLOAD_CHARS) { tooBig.push({ collection: r.collection, id: r.id }); continue; }
       }
       out.push({ id: r.id, updatedAt: r.updatedAt, deleted: !!r.deleted, summary, data });
       ok.push(r);
@@ -75,7 +75,7 @@ export class SheetsAdapter implements StorageAdapter {
     ok.forEach((r, i) => { const a = byCol.get(r.collection) ?? []; a.push(out[i]); byCol.set(r.collection, a); });
     for (const [collection, rows] of byCol) for (let i = 0; i < rows.length; i += 100) await this.call({ action: 'push', collection, records: rows.slice(i, i + 100) });
     // รายการที่ใหญ่เกินส่งไม่ได้ แต่ไม่ให้ขวางรายการอื่น — แจ้งผู้ใช้ให้ตัดข้อความ
-    if (tooBig.length) throw new Error(`รายการ ${tooBig.join(', ')} ใหญ่เกินที่ Google Sheets เก็บได้ในเซลล์เดียว (50,000 ตัวอักษร) — ตัดข้อความยาวๆ ในรายการนั้นออก แล้วซิงก์ใหม่ (รายการอื่นส่งแล้ว)`);
+    if (tooBig.length) throw new PushSkipped(`รายการ ${tooBig.map((x) => x.collection + '/' + x.id).join(', ')} ใหญ่เกินที่ Google Sheets เก็บได้ในเซลล์เดียว (50,000 ตัวอักษร) — ตัดข้อความยาวๆ ในรายการนั้นออก แล้วซิงก์ใหม่ (รายการอื่นส่งแล้ว)`, tooBig);
   }
 
   async delete(collection: CollectionName, id: string, updatedAt: number) {

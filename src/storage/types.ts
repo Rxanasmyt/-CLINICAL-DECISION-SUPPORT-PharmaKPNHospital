@@ -16,6 +16,11 @@ export interface StoredRecord {
   data?: unknown;
 }
 
+/** ส่งได้บางรายการ: รายการที่ส่งไม่ได้ (เช่น ใหญ่เกินเซลล์) อยู่ใน skipped ส่วนที่เหลือส่งสำเร็จแล้ว */
+export class PushSkipped extends Error {
+  constructor(message: string, public skipped: { collection: CollectionName; id: string }[]) { super(message); this.name = 'PushSkipped'; }
+}
+
 export interface StorageAdapter {
   /** รายการทั้งหมดในชุดข้อมูล (since = เอาเฉพาะที่แก้หลังเวลานี้) */
   list(collection: CollectionName, since?: number): Promise<StoredRecord[]>;
