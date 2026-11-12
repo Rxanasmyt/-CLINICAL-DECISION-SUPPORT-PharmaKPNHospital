@@ -22,6 +22,9 @@ export interface ImportResult { cases: number; cqi: number; info: number; intens
 export function importBackup(store: Store, d: any): ImportResult {
   if (!d || d.kind !== 'adr-registry' || !Array.isArray(d.cases)) throw new BackupFormatError('bad');
   const res: ImportResult = { cases: 0, cqi: 0, info: 0, intensive: 0, ptc: 0, workload: 0, std: 0 };
+  // ไฟล์ที่รูปแบบผิดบางส่วน (null, ค่าที่ไม่ใช่ออบเจ็กต์, ชุดที่ไม่ใช่อาร์เรย์) — ตัดรายการเสียทิ้งก่อนเริ่ม เพื่อไม่ให้นำเข้าได้ครึ่งเดียวแล้ว error กลางทาง
+  const objs = (a: any): any[] => (Array.isArray(a) ? a.filter((x) => x != null && typeof x === 'object' && !Array.isArray(x)) : []);
+  d = { ...d, cases: objs(d.cases), cqi: objs(d.cqi), info: objs(d.info), intensive: objs(d.intensive), workload: objs(d.workload), ptc: Array.isArray(d.ptc) ? d.ptc.filter((x: any) => typeof x === 'string') : [] };
 
   const cur = store.getJson<any[]>('adrCases.v1', []).slice();
   const ids = new Set(cur.map((c) => c.id + '|' + c.label));
