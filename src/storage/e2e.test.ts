@@ -168,3 +168,13 @@ describe('คอลัมน์ในชีตเพียงพอเป็น�
     expect(Object.keys(by('ติดตามเข้มข้น (Intensive)').row)).toEqual(expect.arrayContaining(['HN (เข้ารหัส)', 'วันนัดติดตามครั้งถัดไป', 'สถานะ']));
   });
 });
+
+describe('เขียน IndexedDB ล้มเหลว', () => {
+  it('ตั้งธง persistFailed แทนที่จะเงียบ (ให้หน้าจอเตือนผู้ใช้ได้)', async () => {
+    const store = new Store(new AppDb('fail-' + Math.random()), null); await store.init();
+    (store.db.kv as any).put = async () => { throw new Error('QuotaExceededError'); };
+    const spy = (await import('vitest')).vi.spyOn(console, 'error').mockImplementation(() => {});
+    store.setJson('adrCases.v1', [adrCase('1')]); await store.flush();
+    expect(store.persistFailed).toBe(true); spy.mockRestore();
+  });
+});
