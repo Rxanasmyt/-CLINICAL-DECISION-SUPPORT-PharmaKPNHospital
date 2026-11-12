@@ -79,6 +79,7 @@ function SyncPanel({ state, close }: { state: SyncState; close: () => void }) {
         {field('url', 'URL ของ Apps Script Web App', 'https://script.google.com/macros/s/…/exec')}
         {field('token', 'Token (ตรงกับ TOKEN ใน Apps Script)', 'ข้อความลับของกลุ่มงาน', 'password')}
         {field('salt', 'Salt ของ รพ. สำหรับ hash HN', 'ต้องตรงกันทุกเครื่อง · ห้ามเปลี่ยนภายหลัง', 'password')}
+        {s.enabled && s.approved && !s.salt && <div className="warnbox" role="alert"><b>ยังไม่ได้ตั้ง Salt</b> — เคสแพ้ยาและรายการ intensive มี HN จึงไม่ถูกส่งขึ้น Sheets และการซิงก์จะหยุดจนกว่าจะกรอก Salt ของ รพ. (ใช้ค่าเดียวกันทุกเครื่อง)</div>}
         {engine.outdated && (
           <div className="warnbox" role="alert">
             <b>โค้ด Apps Script ในชีตเก่ากว่าที่แอปต้องการ</b>{engine.scriptVersion != null ? ` (ชีตเป็นเวอร์ชัน ${engine.scriptVersion} · แอปต้องการ ${REQUIRED_SCRIPT_VERSION})` : ''}
