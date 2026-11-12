@@ -262,3 +262,10 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .glsum h3{margin:0 0 6px}
 .glsum ul{margin:0;padding-left:1.1em;display:grid;gap:5px}
 .glsum li{line-height:1.5}
+
+/* ตารางตารางยารายวัน 7 คอลัมน์ในหน้า Warfarin: จอแคบ (≤ 400px) ไม่ให้ทั้งหน้าเลื่อนข้าง */
+@media (max-width: 400px) {
+  div[style*="repeat(7, 1fr)"] { grid-template-columns: repeat(7, minmax(0, 1fr)) !important; gap: 3px !important; overflow-x: auto; }
+  div[style*="repeat(7, 1fr)"] > div { min-width: 0; padding-left: 1px !important; padding-right: 1px !important; word-break: keep-all; }
+  div[style*="repeat(7, 1fr)"] > div > :first-child { font-size: 10px !important; letter-spacing: -0.3px; white-space: nowrap; }
+}
