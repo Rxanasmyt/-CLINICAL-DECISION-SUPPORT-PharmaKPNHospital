@@ -15,6 +15,8 @@ export class Store {
   private listeners = new Set<(keys: string[]) => void>();
   private chain: Promise<unknown> = Promise.resolve();
   ready = false;
+  /** เขียน IndexedDB ไม่สำเร็จอย่างน้อยหนึ่งครั้ง (เช่น เบราว์เซอร์ปิด IndexedDB / พื้นที่เต็ม) — ข้อมูลอาจหายเมื่อปิดหน้านี้ */
+  persistFailed = false;
   private actor: () => string = () => '';
   /** กำหนดชื่อผู้ใช้ที่ลงในประวัติการแก้ไข */
   setActor(fn: () => string) { this.actor = fn; }
@@ -164,7 +166,11 @@ export class Store {
   /** รอให้การเขียน IndexedDB ที่ค้างอยู่เสร็จ (ใช้ในทดสอบ) */
   flush() { return this.chain; }
   private persist(fn: () => Promise<unknown>) {
-    this.chain = this.chain.then(fn).catch((e) => console.error('[store] เขียน IndexedDB ไม่สำเร็จ', e));
+    this.chain = this.chain.then(fn).catch((e) => {
+      console.error('[store] เขียน IndexedDB ไม่สำเร็จ', e);
+      this.persistFailed = true;
+      if (typeof window !== 'undefined') window.dispatchEvent(new Event('pharmakpn:storage-error'));
+    });
   }
 }
 
