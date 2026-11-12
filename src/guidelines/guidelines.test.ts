@@ -185,6 +185,16 @@ describe('จัดกลุ่มให้อ่านง่าย', () => {
   });
 });
 
+describe('AF และ DOACs (แนวทางไทย 2568)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว ตัวเลขขนาดยาสำคัญตรงตารางที่ 9, 12, 15 ของต้นฉบับ', () => {
+    const g = GUIDELINES.find((x) => x.id === 'af')!;
+    expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+    expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['150 มก. BID (ลดเป็น 110 มก. BID ถ้าอายุ ≥ 80 ปี หรือใช้ร่วมกับ verapamil)', '20 มก. QD พร้อมอาหาร (ลดเป็น 15 มก. QD ถ้า CrCl 15–49 มล./นาที)', '5 มก. BID (ลดเป็น 2.5 มก. BID เมื่อเข้า 2 ใน 3 ข้อ', '60 มก. QD (ลดเป็น 30 มก. QD ถ้า CrCl 15–50 มล./นาที', 'ระดับในเลือด ≤ 1.2 ng/mL', '300 มก. IV นาน > 30–60 นาที', 'QTc > 500 ms', 'half-life เฉลี่ย 58 วัน']) expect(text).toContain(t);
+  });
+});
+
 describe('ค้นแนวทางตามโรคและตามยา', () => {
   it('ค้นชื่อโรค/คำสำคัญ → พบแนวทาง', () => {
     expect(searchGuidelines('วัณโรค').map((r) => r.guideline.id)).toEqual(['tb']);
