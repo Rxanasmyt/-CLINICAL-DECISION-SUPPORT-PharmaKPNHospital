@@ -66,12 +66,12 @@ export const ASTHMA_GUIDELINE: Guideline = {
   review: { status: 'approved', reviewer: 'เภสัชกรโรงพยาบาล', reviewedAt: '2026-11-10', nextDue: '' },
   blocks,
   drugs: [
-    { name: 'ICS-formoterol', aliases: ['ICS-formoterol', 'formoterol'] }, { name: 'ICS-SABA', aliases: ['ICS-SABA', 'ICS+SABA'] },
-    { name: 'ICS-LABA', aliases: ['ICS-LABA'] }, { name: 'ICS', aliases: ['ICS'] }, { name: 'SABA', aliases: ['SABA'] },
-    { name: 'LAMA / Tiotropium', aliases: ['LAMA', 'Tiotropium'] }, { name: 'Biologic therapy', aliases: ['Biologic', 'Anti-IgE', 'Anti-IL5', 'Anti-IL4Ra', 'Anti-TSLP'] },
-    { name: 'Oral corticosteroids (OCS)', aliases: ['OCS', 'Oral corticosteroids', 'สเตียรอยด์ชนิดรับประทาน'] }, { name: 'LTRA', aliases: ['LTRA'] },
-    { name: 'Azithromycin', aliases: ['Azithromycin'] }, { name: 'Epinephrine', aliases: ['Epinephrine'] }, { name: 'Fenoterol', aliases: ['Fenoterol'] },
-    { name: 'ยาขยายหลอดลมชนิดรับประทาน', aliases: ['ยาขยายหลอดลมชนิดรับประทาน'] },
+    { name: 'ICS-formoterol', group: 'ยาควบคุมและบรรเทาอาการ', aliases: ['ICS-formoterol', 'formoterol'] }, { name: 'ICS-SABA', group: 'ยาควบคุมและบรรเทาอาการ', aliases: ['ICS-SABA', 'ICS+SABA'] },
+    { name: 'ICS-LABA', group: 'ยาควบคุมและบรรเทาอาการ', aliases: ['ICS-LABA'] }, { name: 'ICS', group: 'ยาควบคุมและบรรเทาอาการ', aliases: ['ICS'] }, { name: 'SABA', group: 'ยาควบคุมและบรรเทาอาการ', aliases: ['SABA'] },
+    { name: 'LAMA / Tiotropium', group: 'ยาเสริมในโรคหืดรุนแรง', aliases: ['LAMA', 'Tiotropium'] }, { name: 'Biologic therapy', group: 'ยาเสริมในโรคหืดรุนแรง', aliases: ['Biologic', 'Anti-IgE', 'Anti-IL5', 'Anti-IL4Ra', 'Anti-TSLP'] },
+    { name: 'Oral corticosteroids (OCS)', group: 'ยาที่ควรระวัง/ไม่แนะนำ', aliases: ['OCS', 'Oral corticosteroids', 'สเตียรอยด์ชนิดรับประทาน'] }, { name: 'LTRA', group: 'ยาเสริมในโรคหืดรุนแรง', aliases: ['LTRA'] },
+    { name: 'Azithromycin', group: 'ยาเสริมในโรคหืดรุนแรง', aliases: ['Azithromycin'] }, { name: 'Epinephrine', group: 'ภาวะฉุกเฉิน', aliases: ['Epinephrine'] }, { name: 'Fenoterol', group: 'ยาที่ควรระวัง/ไม่แนะนำ', aliases: ['Fenoterol'] },
+    { name: 'ยาขยายหลอดลมชนิดรับประทาน', group: 'ยาที่ควรระวัง/ไม่แนะนำ', aliases: ['ยาขยายหลอดลมชนิดรับประทาน'] },
   ],
   sections: [
     { title: 'ผู้ใหญ่/วัยรุ่น Track 1', blocks: [0] }, { title: 'Track 2', blocks: [1] }, { title: 'เด็ก 6-11 ปี', blocks: [2] },

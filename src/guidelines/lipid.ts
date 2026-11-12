@@ -103,14 +103,14 @@ const blocks: Block[] = [
 ];
 
 export const LIPID_GUIDELINE: Guideline = {
-  id: 'lipid', title: 'ไขมันผิดปกติในเลือด (Dyslipidemia)', category: 'โรคหัวใจและหลอดเลือด', accent: '#E08A00', icon: '🧈',
+  id: 'lipid', title: 'ไขมันผิดปกติในเลือด (Dyslipidemia)', category: 'โรคหัวใจ ไต และเมตาบอลิก', accent: '#E08A00', icon: '🧈',
   keywords: ['ไขมัน', 'dyslipidemia', 'LDL', 'statin', 'atorvastatin', 'rosuvastatin', 'simvastatin', 'ezetimibe', 'PCSK9', 'alirocumab', 'evolocumab', 'inclisiran', 'bempedoic', 'fenofibrate', 'gemfibrozil', 'omega-3', 'cholestyramine', 'FH', 'triglyceride', 'rhabdomyolysis'],
   drugs: [
-    { name: 'Statins', aliases: ['statin', 'statins', 'Atorvastatin', 'Rosuvastatin', 'Simvastatin', 'Pravastatin', 'Pitavastatin', 'Fluvastatin', 'Lovastatin'] },
-    { name: 'Ezetimibe', aliases: ['Ezetimibe', 'ezetimibe'] }, { name: 'PCSK9 inhibitors', aliases: ['PCSK9', 'Alirocumab', 'Evolocumab', 'Inclisiran', 'SIRNA'] },
-    { name: 'Bempedoic acid', aliases: ['Bempedoic', 'bempedoic'] }, { name: 'Fibrates', aliases: ['Fibrate', 'fibrate', 'Fenofibrate', 'fenofibrate', 'Gemfibrozil', 'gemfibrozil', 'Pemafibrate'] },
-    { name: 'Cholestyramine', aliases: ['Cholestyramine', 'cholestyramine'] }, { name: 'Omega-3 / EPA', aliases: ['Omega-3', 'omega-3', 'EPA', 'น้ำมันปลา'] },
-    { name: 'Niacin', aliases: ['Niacin', 'niacin'] },
+    { name: 'Statins', group: 'Statin', aliases: ['statin', 'statins', 'Atorvastatin', 'Rosuvastatin', 'Simvastatin', 'Pravastatin', 'Pitavastatin', 'Fluvastatin', 'Lovastatin'] },
+    { name: 'Ezetimibe', group: 'ยาเสริมลด LDL-C', aliases: ['Ezetimibe', 'ezetimibe'] }, { name: 'PCSK9 inhibitors', group: 'ยาเสริมลด LDL-C', aliases: ['PCSK9', 'Alirocumab', 'Evolocumab', 'Inclisiran', 'SIRNA'] },
+    { name: 'Bempedoic acid', group: 'ยาเสริมลด LDL-C', aliases: ['Bempedoic', 'bempedoic'] }, { name: 'Fibrates', group: 'ยาลดไตรกลีเซอไรด์', aliases: ['Fibrate', 'fibrate', 'Fenofibrate', 'fenofibrate', 'Gemfibrozil', 'gemfibrozil', 'Pemafibrate'] },
+    { name: 'Cholestyramine', group: 'ยาเสริมลด LDL-C', aliases: ['Cholestyramine', 'cholestyramine'] }, { name: 'Omega-3 / EPA', group: 'ยาลดไตรกลีเซอไรด์', aliases: ['Omega-3', 'omega-3', 'EPA', 'น้ำมันปลา'] },
+    { name: 'Niacin', group: 'ยาลดไตรกลีเซอไรด์', aliases: ['Niacin', 'niacin'] },
   ],
   source: 'แนวทางเวชปฏิบัติการบำบัดภาวะไขมันผิดปกติในเลือดเพื่อป้องกันโรคหัวใจและหลอดเลือด พ.ศ. 2567',
   cites: [

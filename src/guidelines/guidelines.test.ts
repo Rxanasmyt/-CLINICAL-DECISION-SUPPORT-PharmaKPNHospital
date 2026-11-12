@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { GUIDELINES, reviewState, searchGuidelines, blockLines } from './registry';
 import { TB_GUIDELINE } from './tb';
 import { drugHits, aliasRe } from './drugs';
+import { groupedBlocks, drugGroups } from './groups';
 import { TB_EXTRA_BLOCKS, TB_PASTE_DOSE } from './tb-extra';
 import { REF_TB_BLOCKS, REF_TB_CITES, REF_WF_BLOCKS } from '../data/references';
 import { validateFile, addFile, listFiles, removeFile, MAX_FILE_BYTES, MAX_FILES_PER_GUIDELINE } from './attachments';
@@ -164,6 +165,33 @@ describe('หัวใจล้มเหลว (HFCT 2562)', () => {
     expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
     const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
     for (const t of ['6.25 mg t.i.d.', '122.7 mg/d', '3.125 mg b.i.d.', '12.5–25 mg o.d.', '49/51 มก. วันละ 2 ครั้ง', '97/103', 'อย่างน้อย 36 ชั่วโมง', 'K > 5.2'.replace('K', 'โพแทสเซียม'), 'spironolactone ตั้งแต่ 50 มก./วัน', 'furosemide 20–40 มก.', 'Dobutamine 2–20', 'Milrinone bolus 25–75', 'ตารางที่ 26']) expect(text).toContain(t);
+  });
+});
+
+describe('จัดกลุ่มให้อ่านง่าย', () => {
+  it('หมวดโรคไม่เกิน 3 หมวด และทุกยามีกลุ่ม กลุ่มยาไม่เกิน 7 กลุ่มต่อแนวทาง', () => {
+    expect(new Set(GUIDELINES.map((g) => g.category)).size).toBeLessThanOrEqual(3);
+    for (const g of GUIDELINES) {
+      expect(g.drugs!.every((d) => !!d.group), g.id).toBe(true);
+      expect(drugGroups(g).length, g.id).toBeLessThanOrEqual(7); expect(drugGroups(g).length, g.id).toBeGreaterThanOrEqual(2);
+    }
+  });
+  it('ทุกบล็อกอยู่ในส่วนใดส่วนหนึ่งครั้งเดียว (การรักษา/ความปลอดภัย) และทุกแนวทางมีทั้งสองส่วน', () => {
+    for (const g of GUIDELINES) {
+      const gb = groupedBlocks(g);
+      expect([...gb.treat, ...gb.safety].sort((a, b) => a - b), g.id).toEqual(g.blocks.map((_, i) => i));
+      expect(gb.treat.length, g.id + ' treat').toBeGreaterThan(0); expect(gb.safety.length, g.id + ' safety').toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('AF และ DOACs (แนวทางไทย 2568)', () => {
+  it('หมวดนำทางครอบคลุมทุกบล็อกครั้งเดียว ตัวเลขขนาดยาสำคัญตรงตารางที่ 9, 12, 15 ของต้นฉบับ', () => {
+    const g = GUIDELINES.find((x) => x.id === 'af')!;
+    expect(g.sections.flatMap((x) => x.blocks).sort((a, b) => a - b)).toEqual(g.blocks.map((_, i) => i));
+    expect(g.review.status).toBe('pending'); g.blocks.forEach((b) => expect(b.origin).toMatch(/รอเภสัชกรทบทวน/));
+    const text = g.blocks.flatMap((b) => blockLines(b)).join('\n');
+    for (const t of ['150 มก. BID (ลดเป็น 110 มก. BID ถ้าอายุ ≥ 80 ปี หรือใช้ร่วมกับ verapamil)', '20 มก. QD พร้อมอาหาร (ลดเป็น 15 มก. QD ถ้า CrCl 15–49 มล./นาที)', '5 มก. BID (ลดเป็น 2.5 มก. BID เมื่อเข้า 2 ใน 3 ข้อ', '60 มก. QD (ลดเป็น 30 มก. QD ถ้า CrCl 15–50 มล./นาที', 'ระดับในเลือด ≤ 1.2 ng/mL', '300 มก. IV นาน > 30–60 นาที', 'QTc > 500 ms', 'half-life เฉลี่ย 58 วัน']) expect(text).toContain(t);
   });
 });
 

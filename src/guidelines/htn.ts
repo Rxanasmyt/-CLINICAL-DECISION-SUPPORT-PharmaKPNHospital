@@ -108,18 +108,18 @@ const blocks: Block[] = [
 ];
 
 export const HTN_GUIDELINE: Guideline = {
-  id: 'htn', title: 'ความดันโลหิตสูง (Hypertension)', category: 'โรคหัวใจและหลอดเลือด', accent: '#E5483A', icon: '❤️',
+  id: 'htn', title: 'ความดันโลหิตสูง (Hypertension)', category: 'โรคหัวใจ ไต และเมตาบอลิก', accent: '#E5483A', icon: '❤️',
   keywords: ['ความดัน', 'hypertension', 'HT', 'ACEI', 'ARB', 'CCB', 'thiazide', 'chlorthalidone', 'indapamide', 'beta-blocker', 'spironolactone', 'ARNI', 'amlodipine', 'resistant', 'SPC', 'preeclampsia', 'labetalol', 'nifedipine', 'hydralazine'],
   drugs: [
-    { name: 'ACEI', aliases: ['ACEI', 'ACEIs', 'ACEi'] }, { name: 'ARB', aliases: ['ARB'] }, { name: 'CCB (DHP / non-DHP)', aliases: ['CCB', 'DHP-CCB', 'non-DHP-CCB'] },
-    { name: 'Thiazide / thiazide-like', aliases: ['thiazide', 'chlorthalidone', 'indapamide'] }, { name: 'Loop diuretic', aliases: ['Loop diuretic'] },
-    { name: 'Beta-blocker', aliases: ['Beta-blocker', 'beta-blocker'] }, { name: 'Spironolactone / MRA', aliases: ['spironolactone', 'MRA', 'mineralocorticoid'] },
-    { name: 'ARNI', aliases: ['ARNI'] }, { name: 'SGLT2i / GLP1-RA', aliases: ['SGLT2i', 'GLP1-RA'] },
-    { name: 'Hydralazine', aliases: ['Hydralazine'] }, { name: 'Nifedipine', aliases: ['Nifedipine'] }, { name: 'Labetalol', aliases: ['Labetalol'] },
-    { name: 'Aspirin (ป้องกัน preeclampsia)', aliases: ['Aspirin'] },
-    { name: 'Nitroglycerin / Nitroprusside', aliases: ['Nitroglycerin', 'nitroprusside'] }, { name: 'Nicardipine', aliases: ['Nicardipine'] }, { name: 'Esmolol', aliases: ['Esmolol'] },
-    { name: 'Eplerenone', aliases: ['eplerenone'] }, { name: 'Hydralazine / Minoxidil', aliases: ['hydralazine', 'minoxidil'] },
-    { name: 'ยาที่เพิ่มความดัน (NSAIDs ฯลฯ)', aliases: ['NSAIDs', 'Glucocorticoids', 'Sympathomimetic'] },
+    { name: 'ACEI', group: 'ยาลดความดันกลุ่มหลัก', aliases: ['ACEI', 'ACEIs', 'ACEi'] }, { name: 'ARB', group: 'ยาลดความดันกลุ่มหลัก', aliases: ['ARB'] }, { name: 'CCB (DHP / non-DHP)', group: 'ยาลดความดันกลุ่มหลัก', aliases: ['CCB', 'DHP-CCB', 'non-DHP-CCB'] },
+    { name: 'Thiazide / thiazide-like', group: 'ยาลดความดันกลุ่มหลัก', aliases: ['thiazide', 'chlorthalidone', 'indapamide'] }, { name: 'Loop diuretic', group: 'ยาเสริม/ความดันดื้อยา', aliases: ['Loop diuretic'] },
+    { name: 'Beta-blocker', group: 'ยาลดความดันกลุ่มหลัก', aliases: ['Beta-blocker', 'beta-blocker'] }, { name: 'Spironolactone / MRA', group: 'ยาเสริม/ความดันดื้อยา', aliases: ['spironolactone', 'MRA', 'mineralocorticoid'] },
+    { name: 'ARNI', group: 'ยาเสริม/ความดันดื้อยา', aliases: ['ARNI'] }, { name: 'SGLT2i / GLP1-RA', group: 'ยาเสริม/ความดันดื้อยา', aliases: ['SGLT2i', 'GLP1-RA'] },
+    { name: 'Hydralazine', group: 'ยาฉุกเฉินและตั้งครรภ์', aliases: ['Hydralazine'] }, { name: 'Nifedipine', group: 'ยาฉุกเฉินและตั้งครรภ์', aliases: ['Nifedipine'] }, { name: 'Labetalol', group: 'ยาฉุกเฉินและตั้งครรภ์', aliases: ['Labetalol'] },
+    { name: 'Aspirin (ป้องกัน preeclampsia)', group: 'ยาฉุกเฉินและตั้งครรภ์', aliases: ['Aspirin'] },
+    { name: 'Nitroglycerin / Nitroprusside', group: 'ยาฉุกเฉินและตั้งครรภ์', aliases: ['Nitroglycerin', 'nitroprusside'] }, { name: 'Nicardipine', group: 'ยาฉุกเฉินและตั้งครรภ์', aliases: ['Nicardipine'] }, { name: 'Esmolol', group: 'ยาฉุกเฉินและตั้งครรภ์', aliases: ['Esmolol'] },
+    { name: 'Eplerenone', group: 'ยาเสริม/ความดันดื้อยา', aliases: ['eplerenone'] }, { name: 'Hydralazine / Minoxidil', group: 'ยาเสริม/ความดันดื้อยา', aliases: ['hydralazine', 'minoxidil'] },
+    { name: 'ยาที่เพิ่มความดัน (NSAIDs ฯลฯ)', group: 'ยาที่เพิ่มความดัน', aliases: ['NSAIDs', 'Glucocorticoids', 'Sympathomimetic'] },
   ],
   source: 'แนวทางการรักษาโรคความดันโลหิตสูงในเวชปฏิบัติทั่วไป พ.ศ. 2567 · สมาคมความดันโลหิตสูงแห่งประเทศไทย',
   cites: [
