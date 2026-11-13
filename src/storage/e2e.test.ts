@@ -120,6 +120,32 @@ describe('รายการที่ใหญ่เกิน ไม่ขวา
   });
 });
 
+describe('แถวในชีตที่ถูกแก้มือจนเสีย ไม่ทำให้เครื่องอื่นพัง', () => {
+  it('แถวที่ไม่มีรหัส หรือเวลาไม่ใช่ตัวเลข ถูกข้าม ไม่ทำให้ cursor เป็น NaN และเคสปกติยังมาถึง', async () => {
+    const w = world(); const A = await w.device();
+    const raw = (o: any) => JSON.parse(w.env.ctx.doPost({ postData: { contents: JSON.stringify({ token: TOKEN, ...o }) } }).s);
+    raw({ action: 'push', collection: 'adr_cases', records: [{ updatedAt: 1, data: { x: 1 } }, { id: 'bad-time', updatedAt: 'abc', data: {} }, { id: 'ok-1', updatedAt: Date.now(), summary: {}, data: adrCase('77') }] });
+    await A.engine.syncNow();
+    expect(A.engine.state).toMatchObject({ kind: 'synced' });
+    const list = A.store.getJson<any[]>('adrCases.v1', []);
+    expect(list.map((c) => String(c.cid))).toEqual(['77']);
+    expect(Number.isFinite(A.store.getCursor('adr_cases'))).toBe(true);
+    expect(A.store.pendingCount()).toBe(0);
+  });
+});
+
+describe('แถวในชีตที่ข้อมูลว่าง (ไม่ได้ถูกลบ) ต้องไม่ลบเคสในเครื่อง', () => {
+  it('เซลล์ข้อมูลถูกล้างด้วยมือโดยไม่ได้ติ๊กลบ → เครื่องอื่นยังเก็บเคสไว้', async () => {
+    const w = world(); const A = await w.device(); const B = await w.device();
+    A.store.setJson('adrCases.v1', [adrCase('501')]); await A.engine.syncNow(); await B.engine.syncNow();
+    expect(B.store.getJson<any[]>('adrCases.v1', []).length).toBe(1);
+    const raw = (o: any) => JSON.parse(w.env.ctx.doPost({ postData: { contents: JSON.stringify({ token: TOKEN, ...o }) } }).s);
+    raw({ action: 'push', collection: 'adr_cases', records: [{ id: '501', updatedAt: Date.now() + 5000, deleted: false, summary: {}, data: null }] });
+    await B.engine.syncNow();
+    expect(B.store.getJson<any[]>('adrCases.v1', []).length).toBe(1);
+  });
+});
+
 describe('การลบ (PDPA)', () => {
   it('ลบเคสในแอป → แถวในชีตถูกล้างข้อมูลทางคลินิกทั้งหมด เหลือเพียงรหัสและเครื่องหมาย "ลบแล้ว"', async () => {
     const w = world(); const A = await w.device();
