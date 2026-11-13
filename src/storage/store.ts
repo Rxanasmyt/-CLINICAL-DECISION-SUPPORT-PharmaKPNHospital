@@ -129,6 +129,7 @@ export class Store {
     const writes: RecRow[] = [];
     const audits: AuditRow[] = [];
     for (const r of records) {
+      if (!r || !r.id || !Number.isFinite(r.updatedAt) || (!r.deleted && r.data == null)) continue;   // รายการที่เสียจากปลายทาง (ไม่มีรหัส/เวลา หรือไม่ถูกลบแต่ไม่มีข้อมูล) ไม่นำมารวม ไม่ให้ไปลบข้อมูลในเครื่อง
       maxT = Math.max(maxT, r.updatedAt);
       const pk = pkOf(collection, r.id), local = this.rec.get(pk);
       if (local && local.updatedAt >= r.updatedAt) { if (local.updatedAt === r.updatedAt && local.pushedAt < r.updatedAt) { const n = { ...local, pushedAt: r.updatedAt }; this.rec.set(pk, n); writes.push(n); } continue; }

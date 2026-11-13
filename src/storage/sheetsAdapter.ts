@@ -43,7 +43,10 @@ export class SheetsAdapter implements StorageAdapter {
 
   async list(collection: CollectionName, since = 0): Promise<StoredRecord[]> {
     const j = await this.call({ action: 'pull', collection, since });
-    return (j.records || []).map((r: any) => ({ collection, id: String(r.id), updatedAt: Number(r.updatedAt), deleted: !!r.deleted, data: r.data }));
+    // ข้ามแถวที่เสีย (ไม่มีรหัส หรือเวลาไม่ใช่ตัวเลข — เช่น มีคนแก้ชีตด้วยมือ) ไม่ให้สร้างเคสผีหรือทำให้ cursor เป็น NaN
+    return (j.records || [])
+      .filter((r: any) => r && r.id != null && String(r.id).trim() !== '' && String(r.id) !== 'undefined' && Number.isFinite(Number(r.updatedAt)))
+      .map((r: any) => ({ collection, id: String(r.id), updatedAt: Number(r.updatedAt), deleted: !!r.deleted, data: r.data }));
   }
 
   async get(collection: CollectionName, id: string) {
