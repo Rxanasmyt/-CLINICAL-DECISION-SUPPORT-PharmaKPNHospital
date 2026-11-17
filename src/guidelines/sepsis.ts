@@ -79,7 +79,7 @@ export const SEPSIS_GUIDELINE: Guideline = {
   cites: [
     'Evans L, Rhodes A, Alhazzani W, et al. Surviving sepsis campaign: international guidelines for management of sepsis and septic shock 2021. Intensive Care Med. 2021;47:1181–1247. doi:10.1007/s00134-021-06506-y · PMC8486643 · open access · https://pmc.ncbi.nlm.nih.gov/articles/PMC8486643/',
     'สรุปเป็นภาษาไทยจากข้อแนะนำที่ 5–9, 11–23, 25–31, 32–44, 58, 63–66, 69–72 และตารางที่ 3 ของบทความ (ไม่มีเลขหน้าพิมพ์ อ้างตามเลขข้อแนะนำ) · ระดับคำแนะนำ (strong/weak/best practice) และคุณภาพหลักฐานตามต้นฉบับ',
-    'ยังไม่ครอบคลุม: การช่วยหายใจ/ARDS, RRT, โภชนาการ, การดูแลหลังออกจาก ICU, sepsis ในเด็ก/ตั้งครรภ์ (ต้นฉบับมีแยก) และขนาดยาต้านจุลชีพรายตัว ซึ่งต้นฉบับไม่ได้กำหนด',
+    'ยังไม่ครอบคลุม: การช่วยหายใจ/ARDS, RRT, โภชนาการ, การดูแลหลังออกจาก ICU, และขนาดยาต้านจุลชีพรายตัว ซึ่งต้นฉบับไม่ได้กำหนด',
   ],
   summary: [
     'Septic shock หรือโอกาส sepsis สูง: ให้ยาต้านจุลชีพทันที ภายใน 1 ชม. · ไม่ช็อก: ภายใน 3 ชม.',

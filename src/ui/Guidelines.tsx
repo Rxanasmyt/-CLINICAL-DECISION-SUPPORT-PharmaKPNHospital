@@ -6,6 +6,7 @@ import { drugHits, DRUG_KIND_ORDER } from '../guidelines/drugs';
 import { blockGroup, groupedBlocks, drugGroups } from '../guidelines/groups';
 import type { DrugKind } from '../guidelines/drugs';
 import { addFile, fmtSize, listFiles, removeFile } from '../guidelines/attachments';
+import { CODE, DOI_CHECKED_AT, EVIDENCE, LEVEL_LABEL, VERIFIED_DOI, groupCites, linkify } from '../guidelines/evidence';
 import { store } from '../storage';
 import type { FileRow } from '../storage/db';
 
@@ -133,6 +134,38 @@ function Attachments({ g }: { g: Guideline }) {
     </div>);
 }
 
+/** ป้ายระดับหลักฐานและสถานะทบทวน (ใช้ทั้งหัวการ์ดและรายการ) */
+function EvBadges({ g, rs }: { g: Guideline; rs: string }) {
+  const ev = EVIDENCE[g.id];
+  return (
+    <span className="glbadges">
+      {ev && <span className={'glev lv-' + ev.level}>{LEVEL_LABEL[ev.level]}</span>}
+      <span className={'glev ' + (rs === 'ok' ? 'rv-ok' : 'rv-pending')}>{rs === 'ok' ? 'ทบทวนโดยเภสัชกรแล้ว' : 'รอเภสัชกรทบทวน'}</span>
+    </span>);
+}
+
+function Linked({ text }: { text: string }) {
+  return <>{linkify(text).map((s, i) => s.href
+    ? <a key={i} href={s.href} target="_blank" rel="noopener noreferrer">{s.t}{s.verified ? <span className="glchk" title={'ตรวจ DOI กับ Europe PMC แล้ว ' + DOI_CHECKED_AT}> ✓</span> : null}</a>
+    : <span key={i}>{s.t}</span>)}</>;
+}
+
+/** แท็บอ้างอิง: แหล่งอ้างอิง (ลิงก์ตรวจสอบได้) · การตรวจสอบเนื้อหา · ข้อจำกัด · สถานะการทบทวน */
+function Evidence({ g, rs }: { g: Guideline; rs: string }) {
+  const ev = EVIDENCE[g.id]; const c = groupCites(g);
+  const checked = c.references.flatMap((r) => linkify(r)).filter((x) => x.verified).length;
+  return (
+    <div className="glevd">
+      {ev && <section><h3>ระดับหลักฐาน</h3><p><span className={'glev lv-' + ev.level}>{LEVEL_LABEL[ev.level]}</span></p><p>{ev.basis}</p></section>}
+      <section><h3>แหล่งอ้างอิง</h3>
+        <ol className="glcites">{c.references.map((t, i) => <li key={i}><Linked text={t} /></li>)}</ol>
+        {checked > 0 && <p className="muted">เครื่องหมาย ✓ = ตรวจ DOI กับฐานข้อมูล Europe PMC แล้วว่าตรงกับชื่อบทความ ปี และวารสาร (ตรวจเมื่อ {DOI_CHECKED_AT})</p>}</section>
+      {c.verification.length > 0 && <section><h3>การตรวจสอบเนื้อหาและข้อสังเกตต่อต้นฉบับ</h3><ul className="glcites">{c.verification.map((t, i) => <li key={i}>{t}</li>)}</ul></section>}
+      {c.limits.length > 0 && <section><h3>ข้อจำกัดและส่วนที่ไม่ครอบคลุม</h3><ul className="glcites">{c.limits.map((t, i) => <li key={i}>{t}</li>)}</ul></section>}
+      <section><h3>สถานะการทบทวน</h3><p>{rs === 'ok' ? 'ทบทวนโดย ' + g.review.reviewer + (g.review.reviewedAt ? ' · ' + g.review.reviewedAt : '') : 'อยู่ระหว่างการทบทวนโดยเภสัชกร — ใช้ประกอบการตัดสินใจ ไม่ใช้แทนดุลยพินิจทางวิชาชีพ'}</p></section>
+    </div>);
+}
+
 function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m: string) => void }) {
   const [tab, setTab] = useState('ภาพรวม');
   const rs = reviewState(g.review, today());
@@ -149,7 +182,7 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
     <div className="glcard" style={{ ...({ '--gl': g.accent || '#0F5D57' } as React.CSSProperties) }}>
       <button type="button" className="glback" onClick={back}>← รายการแนวทาง</button>
       <header className="glhead">
-        <span className="glicon" aria-hidden="true">{g.icon || '💊'}</span><div><span className="glcat">{g.category}</span><h2>{g.title}</h2><p className="muted">{g.source}</p></div>
+        <span className="glicon" aria-hidden="true">{CODE[g.id] || 'Rx'}</span><div><span className="glcat">{g.category}</span><h2>{g.title}</h2><p className="muted">{g.source}</p><EvBadges g={g} rs={rs.kind} /></div>
       </header>
       {g.calc && <button type="button" className="glbtn pri" onClick={() => goCalc(g.calc!.mode)}>{g.calc.label} →</button>}
       <nav className="gltabs" role="tablist">{tabs.map((t) => <button key={t} type="button" role="tab" aria-selected={tab === t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>{t}</button>)}</nav>
@@ -157,7 +190,7 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
       {tab === 'ยา' && <DrugTab g={g} pick={drugPick} setPick={setDrugPick} goBlock={goBlock} />}
       {tab === 'การรักษา' && <Accordion g={g} ids={gb.treat} openMap={openMap} setOpen={setOpenMap} />}
       {tab === 'ความปลอดภัย' && <Accordion g={g} ids={gb.safety} openMap={openMap} setOpen={setOpenMap} />}
-      {tab === 'อ้างอิง' && <><ol className="glcites">{g.cites.map((c, i) => <li key={i}>{c}</li>)}</ol><p className="muted glstatus">{rs.kind === 'ok' ? 'ทบทวนโดย ' + g.review.reviewer + (g.review.reviewedAt ? ' · ' + g.review.reviewedAt : '') : 'อยู่ระหว่างการทบทวนโดยเภสัชกร'}</p></>}
+      {tab === 'อ้างอิง' && <Evidence g={g} rs={rs.kind} />}
       {tab === 'ไฟล์แนบ' && <Attachments g={g} />}
     </div>);
 }
@@ -185,7 +218,7 @@ export function GuidelineLibrary({ goCalc }: { goCalc: (mode: string) => void })
         <section key={c}><h3 className="glcat2">{c}</h3>
           <div className="glgrid">{GUIDELINES.filter((x) => x.category === c).map((x) => { return (
             <button key={x.id} type="button" className="glitem" style={{ ...({ '--gl': x.accent || '#0F5D57' } as React.CSSProperties) }} onClick={() => setOpen(x.id)}>
-              <span className="glicon" aria-hidden="true">{x.icon || '💊'}</span><b>{x.title}</b><span>{x.source}</span></button>); })}</div></section>))}
+              <span className="glicon" aria-hidden="true">{CODE[x.id] || 'Rx'}</span><b>{x.title}</b><span>{x.source}</span><EvBadges g={x} rs={reviewState(x.review, today()).kind} /></button>); })}</div></section>))}
       {!q.trim() && <p className="muted">ตอนนี้มีแนวทาง {GUIDELINES.length} เรื่อง — เพิ่มโรคอื่นตามลำดับความสำคัญของ รพ.</p>}
     </div>);
 }
