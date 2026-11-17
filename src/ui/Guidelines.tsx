@@ -197,7 +197,7 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
     </div>);
 }
 
-const TOP_VIEWS: [string, string][] = [['gl', 'แนวทางรายโรค'], ['drug', 'ข้อมูลยาในบัญชี'], ['di', 'ตรวจอันตรกิริยา (DI)']];
+const TOP_VIEWS: [string, string][] = [['gl', 'แนวทางรายโรค'], ['drug', 'ข้อมูลยา'], ['di', 'ตรวจอันตรกิริยา']];
 export function GuidelineLibrary({ goCalc }: { goCalc: (mode: string) => void }) {
   const [top, setTop] = useState('gl');
   return (

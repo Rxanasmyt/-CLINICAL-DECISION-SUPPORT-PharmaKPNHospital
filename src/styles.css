@@ -316,3 +316,65 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .dok{padding:10px 12px;background:#FFF4D6;border-radius:10px;color:#5c3b00}
 .dgl{padding:8px 12px;border-radius:10px;background:#E3F3EA;color:#14532D;font-size:14px}
 .glev.rg-foreign{background:#FDECEA;color:#8B1D14;border-color:#F1B1AA}
+.drich p{margin:0 0 7px;line-height:1.65;font-size:14.5px}
+.drich h5{margin:12px 0 4px;font-size:14px;color:#0E3F3B}
+.dbul{padding-left:10px}
+.dnum{background:#FFF4D6;border-radius:4px;padding:0 3px;color:#5c3b00}
+.dsec>.drich{padding:0 12px 10px}
+.dsec>.dtrn{padding:0 12px}
+.dsec>.glbtn{margin:0 12px 10px}
+
+/* ข้อมูลยา: โฉมใหม่ — การ์ดสีตามชนิดหัวข้อ แท็บลัด แบนเนอร์ความปลอดภัย */
+.dhead{padding:14px 16px;border-radius:14px;margin:6px 0 12px;color:#fff;background:linear-gradient(135deg,#0E3F3B,#1F7A70)}
+.dhead.had{background:linear-gradient(135deg,#7A1F16,#C0392B)}
+.dhead h3{margin:0 0 8px;font-size:19px;line-height:1.35;color:#fff}
+.dhead .tg{background:rgba(255,255,255,.92)}
+.dwarn{padding:10px 12px;border-radius:10px;background:#FFF4D6;border:1px solid #EBC96A;color:#5c3b00;font-size:13.5px;line-height:1.55;margin:0 0 10px}
+.dpick{display:grid;gap:6px;margin:0 0 10px}
+.dpick small{color:#5b6b66}
+.dpick button{text-align:left;padding:8px 10px;border:1px solid #D9DED8;border-radius:10px;background:#fff;font:inherit;cursor:pointer;display:grid;gap:2px}
+.dpick button.on{border-color:#0E3F3B;box-shadow:0 0 0 2px rgba(14,63,59,.18);background:#F2F8F6}
+.dpick span{font-size:12.5px;color:#5b6b66}
+.dtabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;margin:0 0 4px;position:sticky;top:0;z-index:5;background:linear-gradient(#F4F1EA 80%,transparent)}
+.dt{flex:none;display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid var(--sc-b);background:var(--sc-bg);color:var(--sc-c);font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.dsdot{width:9px;height:9px;border-radius:50%;background:var(--sc-c);flex:none;display:inline-block}
+.sc-danger{--sc-c:#B42318;--sc-bg:#FDECEA;--sc-b:#F1B1AA}
+.sc-info{--sc-c:#0F766E;--sc-bg:#E2F4F1;--sc-b:#9AD3CB}
+.sc-dose{--sc-c:#4338CA;--sc-bg:#E9E8FB;--sc-b:#B7B3EE}
+.sc-warn{--sc-c:#B45309;--sc-bg:#FFF1DC;--sc-b:#EBC287}
+.sc-ae{--sc-c:#BE185D;--sc-bg:#FCE7F1;--sc-b:#F0AECB}
+.sc-ddi{--sc-c:#C2410C;--sc-bg:#FFE9DB;--sc-b:#F0B898}
+.sc-pop{--sc-c:#1D4ED8;--sc-bg:#E4ECFD;--sc-b:#A9BFF0}
+.sc-ovd{--sc-c:#7E22CE;--sc-bg:#F1E6FB;--sc-b:#CFB0EE}
+.sc-gen{--sc-c:#475569;--sc-bg:#EEF1F4;--sc-b:#CBD0D8}
+.dsec{border:1px solid var(--sc-b);border-left:5px solid var(--sc-c);background:#fff;scroll-margin-top:56px}
+.dsec>summary{display:flex;align-items:center;gap:8px;background:var(--sc-bg);color:var(--sc-c);font-weight:700;list-style:none}
+.dsec>summary::-webkit-details-marker{display:none}
+.dsec>summary::after{content:"▾";margin-left:auto;transition:.2s}
+.dsec[open]>summary::after{transform:rotate(180deg)}
+.dsec[open]>summary{border-bottom:1px solid var(--sc-b)}
+.drich{padding-top:8px}
+.drich h5{color:var(--sc-c)}
+.dnum{background:var(--sc-bg);color:var(--sc-c)}
+
+/* ความสม่ำเสมอของโทนทางการ: โฟกัสแป้นพิมพ์ การเคลื่อนไหวเบา ๆ และเคารพการตั้งค่าลดการเคลื่อนไหว */
+.ddetail,.ddi,.gllib,.gltop{--gl:#0E3F3B}
+.glseg{flex-wrap:nowrap}
+.glseg button{flex:1 1 0;min-width:0;padding:9px 6px;font-size:14px;white-space:nowrap;transition:background .2s,color .2s}
+:where(button,a,input,select,textarea,summary):focus-visible{outline:2px solid #0E3F3B;outline-offset:2px;border-radius:6px}
+:where(button):not(:disabled){transition:transform .12s ease,background-color .2s ease,box-shadow .2s ease,border-color .2s ease}
+:where(button):not(:disabled):active{transform:scale(.98)}
+@keyframes dfade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.dsec[open]>.drich,.dsec[open]>.dtrn,.dpair,.dlist li,.ddetail>.dhead{animation:dfade .22s ease both}
+.dsec>summary{transition:background-color .2s}
+.dsec>summary:hover{filter:brightness(.98)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;scroll-behavior:auto !important}}
+.draw{font-size:12.5px}
+.drawtxt{white-space:pre-wrap;word-break:break-word;font-size:12.5px;line-height:1.55;background:#F6F7F4;border-radius:8px;padding:10px 12px;margin:6px 12px 10px;max-height:340px;overflow:auto}
+.dflt{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px}
+.dflt button{flex:none;padding:5px 12px;border-radius:999px;border:1px solid #CBD0D8;background:#fff;font:inherit;font-size:13px;font-weight:600;color:#365;cursor:pointer;white-space:nowrap}
+.dflt button.on{background:#0E3F3B;color:#fff;border-color:#0E3F3B}
+.dcount{margin:2px 0 6px}
+.dgen{color:#0F766E;font-size:13px;font-weight:600}
+.dlist button.had{border-left:4px solid #C0392B}
+.dlist button:hover{border-color:#0E3F3B;box-shadow:0 2px 8px rgba(14,63,59,.1)}

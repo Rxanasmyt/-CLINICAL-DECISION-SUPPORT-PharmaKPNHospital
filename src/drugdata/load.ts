@@ -18,6 +18,9 @@ function get<T>(path: string): Promise<T> {
 }
 export const loadIndex = () => get<DrugIndex>('index.json');
 export const loadMonograph = (slug: string) => get<Monograph>('monographs/' + slug + '.json');
+/** คำแปลภาษาไทยของบางหัวข้อ (ไม่บังคับมี) — ใช้เมื่อ setid ตรงกับฉลากที่แสดงเท่านั้น */
+export interface ThaiSections { setid: string; note: string; sections: Record<string, string> }
+export const loadThai = (slug: string) => get<ThaiSections>('th/' + slug + '.json');
 export const loadShard = (slug: string) => get<Shard>('di/' + slug + '.json');
 
 export const dailyMedUrl = (setid: string) => 'https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=' + encodeURIComponent(setid);
