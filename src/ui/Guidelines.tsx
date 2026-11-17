@@ -7,6 +7,7 @@ import { blockGroup, groupedBlocks, drugGroups } from '../guidelines/groups';
 import type { DrugKind } from '../guidelines/drugs';
 import { addFile, fmtSize, listFiles, removeFile } from '../guidelines/attachments';
 import { CODE, DOI_CHECKED_AT, EVIDENCE, LEVEL_LABEL, VERIFIED_DOI, groupCites, linkify } from '../guidelines/evidence';
+import { DiChecker, DrugList } from './DrugInfo';
 import { store } from '../storage';
 import type { FileRow } from '../storage/db';
 
@@ -195,7 +196,19 @@ function Card({ g, back, goCalc }: { g: Guideline; back: () => void; goCalc: (m:
     </div>);
 }
 
+const TOP_VIEWS: [string, string][] = [['gl', 'แนวทางรายโรค'], ['drug', 'ข้อมูลยาในบัญชี'], ['di', 'ตรวจอันตรกิริยา (DI)']];
 export function GuidelineLibrary({ goCalc }: { goCalc: (mode: string) => void }) {
+  const [top, setTop] = useState('gl');
+  return (
+    <div className="gltop">
+      <nav className="glseg" role="tablist" aria-label="เลือกหมวด">{TOP_VIEWS.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={top === k} className={top === k ? 'on' : ''} onClick={() => setTop(k)}>{l}</button>)}</nav>
+      {top === 'gl' && <Guidelines goCalc={goCalc} />}
+      {top === 'drug' && <section className="gllib"><h2>ข้อมูลยาในบัญชี</h2><DrugList /></section>}
+      {top === 'di' && <section className="gllib"><h2>ตรวจอันตรกิริยาระหว่างยา</h2><DiChecker /></section>}
+    </div>);
+}
+
+function Guidelines({ goCalc }: { goCalc: (mode: string) => void }) {
   const [q, setQ] = useState(''); const [open, setOpen] = useState<string | null>(null);
   const res = useMemo(() => searchGuidelines(q), [q]);
   const g = GUIDELINES.find((x) => x.id === open);
