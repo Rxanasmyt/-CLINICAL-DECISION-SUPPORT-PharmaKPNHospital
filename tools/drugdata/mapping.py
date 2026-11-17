@@ -5,7 +5,7 @@ import urllib.parse
 RX='https://rxnav.nlm.nih.gov/REST/'
 THAI=re.compile(r'[฀-๿]')
 LEAD=re.compile(r'^\s*[\d.,]+\s*(mg|ml|g|%|mcg|iu|mu|unit|units|กรัม|มก)\.?\s*',re.I)
-STOP=r'\b(PL|CV|GPO|NED|DUE|NB|new|refer back|inj\.?|injection|solution|susp\w*|syrup|syr|sry|tablet|tab\.?|cap\w*|vial|amphule|amp|cream|ointment|oint\.?|lotion|drops?|eye|ear|oral|film|coated|SR|XR|ER|CR|MR|DR|OD|ODT|EC|FC|tablets|capsules|powder|for|and|in|with|inhaler|MDI|nebulizer|vaccines?|vaginal|vagina|troche|paste|irrigation|mouth wash)\b'
+STOP=r'\b(PL|CV|GPO|NED|DUE|NB|new|refer back|inj\.?|injection|solution|susp\w*|syrup|syr|sry|tablet|tab\.?|capsules?|caps?|vial|amphule|amp|cream|ointment|oint\.?|lotion|drops?|eye|ear|oral|film|coated|SR|XR|ER|CR|MR|DR|OD|ODT|EC|FC|tablets|capsules|powder|for|and|in|with|inhaler|MDI|nebulizer|vaccines?|vaginal|vagina|troche|paste|irrigation|mouth wash)\b'
 def clean(name):
     s=name
     for _ in range(3): s=LEAD.sub('',s)
@@ -25,11 +25,14 @@ MANUAL={
  'OXYTOCIN Syntocinon':['oxytocin'],'Rifafour e':['rifampin','isoniazid','pyrazinamide','ethambutol'],'SALBUTAMOL SULFATE NB':['albuterol'],'Spiolto Respimat':['tiotropium','olodaterol'],
  'spiriva handihaler':['tiotropium'],'Tazocin':['piperacillin','tazobactam'],'TRIAMCINOLONE PASTE KENALOG':['triamcinolone'],'Utrogestan':['progesterone'],'Xylocaine viscous':['lidocaine'],
  'simeTHICONE SUS':['simethicone'],'Novomix':['insulin aspart'],'Mixtard':['insulin human'],'GENSULIN N':['insulin human'],'MIXED INSULIN':['insulin human'],
- 'Berodual NB':['ipratropium'],'berODUAL MDI':['ipratropium'],'Seretide accuhaler':['fluticasone','salmeterol'],'Amoxi clav':['amoxicillin','clavulanate'],
+ 'Anoro ellipta':['umeclidinium','vilanterol'],'Duocetz':['tramadol','acetaminophen'],'DTG 3TC TDF':['dolutegravir','lamivudine','tenofovir disoproxil'],'GPO VIR S30':['nevirapine','lamivudine','stavudine'],'R den':['ethinyl estradiol','levonorgestrel'],'seretide evohaler':['fluticasone','salmeterol'],'SALBUTAMOL Ventolin':['albuterol'],'Berodual NB':['ipratropium'],'berODUAL MDI':['ipratropium'],'Seretide accuhaler':['fluticasone','salmeterol'],'Amoxi clav':['amoxicillin','clavulanate'],
 }
 SYN={'salbutamol':'albuterol','paracetamol':'acetaminophen','adrenaline':'epinephrine','noradrenaline':'norepinephrine','pethidine':'meperidine','frusemide':'furosemide','glibenclamide':'glyburide','lignocaine':'lidocaine','rifampicin':'rifampin','benzhexol':'trihexyphenidyl','ceftriazone':'ceftriaxone','ethambutal':'ethambutol','doxazocin':'doxazosin','dicloxacillin':'dicloxacillin','cpz':'chlorpromazine','ptu':'propylthiouracil','pza':'pyrazinamide','hctz':'hydrochlorothiazide','epo':'epoetin','azt':'zidovudine','kcl':'potassium chloride'}
 def syn(t):
     return ' '.join(SYN.get(w.lower(),w) for w in t.split())
+def flat(s):
+    """เทียบชื่อแบบไม่สนช่องว่างซ้ำ/ขีด/จุด (บัญชียาพิมพ์ไม่สม่ำเสมอ)"""
+    return re.sub(r'[\s\-\._,]+',' ',s).strip().lower()
 def tokens(s): return [t for t in re.findall(r'[a-z]{4,}',s.lower())]
 def plausible(term,ing):
     """การจับคู่แบบประมาณรับเมื่อชื่อสารตรงกับคำในชื่อจริง ๆ (ไม่ใช่เดาจากความคล้ายของตัวอักษร)"""

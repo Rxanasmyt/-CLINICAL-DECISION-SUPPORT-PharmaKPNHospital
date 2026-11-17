@@ -34,9 +34,10 @@ def read_items(path):
     return items
 
 def map_item(it):
-    n=it['name']
+    n=it['name']; nn=M.flat(n)
     for k,v in M.MANUAL.items():
-        if n.lower().startswith(k.lower()) or k.lower() in n.lower().split(' - ')[0].lower():
+        kk=M.flat(k)
+        if nn.startswith(kk):
             return {'status':'manual','ingredients':[{'name':x} for x in v]}
     if M.NONLABEL.search(n): return {'status':'nonlabel','why':'วัคซีน/อิมมูโนโกลบูลิน/สารน้ำ/ผลิตภัณฑ์เฉพาะที่หรืออื่น ๆ — ไม่มีฉลากรายสารออกฤทธิ์ให้ตรวจ'}
     if not re.search(r'[A-Za-z]{3}',n): return {'status':'herbal','why':'ผลิตภัณฑ์ชื่อภาษาไทย (สมุนไพร/อื่น ๆ) — ใช้แหล่งข้อมูลของไทย ไม่ใช่ฉลาก FDA'}

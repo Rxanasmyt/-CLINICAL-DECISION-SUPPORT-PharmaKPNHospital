@@ -25,7 +25,7 @@ function Search({ idx, onPick, placeholder }: { idx: DrugIndex; onPick: (it: Dru
       <ul className="dlist">{res.slice(0, max).map((it) => (
         <li key={it.no}><button type="button" onClick={() => onPick(it)}>
           <b>{it.name}</b><small>{it.form || '—'} · {it.unit || '—'}</small>
-          <span className="dtags">{it.had && <em className="tg had">HAD</em>}{it.notInFormulary && <em className="tg off">ไม่อยู่ในบัญชี รพ.</em>}<em className={'tg ' + (hasData(it) ? 'ok' : 'no')}>{hasData(it) ? 'มีข้อมูลฉลาก' : STATUS_TH[it.status] || '—'}</em></span>
+          <span className="dtags">{it.had && <em className="tg had">HAD</em>}{it.notInFormulary && <em className="tg off" title="ยานอกบัญชี รพ. ที่ยังต้องสั่งต่อเมื่อผู้ป่วยได้รับมาจากโรงพยาบาลอื่น (refer)">นอกบัญชี · ยาเดิมจาก refer</em>}<em className={'tg ' + (hasData(it) ? 'ok' : 'no')}>{hasData(it) ? 'มีข้อมูลฉลาก' : STATUS_TH[it.status] || '—'}</em></span>
         </button></li>))}</ul>
       {res.length > max && <button type="button" className="glbtn" onClick={() => setMax(max + 60)}>แสดงเพิ่ม</button>}
     </div>);
@@ -56,7 +56,7 @@ function Detail({ it, onBack }: { it: DrugItem; onBack: () => void }) {
     <div className="ddetail">
       <button type="button" className="glback" onClick={onBack}>← รายการยา</button>
       <h3>{it.name}</h3>
-      <p className="muted">{it.form || '—'} · {it.unit || '—'}{it.had ? ' · ยาความเสี่ยงสูง (HAD)' : ''}{it.notInFormulary ? ' · รายการนี้บันทึกว่าไม่อยู่ในบัญชียา รพ.' : ''}</p>
+      <p className="muted">{it.form || '—'} · {it.unit || '—'}{it.had ? ' · ยาความเสี่ยงสูง (HAD)' : ''}{it.notInFormulary ? ' · ยานอกบัญชี รพ. (ยาเดิมของผู้ป่วยที่ refer มา — ยังต้องตรวจ DI ร่วมกับยาอื่น)' : ''}</p>
       {it.ingredients.length === 0 && <p className="warnbox">{it.why || 'ยังไม่มีข้อมูล'}</p>}
       {it.ingredients.length > 0 && <div className="gldchips">{it.ingredients.map((i) => <button key={i.slug} type="button" className={pick === i.slug ? 'on' : ''} onClick={() => setPick(i.slug)}>{i.name}{i.hasLabel ? '' : ' (ไม่มีฉลาก)'}</button>)}</div>}
       {pick && <Monograph_ slug={pick} route={it.route} />}
