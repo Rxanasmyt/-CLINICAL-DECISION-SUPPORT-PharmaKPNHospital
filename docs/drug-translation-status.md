@@ -8,10 +8,10 @@
 |---|---|---|
 | adenosine | 61d9b8f6 | contraindications, indications_and_usage |
 | adenosine | 9508caf5 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
-| amiodarone | 0c9ee15a | contraindications, indications_and_usage |
+| amiodarone | 0c9ee15a | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | dopamine | b61fffd0 | contraindications, indications_and_usage |
 | epinephrine | 386519ba | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
-| heparin | 0413f511 | contraindications, indications_and_usage |
+| heparin | 0413f511 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | magnesium-sulfate | 03ebeabb | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | meperidine | b31d1308 | boxed_warning, contraindications, indications_and_usage |
 | morphine | 6023606c | boxed_warning, contraindications, indications_and_usage |
