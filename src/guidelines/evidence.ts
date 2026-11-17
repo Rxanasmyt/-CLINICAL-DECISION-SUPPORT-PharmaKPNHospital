@@ -23,6 +23,7 @@ export const EVIDENCE: Record<string, { level: EvidenceLevel; basis: string }> =
   hf: { level: 'primary', basis: 'อ่านจากไฟล์ฉบับเต็ม พร้อมเลขหน้า' },
   af: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) อ้างตามเลขตาราง' },
   sepsis: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) อ้างตามเลขข้อแนะนำและตาราง' },
+  anaphylaxis: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) — ตารางที่ 4 และข้อแนะนำที่ 4–14' },
   cdi: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) — ข้อสรุป 22 ข้อและคำถามเรื่องการรักษา (เป็นความเห็นผู้เชี่ยวชาญ)' },
   mening: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) — ตารางที่ 3–6 อ่านจากไฟล์ XML ของบทความโดยตรง' },
   ssti: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) — ข้อแนะนำเรื่องยาและรายการยา MRSA' },
@@ -30,7 +31,7 @@ export const EVIDENCE: Record<string, { level: EvidenceLevel; basis: string }> =
 };
 
 /** รหัสย่อบนป้ายการ์ด (แทนไอคอนรูปภาพ ให้แสดงผลเหมือนกันทุกเครื่อง) */
-export const CODE: Record<string, string> = { tb: 'TB', copd: 'COPD', asthma: 'AST', htn: 'HTN', cap: 'CAP', dm: 'DM', ckd: 'CKD', lipid: 'LDL', warfarin: 'INR', hf: 'HF', af: 'AF', sepsis: 'SEP', iai: 'IAI', ssti: 'SSTI', mening: 'MEN', cdi: 'CDI' };
+export const CODE: Record<string, string> = { tb: 'TB', copd: 'COPD', asthma: 'AST', htn: 'HTN', cap: 'CAP', dm: 'DM', ckd: 'CKD', lipid: 'LDL', warfarin: 'INR', hf: 'HF', af: 'AF', sepsis: 'SEP', iai: 'IAI', ssti: 'SSTI', mening: 'MEN', cdi: 'CDI', anaphylaxis: 'ANA' };
 
 /** DOI ที่ตรวจกับ Europe PMC แล้วว่าตรงชื่อบทความ ปี และวารสาร (ตรวจเมื่อ 2026-11-17) */
 export const VERIFIED_DOI: Record<string, string> = {
@@ -42,9 +43,10 @@ export const VERIFIED_DOI: Record<string, string> = {
   '10.1186/s13017-018-0219-9': 'World J Emerg Surg 2018 · PMC6295010',
   '10.1186/s42466-023-00264-6': 'Neurol Res Pract 2023 · PMC10470134',
   '10.37201/req/2065.2020': 'Rev Esp Quimioter 2020 · PMC7111242',
+  '10.3389/fphar.2022.845689': 'Front Pharmacol 2022 · PMC8996305',
 };
 /** แนวทางที่จัดทำในต่างประเทศ ไม่ได้ปรับตามบริบทไทย (เชื้อดื้อยา ยาที่มีใช้ และแนวปฏิบัติในไทยอาจต่างกัน) */
-export const FOREIGN = new Set(['copd', 'asthma', 'cap', 'sepsis', 'iai', 'ssti', 'mening', 'cdi']);
+export const FOREIGN = new Set(['copd', 'asthma', 'cap', 'sepsis', 'iai', 'ssti', 'mening', 'cdi', 'anaphylaxis']);
 export const FOREIGN_LABEL = 'แนวทางต่างประเทศ · ไม่ได้ปรับตามบริบทไทย';
 export const DOI_CHECKED_AT = '2026-11-17';
 

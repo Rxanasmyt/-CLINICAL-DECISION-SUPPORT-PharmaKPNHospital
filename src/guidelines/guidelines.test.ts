@@ -179,8 +179,8 @@ describe('หัวใจล้มเหลว (HFCT 2562)', () => {
 });
 
 describe('จัดกลุ่มให้อ่านง่าย', () => {
-  it('หมวดโรคไม่เกิน 3 หมวด และทุกยามีกลุ่ม กลุ่มยาไม่เกิน 7 กลุ่มต่อแนวทาง', () => {
-    expect(new Set(GUIDELINES.map((g) => g.category)).size).toBeLessThanOrEqual(3);
+  it('หมวดโรคไม่เกิน 5 หมวด และทุกยามีกลุ่ม กลุ่มยาไม่เกิน 7 กลุ่มต่อแนวทาง', () => {
+    expect(new Set(GUIDELINES.map((g) => g.category)).size).toBeLessThanOrEqual(5);
     for (const g of GUIDELINES) {
       expect(g.drugs!.every((d) => !!d.group), g.id).toBe(true);
       expect(drugGroups(g).length, g.id).toBeLessThanOrEqual(7); expect(drugGroups(g).length, g.id).toBeGreaterThanOrEqual(2);

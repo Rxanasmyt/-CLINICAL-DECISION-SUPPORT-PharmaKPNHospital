@@ -14,9 +14,10 @@ import { IAI_GUIDELINE } from './iai';
 import { SSTI_GUIDELINE } from './ssti';
 import { MENING_GUIDELINE } from './mening';
 import { CDI_GUIDELINE } from './cdi';
+import { ANAPHYLAXIS_GUIDELINE } from './anaphylaxis';
 import type { Block, Guideline, Review } from './types';
 
-export const GUIDELINES: Guideline[] = [TB_GUIDELINE, COPD_GUIDELINE, ASTHMA_GUIDELINE, HTN_GUIDELINE, CAP_GUIDELINE, DM_GUIDELINE, CKD_GUIDELINE, LIPID_GUIDELINE, WARFARIN_GUIDELINE, HF_GUIDELINE, AF_GUIDELINE, SEPSIS_GUIDELINE, IAI_GUIDELINE, SSTI_GUIDELINE, MENING_GUIDELINE, CDI_GUIDELINE];
+export const GUIDELINES: Guideline[] = [TB_GUIDELINE, COPD_GUIDELINE, ASTHMA_GUIDELINE, HTN_GUIDELINE, CAP_GUIDELINE, DM_GUIDELINE, CKD_GUIDELINE, LIPID_GUIDELINE, WARFARIN_GUIDELINE, HF_GUIDELINE, AF_GUIDELINE, SEPSIS_GUIDELINE, IAI_GUIDELINE, SSTI_GUIDELINE, MENING_GUIDELINE, CDI_GUIDELINE, ANAPHYLAXIS_GUIDELINE];
 
 /** สถานะการทบทวน: ยังไม่ทบทวน / ทบทวนแล้ว / เลยรอบทบทวน */
 export function reviewState(r: Review, today: string): { kind: 'pending' | 'ok' | 'overdue'; label: string } {
