@@ -23,10 +23,11 @@ export const EVIDENCE: Record<string, { level: EvidenceLevel; basis: string }> =
   hf: { level: 'primary', basis: 'อ่านจากไฟล์ฉบับเต็ม พร้อมเลขหน้า' },
   af: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) อ้างตามเลขตาราง' },
   sepsis: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) อ้างตามเลขข้อแนะนำและตาราง' },
+  iai: { level: 'primary', basis: 'อ่านจากบทความฉบับเต็ม open access (PMC) — ภาคผนวก 1–4 (สูตรยา) และข้อแนะนำที่ 38–47' },
 };
 
 /** รหัสย่อบนป้ายการ์ด (แทนไอคอนรูปภาพ ให้แสดงผลเหมือนกันทุกเครื่อง) */
-export const CODE: Record<string, string> = { tb: 'TB', copd: 'COPD', asthma: 'AST', htn: 'HTN', cap: 'CAP', dm: 'DM', ckd: 'CKD', lipid: 'LDL', warfarin: 'INR', hf: 'HF', af: 'AF', sepsis: 'SEP' };
+export const CODE: Record<string, string> = { tb: 'TB', copd: 'COPD', asthma: 'AST', htn: 'HTN', cap: 'CAP', dm: 'DM', ckd: 'CKD', lipid: 'LDL', warfarin: 'INR', hf: 'HF', af: 'AF', sepsis: 'SEP', iai: 'IAI' };
 
 /** DOI ที่ตรวจกับ Europe PMC แล้วว่าตรงชื่อบทความ ปี และวารสาร (ตรวจเมื่อ 2026-11-17) */
 export const VERIFIED_DOI: Record<string, string> = {
@@ -34,7 +35,11 @@ export const VERIFIED_DOI: Record<string, string> = {
   '10.2478/abm-2025-0028': 'Asian Biomed 2025 · PMC12649414',
   '10.1007/s00134-021-06506-y': 'Intensive Care Med 2021 · PMC8486643',
   '10.1164/rccm.201908-1581st': 'Am J Respir Crit Care Med 2019 · PMC6812437',
+  '10.1186/s13017-017-0141-6': 'World J Emerg Surg 2017 · PMC5504840',
 };
+/** แนวทางที่จัดทำในต่างประเทศ ไม่ได้ปรับตามบริบทไทย (เชื้อดื้อยา ยาที่มีใช้ และแนวปฏิบัติในไทยอาจต่างกัน) */
+export const FOREIGN = new Set(['copd', 'asthma', 'cap', 'sepsis', 'iai']);
+export const FOREIGN_LABEL = 'แนวทางต่างประเทศ · ไม่ได้ปรับตามบริบทไทย';
 export const DOI_CHECKED_AT = '2026-11-17';
 
 export interface CiteGroups { references: string[]; verification: string[]; limits: string[] }

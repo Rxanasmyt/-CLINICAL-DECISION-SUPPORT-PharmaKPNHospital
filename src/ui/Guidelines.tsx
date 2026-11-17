@@ -6,7 +6,7 @@ import { drugHits, DRUG_KIND_ORDER } from '../guidelines/drugs';
 import { blockGroup, groupedBlocks, drugGroups } from '../guidelines/groups';
 import type { DrugKind } from '../guidelines/drugs';
 import { addFile, fmtSize, listFiles, removeFile } from '../guidelines/attachments';
-import { CODE, DOI_CHECKED_AT, EVIDENCE, LEVEL_LABEL, VERIFIED_DOI, groupCites, linkify } from '../guidelines/evidence';
+import { CODE, DOI_CHECKED_AT, EVIDENCE, FOREIGN, FOREIGN_LABEL, LEVEL_LABEL, VERIFIED_DOI, groupCites, linkify } from '../guidelines/evidence';
 import { DiChecker, DrugList } from './DrugInfo';
 import { store } from '../storage';
 import type { FileRow } from '../storage/db';
@@ -140,6 +140,7 @@ function EvBadges({ g, rs }: { g: Guideline; rs: string }) {
   const ev = EVIDENCE[g.id];
   return (
     <span className="glbadges">
+      {FOREIGN.has(g.id) && <span className="glev rg-foreign">{FOREIGN_LABEL}</span>}
       {ev && <span className={'glev lv-' + ev.level}>{LEVEL_LABEL[ev.level]}</span>}
       <span className={'glev ' + (rs === 'ok' ? 'rv-ok' : 'rv-pending')}>{rs === 'ok' ? 'ทบทวนโดยเภสัชกรแล้ว' : 'รอเภสัชกรทบทวน'}</span>
     </span>);
@@ -157,7 +158,7 @@ function Evidence({ g, rs }: { g: Guideline; rs: string }) {
   const checked = c.references.flatMap((r) => linkify(r)).filter((x) => x.verified).length;
   return (
     <div className="glevd">
-      {ev && <section><h3>ระดับหลักฐาน</h3><p><span className={'glev lv-' + ev.level}>{LEVEL_LABEL[ev.level]}</span></p><p>{ev.basis}</p></section>}
+      {ev && <section><h3>ระดับหลักฐาน</h3><p><span className={'glev lv-' + ev.level}>{LEVEL_LABEL[ev.level]}</span>{FOREIGN.has(g.id) && <span className="glev rg-foreign">{FOREIGN_LABEL}</span>}</p><p>{ev.basis}</p>{FOREIGN.has(g.id) && <p className="muted">จัดทำในต่างประเทศ ข้อมูลเชื้อดื้อยา ยาที่มีใช้ และแนวปฏิบัติในไทยอาจต่างกัน ต้องเทียบข้อมูลของ รพ. และแนวทางไทยก่อนใช้</p>}</section>}
       <section><h3>แหล่งอ้างอิง</h3>
         <ol className="glcites">{c.references.map((t, i) => <li key={i}><Linked text={t} /></li>)}</ol>
         {checked > 0 && <p className="muted">เครื่องหมาย ✓ = ตรวจ DOI กับฐานข้อมูล Europe PMC แล้วว่าตรงกับชื่อบทความ ปี และวารสาร (ตรวจเมื่อ {DOI_CHECKED_AT})</p>}</section>
