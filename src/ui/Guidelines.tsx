@@ -7,10 +7,7 @@ import { blockGroup, groupedBlocks, drugGroups } from '../guidelines/groups';
 import type { DrugKind } from '../guidelines/drugs';
 import { addFile, fmtSize, listFiles, removeFile } from '../guidelines/attachments';
 import { CODE, DOI_CHECKED_AT, EVIDENCE, LEVEL_LABEL, VERIFIED_DOI, groupCites, linkify } from '../guidelines/evidence';
-<<<<<<< HEAD
 import { DiChecker, DrugList } from './DrugInfo';
-=======
->>>>>>> origin/main
 import { store } from '../storage';
 import type { FileRow } from '../storage/db';
 
