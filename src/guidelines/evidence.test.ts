@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { GUIDELINES } from './registry';
-import { CODE, EVIDENCE, VERIFIED_DOI, groupCites, linkify } from './evidence';
+import { CODE, EVIDENCE, FOREIGN, VERIFIED_DOI, groupCites, linkify } from './evidence';
 
 describe('ทะเบียนหลักฐาน', () => {
   it('ทุกการ์ดมีระดับหลักฐาน รหัสป้าย และแหล่งอ้างอิงอย่างน้อยหนึ่งรายการ', () => {
@@ -23,6 +23,15 @@ describe('ทะเบียนหลักฐาน', () => {
   it('DOI ที่ปรากฏในการ์ดทุกตัวอยู่ในรายการที่ตรวจกับ Europe PMC แล้ว', () => {
     const re = /doi:\s*(10\.\d{4,9}\/[^\s·;,)]+)/gi;
     for (const g of GUIDELINES) for (const c of g.cites) for (const m of c.matchAll(re)) expect(VERIFIED_DOI[m[1].toLowerCase()], g.id + ' ' + m[1]).toBeTruthy();
+  });
+});
+
+describe('แนวทางต่างประเทศ', () => {
+  it('รหัสที่ติดป้ายต่างประเทศต้องเป็นการ์ดที่มีอยู่จริง และการ์ดต่างประเทศใหม่ระบุที่มาในป้ายของเนื้อหา', () => {
+    const ids = GUIDELINES.map((g) => g.id);
+    for (const id of FOREIGN) expect(ids, id).toContain(id);
+    for (const id of ['iai', 'ssti', 'mening', 'cdi']) for (const b of GUIDELINES.find((g) => g.id === id)!.blocks) expect(b.origin, id).toMatch(/ต่างประเทศ.*ไม่ได้ปรับตามบริบทไทย/);
+    for (const id of ['tb', 'htn', 'af', 'dm', 'ckd', 'lipid', 'warfarin', 'hf']) expect(FOREIGN.has(id), id).toBe(false);
   });
 });
 
