@@ -1,8 +1,8 @@
-// ปอดอักเสบชุมชนในผู้ใหญ่ — คัดจาก ATS/IDSA 2019 (Metlay JP, et al. Am J Respir Crit Care Med 2019;200(7):e45-e67) ผ่านบทสรุปของ AAFP (Am Fam Physician 2020;102(2):121-122)
-// ขนาดยา/ทางให้ยาตามตารางในบทสรุป คงชื่อยาและตัวเลขตามต้นฉบับ · ยังไม่ได้ตรวจกับต้นฉบับ ATS/IDSA โดยตรง และยังไม่ได้ปรับตามข้อมูลเชื้อดื้อยา/แนวทางของไทย
+// ปอดอักเสบชุมชนในผู้ใหญ่ — คัดจาก ATS/IDSA 2019 (Metlay JP, et al. Am J Respir Crit Care Med 2019;200(7):e45-e67; PMC6812437 open access)
+// ขนาดยา/ทางให้ยาตามตารางที่ 3–4 ของแนวทางฉบับเต็ม คงชื่อยาและตัวเลขตามต้นฉบับ · ตรวจเทียบฉบับเต็มแล้ว (ดูรายการอ้างอิง) · ยังไม่ได้ปรับตามบริบทไทย รอเภสัชกรทบทวน
 import type { Block, Guideline } from './types';
 
-const o = 'จากบทสรุป AAFP ของแนวทาง ATS/IDSA 2019 — ยังไม่ได้ปรับตามบริบทไทย รอเภสัชกรทบทวน';
+const o = 'ตรวจเทียบแนวทาง ATS/IDSA 2019 ฉบับเต็ม (PMC6812437) — ยังไม่ได้ปรับตามบริบทไทย รอเภสัชกรทบทวน';
 
 const blocks: Block[] = [
   { kind: 'list', h: 'ความรุนแรง และการตัดสินใจรับไว้รักษา', origin: o, items: [
@@ -27,16 +27,16 @@ const blocks: Block[] = [
   { kind: 'list', h: 'ข้อควรระวังและการใช้ยา', origin: o, danger: true, items: [
     { t: 'ไม่แนะนำ macrolide เดี่ยวเป็นประจำ ยกเว้นพื้นที่ที่ pneumococcus ดื้อ macrolide ต่ำ (< 25%) · อัตราดื้อในสหรัฐเกิน 30% ทำให้เกิดการรักษาล้มเหลว' },
     { t: 'การเลือกยาให้ชั่งน้ำหนักข้อมูลความไวต่อยาในพื้นที่ กับลักษณะผู้ป่วย: แพ้ยา, ความเสี่ยงหัวใจเต้นผิดจังหวะ (macrolide), โรคหลอดเลือด (fluoroquinolone), ประวัติ Clostridioides difficile' },
-    { t: 'ไม่แนะนำให้ใช้ corticosteroid เป็นประจำใน CAP หรือปอดอักเสบจากไข้หวัดใหญ่รุนแรง' },
+    { t: 'ไม่แนะนำให้ใช้ corticosteroid เป็นประจำ: CAP ไม่รุนแรง (strong, หลักฐานคุณภาพสูง) · CAP รุนแรง (conditional, moderate) · ปอดอักเสบจากไข้หวัดใหญ่รุนแรง (conditional, low) · กรณี refractory septic shock ให้ใช้ตามแนวทาง Surviving Sepsis' },
     { t: 'ไม่แนะนำให้เติมยาคลุมเชื้อไม่ใช้ออกซิเจน (anaerobe) เว้นแต่สงสัยฝีในปอดหรือ empyema' },
-    { t: 'Procalcitonin ไม่แม่นพอที่จะใช้ตัดสินงดยาปฏิชีวนะในผู้ที่สงสัย CAP' },
+    { t: 'เริ่มยาปฏิชีวนะ empiric ในผู้ที่สงสัย CAP และยืนยันด้วยภาพรังสี โดยไม่ขึ้นกับระดับ procalcitonin (strong, moderate)' },
     { t: 'Omadacycline เทียบเท่า moxifloxacin ใน CAP ไม่รุนแรง แต่คณะกรรมการไม่ได้ใส่ในรายการแนะนำเพราะข้อมูลความปลอดภัยยังไม่มากพอ' },
   ] },
   { kind: 'list', h: 'การตรวจและยาต้านไวรัส', origin: o, items: [
     { t: 'ไม่ต้องเพาะเชื้อเลือด/เสมหะ และไม่ต้องตรวจ urinary antigen เป็นประจำใน CAP ไม่รุนแรง' },
     { t: 'เพาะเชื้อเสมหะก่อนเริ่มยาเฉพาะ CAP รุนแรง (โดยเฉพาะใส่ท่อช่วยหายใจ), มีประวัติ MRSA/P. aeruginosa หรือกำลังให้ยาคลุมเชื้อเหล่านี้, หรือเคยนอนโรงพยาบาลและได้ยาฉีดภายใน 90 วัน' },
     { t: 'ช่วงที่ไข้หวัดใหญ่ระบาด ควรตรวจไข้หวัดใหญ่ในผู้ป่วย CAP ทุกราย (ชอบ rapid NAAT มากกว่า rapid antigen)' },
-    { t: 'ให้ยาต้านไวรัสไข้หวัดใหญ่ในผู้ใหญ่ CAP ที่ตรวจพบไข้หวัดใหญ่ ไม่ว่าอาการมานานเท่าใดและอยู่ที่ใด (ประโยชน์มากที่สุดถ้าเริ่มภายใน 48 ชั่วโมง)' },
+    { t: 'ให้ยาต้านไวรัสไข้หวัดใหญ่ (เช่น oseltamivir) ในผู้ใหญ่ CAP ที่ตรวจพบไข้หวัดใหญ่ ไม่ว่าอาการมานานเท่าใด: ผู้ป่วยใน (strong, moderate) · ผู้ป่วยนอก (conditional, low) · ผลดีที่สุดถ้าเริ่มภายใน 2 วันหลังมีอาการหรือนอนโรงพยาบาล' },
   ] },
 ];
 
@@ -53,10 +53,10 @@ export const CAP_GUIDELINE: Guideline = {
     { name: 'ยาคลุม P. aeruginosa', group: 'ยาคลุมเชื้อดื้อ (MRSA/Pseudomonas)', aliases: ['aeruginosa'], members: [{ name: 'Aztreonam', aliases: ['Aztreonam'] }, { name: 'Imipenem', aliases: ['Imipenem'] }, { name: 'Meropenem', aliases: ['Meropenem'] }, { name: 'Piperacillin', aliases: ['Piperacillin'] }] },
     { name: 'Corticosteroid', group: 'ยาเสริม', aliases: ['corticosteroid'] }, { name: 'ยาต้านไวรัสไข้หวัดใหญ่', group: 'ยาเสริม', aliases: ['ยาต้านไวรัส'] },
   ],
-  source: 'ATS/IDSA 2019 CAP guideline · สรุปโดย AAFP',
+  source: 'ATS/IDSA 2019 CAP guideline (ฉบับเต็ม)',
   cites: [
-    'Metlay JP, Waterer GW, Long AC, et al. Diagnosis and treatment of adults with community-acquired pneumonia. An official clinical practice guideline of the ATS and IDSA. Am J Respir Crit Care Med. 2019;200(7):e45-e67. doi:10.1164/rccm.201908-1581ST',
-    'Am Fam Physician (AFP Editors). Community-acquired pneumonia: updated recommendations from the ATS and IDSA. 2020;102(2):121-122 · https://www.aafp.org/pubs/afp/issues/2020/0715/p121.html — บทสรุปที่ใช้อ่านเนื้อหาในการ์ดนี้ (ตารางที่ 1–3)',
+    'Metlay JP, Waterer GW, Long AC, et al. Diagnosis and treatment of adults with community-acquired pneumonia. An official clinical practice guideline of the ATS and IDSA. Am J Respir Crit Care Med. 2019;200(7):e45-e67. doi:10.1164/rccm.201908-1581ST · PMC6812437 · open access · https://pmc.ncbi.nlm.nih.gov/articles/PMC6812437/',
+    'ตรวจเทียบกับบทความฉบับเต็ม (open access) แล้ว: ขนาดยาและทางให้ยาตามตารางที่ 3–4 และข้อความแนะนำ (ผู้ป่วยนอก ผู้ป่วยใน ยาคลุม MRSA และ P. aeruginosa), เกณฑ์ CAP รุนแรงตารางที่ 1, ปัจจัยเสี่ยง MRSA/P. aeruginosa (ยาฉีดภายใน 90 วัน), เกณฑ์ macrolide < 25%, คำแนะนำเรื่อง corticosteroid, procalcitonin, ยาคลุมเชื้อไม่ใช้ออกซิเจน, urinary antigen และการตรวจ/รักษาไข้หวัดใหญ่ — ตรงกับการ์ด (ปรับข้อความ corticosteroid, procalcitonin และยาต้านไวรัสให้ระบุระดับคำแนะนำตามต้นฉบับ) · เนื้อหาเดิมอ่านจากบทสรุปของ AAFP (Am Fam Physician 2020;102(2):121-122)',
     'ข้อจำกัด: แนวทางนี้สำหรับผู้ใหญ่ภูมิคุ้มกันปกติในสหรัฐ จัดทำก่อนโควิด-19 และไม่ได้ปรับตามข้อมูลเชื้อดื้อยาของไทย · ยังไม่ได้เทียบกับแนวทางไทยของสมาคมโรคติดเชื้อ (ค้นไม่พบฉบับเต็มที่เข้าถึงได้)',
   ],
   summary: [
