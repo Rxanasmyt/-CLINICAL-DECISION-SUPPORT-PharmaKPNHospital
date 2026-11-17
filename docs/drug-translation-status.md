@@ -8,10 +8,10 @@
 |---|---|---|
 | adenosine | 61d9b8f6 | adverse_reactions, contraindications, geriatric_use, indications_and_usage, pediatric_use, pregnancy, use_in_specific_populations, warnings_and_cautions |
 | adenosine | 9508caf5 | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, geriatric_use, indications_and_usage, pediatric_use, pregnancy, warnings |
-| amiodarone | 0c9ee15a | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, overdosage, warnings_and_cautions |
+| amiodarone | 0c9ee15a | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, overdosage, use_in_specific_populations, warnings_and_cautions |
 | dopamine | b61fffd0 | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, overdosage, pediatric_use, warnings |
 | epinephrine | 386519ba | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, overdosage, warnings_and_cautions |
-| heparin | 0413f511 | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, overdosage, warnings_and_cautions |
+| heparin | 0413f511 | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, geriatric_use, indications_and_usage, overdosage, pediatric_use, pregnancy, use_in_specific_populations, warnings_and_cautions |
 | magnesium-sulfate | 03ebeabb | adverse_reactions, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, overdosage, pediatric_use, pregnancy, use_in_specific_populations, warnings_and_cautions |
 | meperidine | b31d1308 | adverse_reactions, boxed_warning, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, warnings_and_cautions |
 | morphine | 6023606c | adverse_reactions, boxed_warning, contraindications, dosage_and_administration, drug_interactions, indications_and_usage, warnings_and_cautions |
