@@ -60,7 +60,7 @@ describe('คำแปลไทยของฉลาก', () => {
     }
   });
   it('ตัวเลขทุกตัวในข้อความต้นฉบับ (ไม่นับเลขอ้างอิงภายในฉลาก) ต้องปรากฏในคำแปล กันตกหล่นหรือพิมพ์ผิด', () => {
-    const strip = (s: string) => s.replace(/\[see [^\]]*\]/gi, ' ').replace(/\(\s*\d[\d.,\s]*\)/g, ' ').replace(/^\s*\d{1,2}\s+(?=[A-Za-z])/g, ' ').replace(/\b\d{1,2}\.\d{1,2}(\.\d{1,2})?\s+(?=[A-Z])/g, ' ');
+    const strip = (s: string) => s.replace(/\[see [^\]]*\]/gi, ' ').replace(/\(\s*\d[\d.,\s]*\)/g, ' ').replace(/^\s*\d{1,2}\s+(?=[A-Za-z])/g, ' ').replace(/\b\d{1,2}\s+(?=[A-Z]{3,}(?:\s[A-Z&]{2,})+\b)/g, ' ').replace(/\b\d{1,2}\.\d{1,2}(\.\d{1,2})?\s+(?=[A-Z])/g, ' ');
     for (const f of ths) {
       const t = J('th/' + f); const m = J('monographs/' + f);
       for (const [setid, secs] of Object.entries<any>(t.labels)) {
