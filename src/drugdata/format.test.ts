@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { emphasize, toLines } from './format';
+import { rankLabels } from './load';
 
 describe('toLines', () => {
   it('แบ่งประโยคและหัวข้อย่อย โดยไม่ทำให้ถ้อยคำหาย (ต่อกลับได้เท่าเดิม ยกเว้นหัวข้อหลักที่ซ้ำและช่องว่าง)', () => {
@@ -35,5 +36,15 @@ describe('emphasize', () => {
     const p = emphasize('Give 0.5 mg every 5 to 10 minutes; max 3 mg/kg or 150 mg for 7 days at 25-30 %.');
     expect(p.filter((x) => x.strong).map((x) => x.t)).toEqual(['0.5 mg', '10 minutes', '3 mg/kg', '150 mg', '7 days', '25-30 %']);
     expect(p.map((x) => x.t).join('')).toBe('Give 0.5 mg every 5 to 10 minutes; max 3 mg/kg or 150 mg for 7 days at 25-30 %.');
+  });
+});
+
+describe('rankLabels', () => {
+  const mk = (t: string) => ({ sections: { indications_and_usage: { t } } });
+  it('ฉลากเฉพาะทาง (preservative-free/ไขสันหลัง) ไปท้ายสุดเว้นแต่ชื่อยาระบุ และไม่ตัดฉลากทิ้ง', () => {
+    const pf = mk('Preservative-free morphine sulfate injection is indicated for'); const std = mk('Morphine Sulfate Injection is indicated for the management of pain');
+    expect(rankLabels([pf, std], 'MORPHINE 10 mg/ml Amphule')).toEqual([std, pf]);
+    expect(rankLabels([pf, std], 'Morphine PF epidural')).toEqual([pf, std]);
+    expect(rankLabels([std, pf], 'x')).toHaveLength(2);
   });
 });

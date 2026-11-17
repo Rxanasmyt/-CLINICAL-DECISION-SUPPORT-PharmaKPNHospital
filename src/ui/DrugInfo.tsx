@@ -1,6 +1,6 @@
 // ข้อมูลยาในบัญชียา รพ. และตรวจอันตรกิริยา (DI) — เนื้อหาทางคลินิกคัดจากฉลากยา FDA (ภาษาอังกฤษต้นฉบับ) พร้อมที่มา
 import { useEffect, useMemo, useState } from 'react';
-import { CLASS_TH, ROUTE_TH, SECTION_TH, dailyMedUrl, effectiveTh, loadIndex, loadMonograph, loadShard, loadThai, type DrugIndex, type DrugItem, type Monograph, type ThaiSections } from '../drugdata/load';
+import { CLASS_TH, ROUTE_TH, SECTION_TH, dailyMedUrl, effectiveTh, loadIndex, loadMonograph, loadShard, loadThai, rankLabels, type DrugIndex, type DrugItem, type Monograph, type ThaiSections } from '../drugdata/load';
 import { emphasize, toLines } from '../drugdata/format';
 import { SEV_LABEL, checkPairs, type PairResult, type Shard } from '../drugdata/di';
 import { GUIDELINES } from '../guidelines/registry';
@@ -74,7 +74,7 @@ function Monograph_({ slug, route, product }: { slug: string; route: string; pro
   useEffect(() => { let on = true; setM(null); setErr(''); setThai(null); setLi(0); loadMonograph(slug).then((d) => on && setM(d)).catch((e) => on && setErr(String(e.message || e))); loadThai(slug).then((d) => on && setThai(d)).catch(() => {}); return () => { on = false; }; }, [slug]);
   if (err) return <p className="warnbox" role="alert">โหลดข้อมูลไม่สำเร็จ ({err}) — ต้องเชื่อมต่ออินเทอร์เน็ตครั้งแรก</p>;
   if (!m) return <p className="muted">กำลังโหลด…</p>;
-  const cands = m.labels.filter((l) => l.route === route); const pool = cands.length ? cands : m.labels;
+  const cands = m.labels.filter((l) => l.route === route); const pool = rankLabels(cands.length ? cands : m.labels, product);
   const label = pool[Math.min(li, pool.length - 1)];
   if (!label) return <p className="warnbox">ไม่พบฉลากยาของ {m.ingredient} ในฐานข้อมูล FDA — ต้องใช้แหล่งข้อมูลอื่น</p>;
   const seen = new Set<string>(); const secs = SECTION_TH.filter(([k, th]) => { if (!label.sections[k] || seen.has(th)) return false; seen.add(th); return true; });

@@ -39,3 +39,10 @@ export const CLASS_TH: Record<string, string> = {
   opioid: 'กลุ่ม opioids', statin: 'กลุ่ม statins', sulfonylurea: 'กลุ่ม sulfonylureas', cortico: 'กลุ่ม corticosteroids', antacid: 'ยาลดกรด/ยาที่มี Al-Mg', cyp3a4_inh: 'CYP3A4 inhibitors', cyp3a4_ind: 'CYP3A4 inducers',
   cyp2d6_inh: 'CYP2D6 inhibitors', cyp2c9_inh: 'CYP2C9 inhibitors', cyp2c19_inh: 'CYP2C19 inhibitors', pgp_inh: 'P-gp inhibitors', qt: 'ยาที่ยืดช่วง QT', anticonv: 'ยากันชัก', cns_dep: 'ยากดระบบประสาทส่วนกลาง',
 };
+
+/** เรียงฉลากให้ฉบับที่น่าจะตรงกับยาในบัญชีมาก่อน: ฉลากเฉพาะทาง (preservative-free/ฉีดเข้าไขสันหลังหรือเหนือเยื่อดูรา) ไปท้ายสุด เว้นแต่ชื่อยาในบัญชีระบุไว้ — ไม่ตัดฉลากทิ้ง */
+export function rankLabels<T extends { sections: Record<string, { t: string }> }>(labels: T[], product: string): T[] {
+  const special = /preservative[- ]free|intrathecal|epidural|neuraxial/i; const wanted = special.test(product) || /\bPF\b/.test(product);
+  const penal = (l: T) => (!wanted && special.test((l.sections.indications_and_usage?.t || '').slice(0, 400)) ? 1 : 0);
+  return labels.map((l, i) => ({ l, i })).sort((a, b) => penal(a.l) - penal(b.l) || a.i - b.i).map((x) => x.l);
+}
