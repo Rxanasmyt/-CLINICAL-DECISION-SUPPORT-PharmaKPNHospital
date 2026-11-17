@@ -18,7 +18,7 @@
 | nicardipine | 433dbca3 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | norepinephrine | 6363e9b4 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | potassium-chloride | 3849b89c | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
-| warfarin | 61ab23a7 | boxed_warning, contraindications, indications_and_usage |
+| warfarin | 61ab23a7 | boxed_warning, contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 
 ## ยังไม่ได้แปล
 หัวข้ออื่นทั้งหมด (คำเตือนและข้อควรระวัง, อาการไม่พึงประสงค์, ประชากรกลุ่มพิเศษ, การใช้เกินขนาด, และขนาดยา/อันตรกิริยาที่ยังเหลือ) และสารออกฤทธิ์ที่เหลือ — ทำเป็นชุดตามลำดับความเสี่ยง (ยากลุ่ม HAD ก่อน)
