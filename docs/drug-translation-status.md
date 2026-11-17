@@ -10,12 +10,12 @@
 | adenosine | 9508caf5 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | amiodarone | 0c9ee15a | contraindications, indications_and_usage |
 | dopamine | b61fffd0 | contraindications, indications_and_usage |
-| epinephrine | 386519ba | contraindications, drug_interactions, indications_and_usage |
+| epinephrine | 386519ba | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | heparin | 0413f511 | contraindications, indications_and_usage |
 | magnesium-sulfate | 03ebeabb | contraindications, indications_and_usage |
 | meperidine | b31d1308 | boxed_warning, contraindications, indications_and_usage |
 | morphine | 6023606c | boxed_warning, contraindications, indications_and_usage |
-| nicardipine | 433dbca3 | contraindications, drug_interactions, indications_and_usage |
+| nicardipine | 433dbca3 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | norepinephrine | 6363e9b4 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | potassium-chloride | 3849b89c | contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | warfarin | 61ab23a7 | boxed_warning, contraindications, indications_and_usage |
