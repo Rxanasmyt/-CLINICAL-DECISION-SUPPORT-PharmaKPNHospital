@@ -288,3 +288,30 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .glitem .glicon,.glhead .glicon{color:#fff !important}
 .glevd p,.glevd li{font-size:14.5px;line-height:1.6}
 .glevd .muted{font-size:13px}
+
+/* ข้อมูลยาในบัญชี และตรวจอันตรกิริยา */
+.glseg{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px;padding:4px;background:#ECEFEA;border-radius:12px}
+.glseg button{flex:1 1 auto;padding:8px 12px;border:0;border-radius:9px;background:transparent;font:inherit;font-weight:600;color:#365;cursor:pointer}
+.glseg button.on{background:#0E3F3B;color:#fff}
+.dlist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.dlist button{width:100%;text-align:left;display:grid;gap:3px;padding:10px 12px;border:1px solid #D9DED8;border-radius:10px;background:#fff;font:inherit;cursor:pointer}
+.dlist small{color:#5b6b66}
+.dtags{display:flex;gap:6px;flex-wrap:wrap}
+.tg{font-style:normal;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid #CBD0D8;background:#F1F2F4;color:#4B5563}
+.tg.ok{background:#E3F3EA;color:#14532D;border-color:#9AD3B1}.tg.had{background:#FDE8E6;color:#8B1D14;border-color:#F1B1AA}.tg.off{background:#FFF4D6;color:#7A4B00;border-color:#EBC96A}.tg.no{background:#F1F2F4}
+.dsec{border:1px solid #D9DED8;border-radius:10px;margin:8px 0;background:#fff}
+.dsec summary{padding:9px 12px;font-weight:600;cursor:pointer}
+.dtext{margin:0;padding:0 12px 12px;white-space:pre-wrap;line-height:1.55;font-size:13.5px;word-break:break-word}
+.dsrc a,.dpair a{color:#0E3F3B}
+.dnote{margin-top:14px}
+.dpair{border:1px solid #D9DED8;border-left-width:5px;border-radius:10px;background:#fff;padding:10px 12px;margin:10px 0}
+.dpair h4{margin:0 0 6px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.dpair blockquote{margin:8px 0 0;padding:6px 10px;background:#F6F7F4;border-radius:8px}
+.dpair blockquote p{margin:4px 0 0;font-size:13.5px;line-height:1.55}
+.dsev{font-size:12px;padding:2px 9px;border-radius:999px;font-weight:700}
+.sv-contraindicated{border-left-color:#B42318}.dsev.sv-contraindicated{background:#FDE8E6;color:#8B1D14}
+.sv-avoid{border-left-color:#D9730D}.dsev.sv-avoid{background:#FFE9D2;color:#8A4300}
+.sv-monitor{border-left-color:#C9A100}.dsev.sv-monitor{background:#FFF4D6;color:#7A4B00}
+.sv-info{border-left-color:#7C8A99}.dsev.sv-info{background:#EEF1F4;color:#4B5563}
+.dok{padding:10px 12px;background:#FFF4D6;border-radius:10px;color:#5c3b00}
+.dgl{padding:8px 12px;border-radius:10px;background:#E3F3EA;color:#14532D;font-size:14px}

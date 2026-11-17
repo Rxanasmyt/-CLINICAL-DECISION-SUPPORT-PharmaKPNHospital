@@ -33,6 +33,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
         navigateFallback: 'index.html',
         runtimeCaching: [
+          { urlPattern: /\/drugdata\/.*\.json$/i, handler: 'StaleWhileRevalidate', options: { cacheName: 'drugdata', expiration: { maxEntries: 900, maxAgeSeconds: 60 * 60 * 24 * 90 } } },
           { urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i, handler: 'StaleWhileRevalidate', options: { cacheName: 'gfonts-css' } },
           { urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i, handler: 'CacheFirst', options: { cacheName: 'gfonts-files', expiration: { maxEntries: 30, maxAgeSeconds: 31536000 }, cacheableResponse: { statuses: [0, 200] } } },
         ],
