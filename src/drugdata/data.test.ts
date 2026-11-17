@@ -45,3 +45,31 @@ describe('ไฟล์ข้อมูลยา', () => {
     expect(has('warfarin', 'aspirin', ['monitor', 'avoid', 'contraindicated'])).toBe(true);
   });
 });
+
+describe('คำแปลไทยของฉลาก', () => {
+  const ths = readdirSync(DIR + 'th');
+  it('ทุกไฟล์อ้าง setid ที่มีอยู่จริง หัวข้อที่รู้จัก และมีป้ายระบุว่าแปลโดยระบบ', () => {
+    expect(ths.length).toBeGreaterThan(0);
+    for (const f of ths) {
+      const t = J('th/' + f); const m = J('monographs/' + f);
+      expect(t.note, f).toMatch(/แปลโดยระบบ/);
+      for (const [setid, secs] of Object.entries<any>(t.labels)) {
+        const lab = m.labels.find((l: any) => l.setid === setid); expect(lab, f + ' ' + setid).toBeTruthy();
+        for (const k of Object.keys(secs)) { expect(lab.sections[k], f + ' ' + k).toBeTruthy(); expect(secs[k].length, f + ' ' + k).toBeGreaterThan(5); }
+      }
+    }
+  });
+  it('ตัวเลขทุกตัวในข้อความต้นฉบับ (ไม่นับเลขอ้างอิงภายในฉลาก) ต้องปรากฏในคำแปล กันตกหล่นหรือพิมพ์ผิด', () => {
+    const strip = (s: string) => s.replace(/\[see [^\]]*\]/gi, ' ').replace(/\(\s*\d[\d.,\s]*\)/g, ' ').replace(/^\s*\d{1,2}\s+(?=[A-Za-z])/g, ' ').replace(/\b\d{1,2}\.\d{1,2}(\.\d{1,2})?\s+(?=[A-Z])/g, ' ');
+    for (const f of ths) {
+      const t = J('th/' + f); const m = J('monographs/' + f);
+      for (const [setid, secs] of Object.entries<any>(t.labels)) {
+        const lab = m.labels.find((l: any) => l.setid === setid);
+        for (const [k, th] of Object.entries<string>(secs)) {
+          const en = strip(lab.sections[k].t); const nums = Array.from(new Set(en.match(/\d+(?:[.,]\d+)?/g) || []));
+          for (const n of nums) expect(th, f + ' ' + k + ' เลข ' + n).toContain(n);
+        }
+      }
+    }
+  });
+});

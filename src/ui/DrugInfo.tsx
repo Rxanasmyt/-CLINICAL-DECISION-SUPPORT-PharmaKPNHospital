@@ -49,7 +49,7 @@ function Rich({ text, limit = 14, raw = true }: { text: string; limit?: number; 
   const body = (t: string) => emphasize(t).map((p, i) => p.strong ? <b key={i} className="dnum">{p.t}</b> : <span key={i}>{p.t}</span>);
   return (
     <div className="drich">
-      {shown.map((l, i) => l.kind === 'h' ? <h5 key={i}>{l.text}</h5> : l.kind === 'b' ? <p key={i} className="dbul">• {body(l.text)}</p> : <p key={i}>{body(l.text)}</p>)}
+      {shown.map((l, i) => l.kind === 'b' ? <p key={i} className="dbul">• {body(l.text)}</p> : <p key={i} className={l.num ? 'dsub' : undefined}>{l.num && <b className="dsn">{l.num}</b>}{body(l.text)}</p>)}
       {lines.length > limit && <button type="button" className="glbtn" onClick={() => setAll(!all)}>{all ? 'ย่อ' : `แสดงทั้งหมด (${lines.length - limit} บรรทัดที่เหลือ)`}</button>}
       {raw && <p className="muted draw">จัดบรรทัดเพื่อให้อ่านง่าย (ตัดเลขอ้างอิงภายในและประโยคซ้ำจากส่วนสรุปของฉลาก) <button type="button" className="glbtn" onClick={() => setShowRaw(!showRaw)}>{showRaw ? 'ซ่อนข้อความดิบ' : 'ดูข้อความดิบตามฉลาก'}</button></p>}
       {showRaw && <pre className="drawtxt">{text}</pre>}
@@ -63,7 +63,7 @@ function Sec({ id, th, sec, thai, open }: { id: string; th: string; sec: { t: st
   const [en, setEn] = useState(!thai);
   return (
     <details className={'dsec sc-' + (SEC_KIND[id] || 'gen')} id={'dsec-' + id} open={open}><summary><span className="dsdot" />{th}{thai && <em className="tg ok">แปลไทยแล้ว</em>}</summary>
-      {thai && <><Rich text={thai} raw={false} /><p className="muted dtrn">คำแปลโดยระบบ (AI) จากฉลากต้นฉบับ ยังไม่ได้ตรวจโดยเภสัชกร — ตัวเลข ขนาดยา และชื่อยาให้ยืนยันกับข้อความต้นฉบับ <button type="button" className="glbtn" onClick={() => setEn(!en)}>{en ? 'ซ่อนต้นฉบับ' : 'ดูต้นฉบับ English'}</button></p></>}
+      {thai && <><Rich text={thai} raw={false} /><p className="muted dtrn">คำแปลโดยระบบ (AI) จากฉลากต้นฉบับ ตัดประโยคซ้ำจากส่วนสรุป ยังไม่ได้ตรวจโดยเภสัชกร — ชื่อยา ตัวเลข และขนาดยาให้ยืนยันกับข้อความต้นฉบับ <button type="button" className="glbtn" onClick={() => setEn(!en)}>{en ? 'ซ่อนต้นฉบับ' : 'ดูต้นฉบับ English'}</button></p></>}
       {en && <Rich text={sec.t} />}
       {sec.trunc && <p className="muted">ข้อความยาว ตัดทอนไว้ — ดูฉบับเต็มที่ DailyMed</p>}
     </details>);
@@ -86,7 +86,7 @@ function Monograph_({ slug, route, product }: { slug: string; route: string; pro
         {pool.map((l, i) => <button key={l.setid} type="button" className={i === Math.min(li, pool.length - 1) ? 'on' : ''} onClick={() => setLi(i)}><b>{l.brands[0] || m.ingredient}</b><span>{(l.sections.indications_and_usage?.t || '').replace(/^\d*\s*INDICATIONS (AND|&) USAGE\s*/i, '').slice(0, 90)}…</span></button>)}</div>}
       <nav className="dtabs" aria-label="ไปยังหัวข้อ">{secs.map(([k, th]) => <button key={k} type="button" className={'dt sc-' + (SEC_KIND[k] || 'gen')} onClick={() => jump(k)}><span className="dsdot" />{th.replace(/\s*\(.*\)/, '')}</button>)}</nav>
       <p className="muted dsrc">{m.classes.length ? 'กลุ่มยา: ' + m.classes.slice(0, 4).join(' · ') + ' · ' : ''}ฉลาก{ROUTE_TH[label.route] ? ' ' + ROUTE_TH[label.route] : ''} · {label.manufacturer} · ปรับปรุงฉลาก {effectiveTh(label.effective)} · <a href={dailyMedUrl(label.setid)} target="_blank" rel="noopener noreferrer">เปิดฉลากเต็มที่ DailyMed</a></p>
-      {secs.map(([k, th]) => <Sec key={k} id={k} th={th} sec={label.sections[k]} thai={thai && thai.setid === label.setid ? thai.sections[k] : undefined} open={k === 'boxed_warning' || k === 'contraindications' || k === 'indications_and_usage'} />)}
+      {secs.map(([k, th]) => <Sec key={k} id={k} th={th} sec={label.sections[k]} thai={thai?.labels[label.setid]?.[k]} open={k === 'boxed_warning' || k === 'contraindications' || k === 'indications_and_usage'} />)}
     </div>);
 }
 
