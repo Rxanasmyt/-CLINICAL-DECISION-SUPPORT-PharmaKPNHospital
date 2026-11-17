@@ -378,3 +378,5 @@ main,x-dc,x-dc>div{display:block!important;padding:0!important;margin:0!importan
 .dgen{color:#0F766E;font-size:13px;font-weight:600}
 .dlist button.had{border-left:4px solid #C0392B}
 .dlist button:hover{border-color:#0E3F3B;box-shadow:0 2px 8px rgba(14,63,59,.1)}
+.drich .dsub{margin-top:12px}
+.dsn{display:inline-block;min-width:2.4em;margin-right:6px;padding:0 6px;border-radius:5px;background:var(--sc-c);color:#fff;font-size:12px;text-align:center}

@@ -5,7 +5,8 @@ describe('toLines', () => {
   it('แบ่งประโยคและหัวข้อย่อย โดยไม่ทำให้ถ้อยคำหาย (ต่อกลับได้เท่าเดิม ยกเว้นหัวข้อหลักที่ซ้ำและช่องว่าง)', () => {
     const raw = '2 DOSAGE AND ADMINISTRATION Individualize dosing for each patient. Adjust based on INR. 2.1 Individualized Dosing The dosage must be individualized for each patient according to the INR response to the drug. 2.2 Recommended Starting Dose Start with 2 to 5 mg once daily for 1 or 2 days.';
     const lines = toLines(raw);
-    expect(lines.map((l) => l.kind)).toEqual(['p', 'h', 'p', 'h', 'p']);
+    expect(lines.map((l) => l.kind)).toEqual(['p', 'p', 'p']);
+    expect(lines.map((l) => l.num)).toEqual([undefined, '2.1', '2.2']);
     expect(lines[0].text).toBe('Individualize dosing for each patient. Adjust based on INR.');
     const joined = lines.map((l) => l.text).join(' ').replace(/\s+/g, ' ');
     for (const w of ['Individualize', 'Adjust based on INR.', '2 to 5 mg once daily', 'INR response']) expect(joined).toContain(w);

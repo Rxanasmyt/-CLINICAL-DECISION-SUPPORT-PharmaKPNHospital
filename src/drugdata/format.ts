@@ -1,5 +1,5 @@
 // จัดรูปข้อความฉลากยาให้อ่านง่าย: ตัดเป็นประโยค/หัวข้อย่อย และเน้นตัวเลขขนาดยา — ไม่เปลี่ยนถ้อยคำ (เฉพาะการแบ่งบรรทัดและตัวหนา)
-export interface Line { kind: 'h' | 'p' | 'b'; text: string }
+export interface Line { kind: 'h' | 'p' | 'b'; text: string; /** เลขหัวข้อย่อยของฉลาก เช่น 2.1 (ขึ้นต้นบรรทัดแรกของหัวข้อนั้น) */ num?: string }
 export type Piece = { t: string; strong?: boolean };
 
 const ABBR = /(?:e\.g|i\.e|vs|approx|Dr|St|No|Fig|etc|USP|Inj|spp|sp|cf|al)\.$/i;
@@ -19,10 +19,8 @@ export function toLines(raw: string): Line[] {
     const m = NUM_HEAD.exec(s);
     const body = m ? m[2] : s;
     if (m) {
-      // หัวข้อย่อย = วลีต้นประโยคก่อนประโยคแรก (ตัดที่ประโยคแรกจบ หรือไม่เกิน 8 คำ)
-      const words = body.split(' '); const head = words.slice(0, Math.min(words.length, 7)).join(' ');
-      out.push({ kind: 'h', text: m[1] + ' ' + head }); const rest = words.slice(7).join(' ');
-      if (rest) pushSentences(out, rest);
+      const start = out.length; pushSentences(out, body);
+      if (out[start]) out[start] = { ...out[start], num: m[1] };
     } else pushSentences(out, body);
   }
   return dedupe(out);
