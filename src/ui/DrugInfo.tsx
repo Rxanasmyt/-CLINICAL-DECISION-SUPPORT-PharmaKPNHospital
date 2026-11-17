@@ -2,6 +2,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CLASS_TH, ROUTE_TH, SECTION_TH, dailyMedUrl, effectiveTh, loadIndex, loadMonograph, loadShard, type DrugIndex, type DrugItem, type Monograph } from '../drugdata/load';
 import { SEV_LABEL, checkPairs, type PairResult, type Shard } from '../drugdata/di';
+import { GUIDELINES } from '../guidelines/registry';
+import { drugHits } from '../guidelines/drugs';
 
 const NOTE = 'ข้อมูลคัดจากฉลากยาที่ FDA สหรัฐฯ อนุมัติ (ภาษาอังกฤษต้นฉบับ ไม่ได้ปรับตามบริบทไทย) — ใช้ประกอบการตัดสินใจ ไม่ใช้แทนดุลยพินิจทางวิชาชีพ และยังไม่ได้ทบทวนโดยเภสัชกร';
 const STATUS_TH: Record<string, string> = { mapped: 'มีข้อมูลฉลาก', manual: 'มีข้อมูลฉลาก', nonlabel: 'ไม่มีฉลากรายสารออกฤทธิ์', herbal: 'สมุนไพร/ชื่อไทย', unmapped: 'ยังจับคู่สารออกฤทธิ์ไม่ได้' };
@@ -45,10 +47,13 @@ function Monograph_({ slug, route }: { slug: string; route: string }) {
       <p className="muted dsrc">ที่มา: ฉลาก{ROUTE_TH[label.route] ? ' ' + ROUTE_TH[label.route] : ''} · {label.brands.join(', ') || m.ingredient} · {label.manufacturer} · ปรับปรุงฉลาก {effectiveTh(label.effective)} · <a href={dailyMedUrl(label.setid)} target="_blank" rel="noopener noreferrer">เปิดฉลากเต็มที่ DailyMed</a></p>
       {m.labels.length > 1 && <p className="muted">ยานี้มีฉลากอีก {m.labels.length - 1} รูปแบบ ({m.labels.filter((l) => l !== label).map((l) => ROUTE_TH[l.route] || l.route).join(', ')}) — เลือกจากรายการยาตามรูปแบบที่ใช้จริง</p>}
       {secs.map(([k, th]) => (
-        <details key={k} open={k === 'boxed_warning' || k === 'contraindications'} className="dsec"><summary>{th}</summary>
+        <details key={k} open={k === 'boxed_warning' || k === 'contraindications' || k === 'indications_and_usage'} className="dsec"><summary>{th}</summary>
           <p className="dtext">{label.sections[k].t}</p>{label.sections[k].trunc && <p className="muted">ข้อความยาว ตัดทอนไว้ — ดูฉบับเต็มที่ DailyMed</p>}</details>))}
     </div>);
 }
+
+/** แนวทางในคลังของแอปที่มีข้อความเกี่ยวกับสารออกฤทธิ์นี้ (ค้นจากชื่อสารในเนื้อหาแนวทาง) */
+const guidelinesFor = (name: string) => GUIDELINES.filter((g) => drugHits(g, [name.split(',')[0]]).length > 0).map((g) => g.title);
 
 function Detail({ it, onBack }: { it: DrugItem; onBack: () => void }) {
   const [pick, setPick] = useState(it.ingredients.find((i) => i.hasLabel)?.slug || it.ingredients[0]?.slug || '');
@@ -59,6 +64,7 @@ function Detail({ it, onBack }: { it: DrugItem; onBack: () => void }) {
       <p className="muted">{it.form || '—'} · {it.unit || '—'}{it.had ? ' · ยาความเสี่ยงสูง (HAD)' : ''}{it.notInFormulary ? ' · ยานอกบัญชี รพ. (ยาเดิมของผู้ป่วยที่ refer มา — ยังต้องตรวจ DI ร่วมกับยาอื่น)' : ''}</p>
       {it.ingredients.length === 0 && <p className="warnbox">{it.why || 'ยังไม่มีข้อมูล'}</p>}
       {it.ingredients.length > 0 && <div className="gldchips">{it.ingredients.map((i) => <button key={i.slug} type="button" className={pick === i.slug ? 'on' : ''} onClick={() => setPick(i.slug)}>{i.name}{i.hasLabel ? '' : ' (ไม่มีฉลาก)'}</button>)}</div>}
+      {pick && (() => { const nm = it.ingredients.find((i) => i.slug === pick)?.name || ''; const gl = guidelinesFor(nm); return gl.length > 0 ? <p className="dgl">มีเนื้อหาเกี่ยวกับยานี้ในแนวทางของแอป: {gl.join(' · ')} (เปิดที่หมวด "แนวทางรายโรค")</p> : <p className="muted">ยังไม่มีแนวทางรายโรคในแอปที่กล่าวถึงยานี้</p>; })()}
       {pick && <Monograph_ slug={pick} route={it.route} />}
       <p className="muted dnote">{NOTE}</p>
     </div>);

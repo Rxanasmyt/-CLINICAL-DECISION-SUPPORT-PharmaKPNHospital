@@ -5,6 +5,7 @@
 ระดับความรุนแรงจัดอัตโนมัติจากถ้อยคำในประโยค (contraindicated > avoid > monitor > info) — ไม่ใช่ระดับจากฐานข้อมูล DI"""
 import sys,os,re,json,collections
 SEC=['boxed_warning','contraindications','drug_interactions','warnings_and_cautions','warnings','dosage_and_administration']
+DIRECT_SEC={'boxed_warning','contraindications','drug_interactions','warnings_and_cautions','warnings'}   # ชื่อยาในหัวข้อขนาดยาไม่นับเป็น DI (มักเป็นข้อความอื่น)
 SEC_TH={'boxed_warning':'คำเตือนกรอบดำ','contraindications':'ข้อห้ามใช้','drug_interactions':'อันตรกิริยา','warnings_and_cautions':'คำเตือน/ข้อควรระวัง','warnings':'คำเตือน','dosage_and_administration':'ขนาดและการให้ยา'}
 REV={'albuterol':['salbutamol'],'acetaminophen':['paracetamol'],'epinephrine':['adrenaline'],'norepinephrine':['noradrenaline'],'meperidine':['pethidine'],'rifampin':['rifampicin'],'glyburide':['glibenclamide'],'valproic acid':['valproate','divalproex','valproate sodium'],'potassium chloride':['potassium supplements'],'furosemide':['frusemide']}
 # กลุ่มยาที่ฉลากมักเขียนเป็นชื่อกลุ่ม: (รหัสกลุ่ม, regex ในข้อความฉลาก, regex ชื่อกลุ่ม RxClass ที่สารต้องอยู่)
@@ -40,7 +41,7 @@ CLASSES=[
 ]
 CUE_CI=re.compile(r'contraindicat|must not|should not be (co-?administered|used|given|taken)|do not (co-?administer|use|give)|never ',re.I)
 CUE_AV=re.compile(r'\bavoid|not recommended|should be avoided|concomitant use of .{0,60} (with|and) .{0,60} (is|are) not|not be used (together|concomitantly)',re.I)
-CUE_MO=re.compile(r'monitor|adjust|reduc|decreas|increas|caution|consider|may (result|lead|cause|enhance|potentiate|diminish|alter|affect|increase|decrease)|dose|titrat|observe|check',re.I)
+CUE_MO=re.compile(r'monitor|adjust|reduc|decreas|increas|caution|consider|may (result|lead|cause|enhance|potentiate|diminish|alter|affect|increase|decrease)|dose|titrat|observe|check|risk of|bleeding|toxicit|serotonin syndrome|qt|torsade|hypotension|hyperkal|hypokal|myopathy|rhabdomyolysis|respiratory depression|sedation|exposure|auc\b|cmax|plasma (concentration|level)|serum (concentration|level)|displace|potentiat|synerg|additive',re.I)
 NEG=re.compile(r'no (clinically )?(significant|relevant|meaningful|dose adjustment)|did not (affect|alter|change|result|have)|not (affected|altered)|no (effect|interaction|change|pharmacokinetic)|without (any )?(significant|clinical)|not expected to|no need to|not (clinically )?(significant|relevant)',re.I)
 RANK={'contraindicated':3,'avoid':2,'monitor':1,'info':0}
 def sev(sentence,section):
@@ -54,6 +55,13 @@ def sentences(t):
     t=re.sub(r'\s+',' ',t)
     parts=re.split(r'(?<=[.;:!?])\s+(?=[A-Z0-9•\[(])|\s+•\s+|\s+\d+\.\d+(?:\.\d+)?\s+(?=[A-Z])',t)
     return [p.strip() for p in parts if 25<=len(p.strip())]
+def window(sn,m,before=170,after=330):
+    if len(sn)<=before+after: return sn
+    a=max(0,m.start()-before); b=min(len(sn),m.end()+after)
+    a=sn.rfind(' ',0,a+1) if a>0 and sn[a-1]!=' ' else a
+    b=sn.find(' ',b) if b<len(sn) and sn[b]!=' ' else b
+    b=len(sn) if b==-1 else b
+    return ('… ' if a>0 else '')+sn[max(a,0):b].strip()+(' …' if b<len(sn) else '')
 def slug(n): return re.sub(r'[^a-z0-9]+','-',n.lower()).strip('-')
 def main(raw,outdir):
     R=json.load(open(raw)); os.makedirs(os.path.join(outdir,'monographs'),exist_ok=True); os.makedirs(os.path.join(outdir,'di'),exist_ok=True)
@@ -84,14 +92,18 @@ def main(raw,outdir):
                 s=L['sections'].get(sec)
                 if not s: continue
                 for sn in sentences(s['t']):
-                    for other in ings:
-                        if other==ing or not ARE[other].search(sn): continue
-                        sv=sev(sn,sec)
-                        if sv: partners[other].append({'s':sv,'sec':sec,'t':sn[:520],'setid':L['setid']})
-                    for code,rx in CRE.items():
-                        if rx.search(sn):
+                    if sec in DIRECT_SEC:
+                        for other in ings:
+                            if other==ing: continue
+                            m=ARE[other].search(sn)
+                            if not m: continue
                             sv=sev(sn,sec)
-                            if sv: classhits[code].append({'s':sv,'sec':sec,'t':sn[:520],'setid':L['setid']})
+                            if sv: partners[other].append({'s':sv,'sec':sec,'t':window(sn,m),'setid':L['setid']})
+                    for code,rx in CRE.items():
+                        m=rx.search(sn)
+                        if m:
+                            sv=sev(sn,sec)
+                            if sv: classhits[code].append({'s':sv,'sec':sec,'t':window(sn,m),'setid':L['setid']})
         def keep(h):
             seen=set(); out=[]
             for x in sorted(h,key=lambda x:(-RANK[x['s']],SEC.index(x['sec']))):
