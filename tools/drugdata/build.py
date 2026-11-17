@@ -53,14 +53,30 @@ def map_item(it):
     return {'status':'mapped','ingredients':out}
 
 def txt(v): return re.sub(r'\s+',' ',' '.join(v) if isinstance(v,list) else str(v)).strip()
-def fetch_label(ing,rclass):
-    q=OPENFDA+urllib.parse.quote(f'openfda.substance_name:"{ing}" AND openfda.product_type:"HUMAN PRESCRIPTION DRUG"')+'&limit=40'
+GENERIC={'indicated','indications','indication','injection','tablets','tablet','capsules','capsule','solution','usage','treatment','patients','adults','adult','children','pediatric','extended','release','delayed','oral','suspension','hydrochloride','sodium','should','following','include','including','condition','conditions','management','therapy','without','prescribing','information','limitations'}
+def kw(r):
+    """คำสำคัญของข้อบ่งใช้ (ไม่รวมชื่อรูปแบบยา/คำทั่วไป) ใช้แยกฉลากที่ข้อบ่งใช้ต่างกันจริง เช่น adenosine รักษา PSVT กับตรวจหัวใจ"""
+    t=txt(r.get('indications_and_usage','')).lower()
+    return {w for w in re.findall(r'[a-z]{8,}',t) if w not in GENERIC}
+def differs(a,b,thr=0.35):
+    if not a or not b: return False
+    return len(a&b)/len(a|b)<thr
+def pack(r):
+    o=r.get('openfda',{}); sec={}
+    for k,cap in KEEP.items():
+        if r.get(k):
+            t=txt(r[k]); sec[k]={'t':t[:cap],'trunc':len(t)>cap}
+    return {'setid':r.get('set_id'),'effective':r.get('effective_time'),'brands':o.get('brand_name',[])[:4],'manufacturer':(o.get('manufacturer_name') or [''])[0],
+            'routes':o.get('route',[]),'substances':o.get('substance_name',[]),'sections':sec}
+def fetch_labels(ing,rclass,extra=2):
+    """ฉลากหลัก 1 ฉบับ + ฉลากอื่นที่ข้อบ่งใช้ต่างกัน (สูงสุด extra ฉบับ) — คืนเป็นรายการ"""
+    q=OPENFDA+urllib.parse.quote(f'openfda.substance_name:"{ing}" AND openfda.product_type:"HUMAN PRESCRIPTION DRUG"')+'&limit=100'
     d=get(q); res=d.get('results') or []
     if not res:
         d=get(OPENFDA+urllib.parse.quote(f'openfda.generic_name:"{ing}"')+'&limit=40'); res=d.get('results') or []
-    best=None
+    scored=[]
     for r in res:
-        o=r.get('openfda',{}); subs=[s.lower() for s in o.get('substance_name',[])]
+        o=r.get('openfda',{}); subs=[x.lower() for x in o.get('substance_name',[])]
         routes=set(x.upper() for x in o.get('route',[]))
         sc=0
         sc+=6*sum(1 for k in ('indications_and_usage','dosage_and_administration','contraindications','adverse_reactions','drug_interactions') if r.get(k))
@@ -68,15 +84,19 @@ def fetch_label(ing,rclass):
         sc+=8 if routes & ROUTE_OF[rclass] else 0
         sc+=2 if o.get('product_type',[''])[0].startswith('HUMAN PRESCRIPTION') else 0
         sc+=min(len(txt(r.get('drug_interactions',''))),6000)/6000
-        sc+=int(r.get('effective_time','0'))/1e9      # ใหม่กว่าได้เปรียบเล็กน้อย
-        if best is None or sc>best[0]: best=(sc,r)
-    if not best: return None
-    r=best[1]; o=r.get('openfda',{}); sec={}
-    for k,cap in KEEP.items():
-        if r.get(k):
-            t=txt(r[k]); sec[k]={'t':t[:cap],'trunc':len(t)>cap}
-    return {'setid':r.get('set_id'),'effective':r.get('effective_time'),'brands':o.get('brand_name',[])[:4],'manufacturer':(o.get('manufacturer_name') or [''])[0],
-            'routes':o.get('route',[]),'substances':o.get('substance_name',[]),'sections':sec}
+        sc+=int(r.get('effective_time','0'))/1e9
+        scored.append((sc,r))
+    scored.sort(key=lambda x:-x[0])
+    if not scored: return []
+    out=[pack(scored[0][1])]; seen=[kw(scored[0][1])]
+    for sc,r in scored[1:]:
+        if len(out)>=1+extra: break
+        routes=set(x.upper() for x in r.get('openfda',{}).get('route',[]))
+        if not (routes & ROUTE_OF[rclass]) or not r.get('indications_and_usage'): continue
+        k=kw(r)
+        if all(differs(k,x) for x in seen):
+            seen.append(k); out.append(pack(r))
+    return out
 
 def classes(ing_rxcui):
     out=[]
@@ -103,7 +123,7 @@ def main(xls,outdir):
     labels={}; 
     for n,(ing,routes) in enumerate(sorted(need.items())):
         for rc in sorted(routes):
-            L=fetch_label(ing,rc)
+            L=fetch_labels(ing,rc)
             if L: labels[(ing,rc)]=L
         if n%40==0: print('labels',n,'/',len(need),flush=True)
     cls={ing:(classes(ing_ids[ing]) if ing_ids.get(ing) else []) for ing in need}

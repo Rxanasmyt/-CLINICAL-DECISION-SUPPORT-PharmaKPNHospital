@@ -67,7 +67,8 @@ def main(raw,outdir):
     R=json.load(open(raw)); os.makedirs(os.path.join(outdir,'monographs'),exist_ok=True); os.makedirs(os.path.join(outdir,'di'),exist_ok=True)
     labels=collections.defaultdict(list)
     for k,L in R['labels'].items():
-        ing,rc=k.split('|'); labels[ing].append(dict(L,route=rc))
+        ing,rc=k.split('|')
+        for x in (L if isinstance(L,list) else [L]): labels[ing].append(dict(x,route=rc))
     ings=sorted({i['name'] for it in R['items'] for i in it['map'].get('ingredients',[])})
     # สมาชิกของกลุ่มยา (จาก RxClass ของแต่ละสาร)
     member={}

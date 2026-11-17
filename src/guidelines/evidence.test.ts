@@ -30,7 +30,7 @@ describe('แนวทางต่างประเทศ', () => {
   it('รหัสที่ติดป้ายต่างประเทศต้องเป็นการ์ดที่มีอยู่จริง และการ์ดต่างประเทศใหม่ระบุที่มาในป้ายของเนื้อหา', () => {
     const ids = GUIDELINES.map((g) => g.id);
     for (const id of FOREIGN) expect(ids, id).toContain(id);
-    for (const id of ['iai', 'ssti', 'mening', 'cdi']) for (const b of GUIDELINES.find((g) => g.id === id)!.blocks) expect(b.origin, id).toMatch(/ต่างประเทศ.*ไม่ได้ปรับตามบริบทไทย/);
+    for (const id of ['iai', 'ssti', 'mening', 'cdi', 'anaphylaxis']) for (const b of GUIDELINES.find((g) => g.id === id)!.blocks) expect(b.origin, id).toMatch(/ต่างประเทศ.*ไม่ได้ปรับตามบริบทไทย/);
     for (const id of ['tb', 'htn', 'af', 'dm', 'ckd', 'lipid', 'warfarin', 'hf']) expect(FOREIGN.has(id), id).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 // ข้อมูลยาในบัญชียา รพ. และตรวจอันตรกิริยา (DI) — เนื้อหาทางคลินิกคัดจากฉลากยา FDA (ภาษาอังกฤษต้นฉบับ) พร้อมที่มา
 import { useEffect, useMemo, useState } from 'react';
-import { CLASS_TH, ROUTE_TH, SECTION_TH, dailyMedUrl, effectiveTh, loadIndex, loadMonograph, loadShard, type DrugIndex, type DrugItem, type Monograph } from '../drugdata/load';
+import { CLASS_TH, ROUTE_TH, SECTION_TH, dailyMedUrl, effectiveTh, loadIndex, loadMonograph, loadShard, loadThai, type DrugIndex, type DrugItem, type Monograph, type ThaiSections } from '../drugdata/load';
+import { emphasize, toLines } from '../drugdata/format';
 import { SEV_LABEL, checkPairs, type PairResult, type Shard } from '../drugdata/di';
 import { GUIDELINES } from '../guidelines/registry';
 import { drugHits } from '../guidelines/drugs';
@@ -16,39 +17,76 @@ function useIndex() {
 const norm = (s: string) => s.toLowerCase();
 const hasData = (it: DrugItem) => it.ingredients.some((i) => i.hasLabel);
 
+type Flt = 'all' | 'data' | 'had' | 'off';
+const FILTERS: [Flt, string][] = [['all', 'ทั้งหมด'], ['data', 'มีข้อมูลฉลาก'], ['had', 'ยาความเสี่ยงสูง (HAD)'], ['off', 'นอกบัญชี · ยาเดิมจาก refer']];
 function Search({ idx, onPick, placeholder }: { idx: DrugIndex; onPick: (it: DrugItem) => void; placeholder: string }) {
-  const [q, setQ] = useState(''); const [onlyData, setOnlyData] = useState(false); const [max, setMax] = useState(40);
-  const res = useMemo(() => { const t = norm(q.trim()); return idx.items.filter((it) => (!onlyData || hasData(it)) && (!t || norm(it.name).includes(t) || it.ingredients.some((i) => i.name.includes(t)))); }, [idx, q, onlyData]);
+  const [q, setQ] = useState(''); const [flt, setFlt] = useState<Flt>('all'); const [max, setMax] = useState(40);
+  const res = useMemo(() => {
+    const t = norm(q.trim());
+    return idx.items.filter((it) => (flt === 'all' || (flt === 'data' && hasData(it)) || (flt === 'had' && it.had) || (flt === 'off' && it.notInFormulary)) && (!t || norm(it.name).includes(t) || it.ingredients.some((i) => i.name.includes(t))));
+  }, [idx, q, flt]);
   return (
     <div className="dsearch">
-      <input type="search" className="clsearch" value={q} placeholder={placeholder} onChange={(e) => { setQ(e.target.value); setMax(40); }} autoComplete="off" />
-      <label className="chk"><input type="checkbox" checked={onlyData} onChange={(e) => setOnlyData(e.target.checked)} /> เฉพาะรายการที่มีข้อมูลฉลาก</label>
-      <p className="muted">{res.length} รายการ</p>
+      <input type="search" className="clsearch" value={q} placeholder={placeholder} onChange={(e) => { setQ(e.target.value); setMax(40); }} autoComplete="off" aria-label="ค้นหายา" />
+      <div className="dflt" role="tablist" aria-label="กรองรายการ">{FILTERS.map(([k, l]) => <button key={k} type="button" role="tab" aria-selected={flt === k} className={flt === k ? 'on' : ''} onClick={() => { setFlt(k); setMax(40); }}>{l}</button>)}</div>
+      <p className="muted dcount">พบ {res.length} จาก {idx.items.length} รายการ</p>
       <ul className="dlist">{res.slice(0, max).map((it) => (
-        <li key={it.no}><button type="button" onClick={() => onPick(it)}>
-          <b>{it.name}</b><small>{it.form || '—'} · {it.unit || '—'}</small>
+        <li key={it.no}><button type="button" className={it.had ? 'had' : ''} onClick={() => onPick(it)}>
+          <b>{it.name}</b>
+          {it.ingredients.length > 0 && <span className="dgen">{it.ingredients.map((i) => i.name).join(' + ')}</span>}
+          <small>{it.form || '—'} · {it.unit || '—'}</small>
           <span className="dtags">{it.had && <em className="tg had">HAD</em>}{it.notInFormulary && <em className="tg off" title="ยานอกบัญชี รพ. ที่ยังต้องสั่งต่อเมื่อผู้ป่วยได้รับมาจากโรงพยาบาลอื่น (refer)">นอกบัญชี · ยาเดิมจาก refer</em>}<em className={'tg ' + (hasData(it) ? 'ok' : 'no')}>{hasData(it) ? 'มีข้อมูลฉลาก' : STATUS_TH[it.status] || '—'}</em></span>
         </button></li>))}</ul>
+      {res.length === 0 && <p className="dok">ไม่พบรายการ ลองค้นด้วยชื่อสามัญภาษาอังกฤษ หรือเลือก "ทั้งหมด"</p>}
       {res.length > max && <button type="button" className="glbtn" onClick={() => setMax(max + 60)}>แสดงเพิ่ม</button>}
     </div>);
 }
 
-function Monograph_({ slug, route }: { slug: string; route: string }) {
-  const [m, setM] = useState<Monograph | null>(null); const [err, setErr] = useState('');
-  useEffect(() => { let on = true; setM(null); setErr(''); loadMonograph(slug).then((d) => on && setM(d)).catch((e) => on && setErr(String(e.message || e))); return () => { on = false; }; }, [slug]);
+/** แสดงข้อความฉลากแบบแบ่งประโยค/หัวข้อย่อย เน้นตัวเลขขนาดยา และพับเมื่อยาว */
+function Rich({ text, limit = 14, raw = true }: { text: string; limit?: number; raw?: boolean }) {
+  const lines = useMemo(() => toLines(text), [text]); const [all, setAll] = useState(false); const [showRaw, setShowRaw] = useState(false);
+  const shown = all ? lines : lines.slice(0, limit);
+  const body = (t: string) => emphasize(t).map((p, i) => p.strong ? <b key={i} className="dnum">{p.t}</b> : <span key={i}>{p.t}</span>);
+  return (
+    <div className="drich">
+      {shown.map((l, i) => l.kind === 'h' ? <h5 key={i}>{l.text}</h5> : l.kind === 'b' ? <p key={i} className="dbul">• {body(l.text)}</p> : <p key={i}>{body(l.text)}</p>)}
+      {lines.length > limit && <button type="button" className="glbtn" onClick={() => setAll(!all)}>{all ? 'ย่อ' : `แสดงทั้งหมด (${lines.length - limit} บรรทัดที่เหลือ)`}</button>}
+      {raw && <p className="muted draw">จัดบรรทัดเพื่อให้อ่านง่าย (ตัดเลขอ้างอิงภายในและประโยคซ้ำจากส่วนสรุปของฉลาก) <button type="button" className="glbtn" onClick={() => setShowRaw(!showRaw)}>{showRaw ? 'ซ่อนข้อความดิบ' : 'ดูข้อความดิบตามฉลาก'}</button></p>}
+      {showRaw && <pre className="drawtxt">{text}</pre>}
+    </div>);
+}
+
+const SEC_KIND: Record<string, string> = { boxed_warning: 'danger', contraindications: 'danger', indications_and_usage: 'info', dosage_and_administration: 'dose', warnings_and_cautions: 'warn', warnings: 'warn', adverse_reactions: 'ae', drug_interactions: 'ddi', use_in_specific_populations: 'pop', pregnancy: 'pop', lactation: 'pop', pediatric_use: 'pop', geriatric_use: 'pop', renal_impairment: 'pop', hepatic_impairment: 'pop', overdosage: 'ovd', mechanism_of_action: 'gen' };
+
+/** หัวข้อหนึ่งของฉลาก: ถ้ามีคำแปลไทยแสดงไทยก่อนพร้อมปุ่มดูต้นฉบับ */
+function Sec({ id, th, sec, thai, open }: { id: string; th: string; sec: { t: string; trunc?: boolean }; thai?: string; open: boolean }) {
+  const [en, setEn] = useState(!thai);
+  return (
+    <details className={'dsec sc-' + (SEC_KIND[id] || 'gen')} id={'dsec-' + id} open={open}><summary><span className="dsdot" />{th}{thai && <em className="tg ok">แปลไทยแล้ว</em>}</summary>
+      {thai && <><Rich text={thai} raw={false} /><p className="muted dtrn">คำแปลโดยระบบ (AI) จากฉลากต้นฉบับ ยังไม่ได้ตรวจโดยเภสัชกร — ตัวเลข ขนาดยา และชื่อยาให้ยืนยันกับข้อความต้นฉบับ <button type="button" className="glbtn" onClick={() => setEn(!en)}>{en ? 'ซ่อนต้นฉบับ' : 'ดูต้นฉบับ English'}</button></p></>}
+      {en && <Rich text={sec.t} />}
+      {sec.trunc && <p className="muted">ข้อความยาว ตัดทอนไว้ — ดูฉบับเต็มที่ DailyMed</p>}
+    </details>);
+}
+
+function Monograph_({ slug, route, product }: { slug: string; route: string; product: string }) {
+  const [m, setM] = useState<Monograph | null>(null); const [err, setErr] = useState(''); const [thai, setThai] = useState<ThaiSections | null>(null); const [li, setLi] = useState(0);
+  useEffect(() => { let on = true; setM(null); setErr(''); setThai(null); setLi(0); loadMonograph(slug).then((d) => on && setM(d)).catch((e) => on && setErr(String(e.message || e))); loadThai(slug).then((d) => on && setThai(d)).catch(() => {}); return () => { on = false; }; }, [slug]);
   if (err) return <p className="warnbox" role="alert">โหลดข้อมูลไม่สำเร็จ ({err}) — ต้องเชื่อมต่ออินเทอร์เน็ตครั้งแรก</p>;
   if (!m) return <p className="muted">กำลังโหลด…</p>;
-  const label = m.labels.find((l) => l.route === route) || m.labels[0];
+  const cands = m.labels.filter((l) => l.route === route); const pool = cands.length ? cands : m.labels;
+  const label = pool[Math.min(li, pool.length - 1)];
   if (!label) return <p className="warnbox">ไม่พบฉลากยาของ {m.ingredient} ในฐานข้อมูล FDA — ต้องใช้แหล่งข้อมูลอื่น</p>;
   const seen = new Set<string>(); const secs = SECTION_TH.filter(([k, th]) => { if (!label.sections[k] || seen.has(th)) return false; seen.add(th); return true; });
+  const jump = (id: string) => { const el = document.getElementById('dsec-' + id) as HTMLDetailsElement | null; if (el) { el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
   return (
     <div className="dmono">
-      <p className="muted">{m.classes.length ? 'กลุ่มยา: ' + m.classes.slice(0, 5).join(' · ') : ''}</p>
-      <p className="muted dsrc">ที่มา: ฉลาก{ROUTE_TH[label.route] ? ' ' + ROUTE_TH[label.route] : ''} · {label.brands.join(', ') || m.ingredient} · {label.manufacturer} · ปรับปรุงฉลาก {effectiveTh(label.effective)} · <a href={dailyMedUrl(label.setid)} target="_blank" rel="noopener noreferrer">เปิดฉลากเต็มที่ DailyMed</a></p>
-      {m.labels.length > 1 && <p className="muted">ยานี้มีฉลากอีก {m.labels.length - 1} รูปแบบ ({m.labels.filter((l) => l !== label).map((l) => ROUTE_TH[l.route] || l.route).join(', ')}) — เลือกจากรายการยาตามรูปแบบที่ใช้จริง</p>}
-      {secs.map(([k, th]) => (
-        <details key={k} open={k === 'boxed_warning' || k === 'contraindications' || k === 'indications_and_usage'} className="dsec"><summary>{th}</summary>
-          <p className="dtext">{label.sections[k].t}</p>{label.sections[k].trunc && <p className="muted">ข้อความยาว ตัดทอนไว้ — ดูฉบับเต็มที่ DailyMed</p>}</details>))}
+      <div className="dwarn" role="note"><b>ตรวจให้ตรงกับยาในบัญชี:</b> ข้อมูลด้านล่างมาจากฉลากของสหรัฐฯ ({label.brands.join(', ') || m.ingredient}) ซึ่งอาจเป็นคนละรูปแบบ ความแรง หรือข้อบ่งใช้กับ "{product}" ในบัญชี — อ่านข้อบ่งใช้และความแรงก่อนใช้ข้อมูลทุกครั้ง</div>
+      {pool.length > 1 && <div className="dpick"><small>ฉลากที่ข้อบ่งใช้ต่างกัน ({pool.length} ฉบับ) — เลือกฉบับที่ตรงกับยาที่ใช้:</small>
+        {pool.map((l, i) => <button key={l.setid} type="button" className={i === Math.min(li, pool.length - 1) ? 'on' : ''} onClick={() => setLi(i)}><b>{l.brands[0] || m.ingredient}</b><span>{(l.sections.indications_and_usage?.t || '').replace(/^\d*\s*INDICATIONS (AND|&) USAGE\s*/i, '').slice(0, 90)}…</span></button>)}</div>}
+      <nav className="dtabs" aria-label="ไปยังหัวข้อ">{secs.map(([k, th]) => <button key={k} type="button" className={'dt sc-' + (SEC_KIND[k] || 'gen')} onClick={() => jump(k)}><span className="dsdot" />{th.replace(/\s*\(.*\)/, '')}</button>)}</nav>
+      <p className="muted dsrc">{m.classes.length ? 'กลุ่มยา: ' + m.classes.slice(0, 4).join(' · ') + ' · ' : ''}ฉลาก{ROUTE_TH[label.route] ? ' ' + ROUTE_TH[label.route] : ''} · {label.manufacturer} · ปรับปรุงฉลาก {effectiveTh(label.effective)} · <a href={dailyMedUrl(label.setid)} target="_blank" rel="noopener noreferrer">เปิดฉลากเต็มที่ DailyMed</a></p>
+      {secs.map(([k, th]) => <Sec key={k} id={k} th={th} sec={label.sections[k]} thai={thai && thai.setid === label.setid ? thai.sections[k] : undefined} open={k === 'boxed_warning' || k === 'contraindications' || k === 'indications_and_usage'} />)}
     </div>);
 }
 
@@ -60,12 +98,14 @@ function Detail({ it, onBack }: { it: DrugItem; onBack: () => void }) {
   return (
     <div className="ddetail">
       <button type="button" className="glback" onClick={onBack}>← รายการยา</button>
-      <h3>{it.name}</h3>
-      <p className="muted">{it.form || '—'} · {it.unit || '—'}{it.had ? ' · ยาความเสี่ยงสูง (HAD)' : ''}{it.notInFormulary ? ' · ยานอกบัญชี รพ. (ยาเดิมของผู้ป่วยที่ refer มา — ยังต้องตรวจ DI ร่วมกับยาอื่น)' : ''}</p>
+      <header className={'dhead' + (it.had ? ' had' : '')}>
+        <h3>{it.name}</h3>
+        <div className="dtags">{it.had && <em className="tg had">ยาความเสี่ยงสูง (HAD)</em>}{it.notInFormulary && <em className="tg off" title="ยานอกบัญชี รพ. ที่ยังต้องสั่งต่อเมื่อผู้ป่วยได้รับมาจากโรงพยาบาลอื่น (refer)">นอกบัญชี · ยาเดิมจาก refer</em>}<em className="tg no">{ROUTE_TH[it.route] || it.route}</em><em className="tg no">{it.form || '—'} · {it.unit || '—'}</em></div>
+      </header>
       {it.ingredients.length === 0 && <p className="warnbox">{it.why || 'ยังไม่มีข้อมูล'}</p>}
       {it.ingredients.length > 0 && <div className="gldchips">{it.ingredients.map((i) => <button key={i.slug} type="button" className={pick === i.slug ? 'on' : ''} onClick={() => setPick(i.slug)}>{i.name}{i.hasLabel ? '' : ' (ไม่มีฉลาก)'}</button>)}</div>}
       {pick && (() => { const nm = it.ingredients.find((i) => i.slug === pick)?.name || ''; const gl = guidelinesFor(nm); return gl.length > 0 ? <p className="dgl">มีเนื้อหาเกี่ยวกับยานี้ในแนวทางของแอป: {gl.join(' · ')} (เปิดที่หมวด "แนวทางรายโรค")</p> : <p className="muted">ยังไม่มีแนวทางรายโรคในแอปที่กล่าวถึงยานี้</p>; })()}
-      {pick && <Monograph_ slug={pick} route={it.route} />}
+      {pick && <Monograph_ slug={pick} route={it.route} product={it.name} />}
       <p className="muted dnote">{NOTE}</p>
     </div>);
 }
