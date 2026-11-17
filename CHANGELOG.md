@@ -2,6 +2,11 @@
 
 รูปแบบเวอร์ชัน `MAJOR.MINOR.PATCH` — แก้บั๊ก/ปรับเล็กน้อย = PATCH · เพิ่มความสามารถ = MINOR · เปลี่ยนที่กระทบข้อมูลเดิมหรือสูตรคำนวณ = MAJOR
 
+## 2.41.0
+### คำแปลไทย: หัวข้อ "การใช้เกินขนาด" ของยาไฮอะเลิร์ต
+- แปล epinephrine, norepinephrine, nicardipine, magnesium sulfate, potassium chloride, heparin (protamine, ระบุว่าเบอร์สายด่วนเป็นของสหรัฐฯ), amiodarone
+- ตัวเลขทุกตัวในต้นฉบับตรวจโดยเทสต์อัตโนมัติ · คำแปลทำโดยระบบ รอเภสัชกรทบทวน
+
 ## 2.40.0
 ### คำแปลไทย: ส่วนคำเตือนของ morphine และ meperidine
 - แปลหัวข้อ "คำเตือนและข้อควรระวัง" ของ morphine (ฉลากฉีดเข้าหลอดเลือดดำ) และ meperidine (DEMEROL): การติด/ใช้ผิดวัตถุประสงค์, กดการหายใจ, ใช้ร่วม benzodiazepines/CNS depressants, serotonin syndrome, MAOI, CYP3A4, ต่อมหมวกไต, ความดันโลหิตต่ำ ฯลฯ
