@@ -13,7 +13,7 @@
 | epinephrine | 386519ba | contraindications, dosage_and_administration, drug_interactions, indications_and_usage, warnings_and_cautions |
 | heparin | 0413f511 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage, warnings_and_cautions |
 | magnesium-sulfate | 03ebeabb | contraindications, dosage_and_administration, drug_interactions, indications_and_usage, warnings_and_cautions |
-| meperidine | b31d1308 | boxed_warning, contraindications, indications_and_usage |
+| meperidine | b31d1308 | boxed_warning, contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | morphine | 6023606c | boxed_warning, contraindications, dosage_and_administration, drug_interactions, indications_and_usage |
 | nicardipine | 433dbca3 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage, warnings_and_cautions |
 | norepinephrine | 6363e9b4 | contraindications, dosage_and_administration, drug_interactions, indications_and_usage, warnings_and_cautions |
